@@ -9,7 +9,7 @@
         <q-form @submit="handleVerify" class="q-gutter-xs">
           <q-input
             filled
-            v-model="code"
+            v-model.trim="code"
             type="text"
             placeholder="Digite o código de verificação"
             lazy-rules

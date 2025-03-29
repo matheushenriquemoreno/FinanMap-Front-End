@@ -9,7 +9,7 @@
         <q-form @submit="handleRegister" class="q-gutter-xs">
           <q-input
             filled
-            v-model="name"
+            v-model.trim="name"
             placeholder="Digite seu nome"
             lazy-rules
             dense
@@ -18,7 +18,7 @@
 
           <q-input
             filled
-            v-model="email"
+            v-model.trim="email"
             type="text"
             placeholder="Digite seu e-mail"
             lazy-rules

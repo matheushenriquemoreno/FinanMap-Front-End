@@ -16,6 +16,8 @@
     @filter="filtrarPesquisa"
     :rules="rules"
     :disable="disable"
+    options-cover
+    stack-label
     transition-show="scale"
     transition-hide="scale"
     behavior="menu"

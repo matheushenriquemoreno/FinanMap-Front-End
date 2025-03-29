@@ -24,7 +24,7 @@
 
       <template v-slot:top-right>
         <section class="q-gutter-md">
-          <q-btn color="primary" icon="add" @click="abriModalAdicionarRendimento" />
+          <q-btn color="primary" icon="add" @click="() => abriModalAdicionar()" />
         </section>
       </template>
 
@@ -141,7 +141,7 @@
 import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
 import TransacaoBaseModal from 'src/components/Transacao/TransacaoBaseModal.vue';
 
-import type { RendimentosCreate, RendimentosResult } from 'src/Model/Transacao';
+import type { InvestimentoCreate, RendimentosCreate, RendimentosResult } from 'src/Model/Transacao';
 import { TipoCategoria } from 'src/Model/Categoria';
 
 import getRendimentoService from 'src/services/transacao/RendimentoService';
@@ -230,10 +230,8 @@ async function adicionarRendimento(rendimentoCreate: RendimentosCreate) {
 }
 
 async function editarRendimento() {
-  console.log(rendimentoEdit.value);
   await rendimentoService.update(rendimentoEdit.value);
-  abriModal.value = false;
-  ehEdicao.value = false;
+  fecharModal();
   getReportAcumulado();
 }
 
@@ -255,8 +253,7 @@ function abriModalEditarRendimento(rendimento: RendimentosResult) {
   rendimentoEdit.value.id = rendimento.id;
   rendimentoEdit.value.descricao = rendimento.descricao;
   rendimentoEdit.value.valor = rendimento.valor;
-  abriModalAdicionarRendimento();
-  ehEdicao.value = true;
+  abriModalAdicionar(true);
 }
 
 async function alterarValor(id: string, valor: number) {
@@ -268,7 +265,14 @@ async function alterarValor(id: string, valor: number) {
   }
 }
 
-function abriModalAdicionarRendimento() {
+function abriModalAdicionar(isEdit = false) {
   abriModal.value = true;
+  ehEdicao.value = isEdit;
+}
+
+function fecharModal() {
+  abriModal.value = false;
+  ehEdicao.value = false;
+  rendimentoEdit.value = {} as InvestimentoCreate;
 }
 </script>

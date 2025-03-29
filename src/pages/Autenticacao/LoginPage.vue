@@ -9,7 +9,7 @@
         <q-form @submit="handleLogin">
           <q-input
             filled
-            v-model="email"
+            v-model.trim="email"
             type="text"
             placeholder="E-mail"
             lazy-rules

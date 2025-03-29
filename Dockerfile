@@ -6,9 +6,9 @@ COPY package*.json ./
 COPY quasar.config.ts ./
 COPY ./ ./
 
+RUN npm install -g @quasar/cli@latest 
 RUN npm install
-RUN npm install -g @vue/cli
-RUN npm install -g @quasar/cli 
+
 
 # build stage
 FROM develop-stage as build-stage
