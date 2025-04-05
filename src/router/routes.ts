@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/verify',
-    component: () => import('src/pages/Autenticacao/ConfirmarEmailPage.vue'),
+    component: () => import('src/pages/Autenticacao/ConfirmarCodigoLoginPage.vue'),
   },
   {
     path: '/:catchAll(.*)*',
@@ -28,7 +28,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: 'RecebimentosPage',
-            component: () => import('pages/GerenciamentoMensal/RecebimentosPage.vue')
+            component: () => import('pages/GerenciamentoMensal/RendimentoPage.vue')
           },
           {
             path: 'Despesas',

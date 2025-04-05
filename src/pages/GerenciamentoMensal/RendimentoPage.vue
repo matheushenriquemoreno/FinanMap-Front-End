@@ -6,13 +6,15 @@
       class="tabela-transacao"
       :rows="rendimentos"
       :columns="rendimentosColumns"
-      row-key="descricao"
+      row-key="id"
       color="primary"
       flat
       bordered
       table-class="text-dark text-center"
       :rows-per-page-options="[$q.screen.gt.xs ? 7 : 5, 9, 12, 15, 18, 21]"
       :loading="useGerenciamentoMensal.loading"
+      selection="multiple"
+      v-model:selected="registrosSelecionados"
     >
       <template v-slot:top-left>
         <q-input dense debounce="300" label="Descrição" color="primary" v-model="filter">
@@ -24,12 +26,34 @@
 
       <template v-slot:top-right>
         <section class="q-gutter-md">
-          <q-btn color="primary" icon="add" @click="() => abriModalAdicionar()" />
+          <q-btn
+            v-if="existeRegistroSelecionados"
+            color="primary"
+            icon="date_range"
+            @click="() => enviarRegistrosSelecionadosParaProximoMes()"
+          />
+          <q-btn
+            v-if="existeRegistroSelecionados"
+            color="primary"
+            icon="delete_forever"
+            @click="() => excluirRegistrosSelecionados()"
+          />
+          <q-btn
+            v-if="existeRegistroSelecionados === false"
+            color="primary"
+            icon="add"
+            @click="() => abriModalAdicionar()"
+            :loading="useGerenciamentoMensal.loading"
+          />
         </section>
       </template>
 
       <template v-slot:body="props">
         <q-tr :props="props">
+          <q-td key="categoriaNome" :props="props">
+            <q-checkbox v-model="props.selected" />
+          </q-td>
+
           <q-td key="categoriaNome" :props="props" class="no-pointer-events">
             <q-icon name="arrow_upward" color="green" size="xs" />
             {{ props.row.categoriaNome }}
@@ -131,23 +155,30 @@
     titulo-edit="Editar Rendimento"
     @on-submit-add="adicionarRendimento"
     @on-submit-edit="editarRendimento"
-    :tipo-categoria-transacao="TipoCategoria.Rendimento"
+    :tipo-categoria-transacao="TipoCategoriaETransacao.Rendimento"
     :loading="useGerenciamentoMensal.loading"
     :eh-edicao="ehEdicao"
+  />
+
+  <CriarRegistroProximoMesModal
+    v-model:model-value="abriModalCriarRegistroProximoMes"
+    :ids-transacao="obterIdsRegistrosSelecionados"
+    :tipo-categoria-transacao="TipoCategoriaETransacao.Rendimento"
   />
 </template>
 
 <script setup lang="ts">
 import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
 import TransacaoBaseModal from 'src/components/Transacao/TransacaoBaseModal.vue';
+import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
 
 import type { InvestimentoCreate, RendimentosCreate, RendimentosResult } from 'src/Model/Transacao';
-import { TipoCategoria } from 'src/Model/Categoria';
+import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 
 import getRendimentoService from 'src/services/transacao/RendimentoService';
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 
 // services
@@ -155,6 +186,7 @@ const rendimentoService = getRendimentoService();
 const $q = useQuasar();
 
 // Variaveis
+
 const filter = ref('');
 const abriModal = ref(false);
 const ehEdicao = ref(false);
@@ -213,7 +245,7 @@ async function getReportAcumulado() {
   const report = await obterAcumuladoMensalReport(
     useGerenciamentoMensal.mesAtual.ano,
     useGerenciamentoMensal.mesAtual.mes,
-    TipoCategoria.Rendimento,
+    TipoCategoriaETransacao.Rendimento,
   );
   useGerenciamentoMensal.setAcumuladoMensal(report);
   rendimentos.value = report.rendimentos ?? [];
@@ -275,4 +307,43 @@ function fecharModal() {
   ehEdicao.value = false;
   rendimentoEdit.value = {} as InvestimentoCreate;
 }
+
+// Ações de seleção de registros
+
+const registrosSelecionados = ref<RendimentosResult[]>([]);
+const abriModalCriarRegistroProximoMes = ref(false);
+
+function excluirRegistrosSelecionados() {
+  const registros = registrosSelecionados.value.length;
+  const mensagemRegistros =
+    registros === 1
+      ? `Deseja realmente excluir o registro selecionado?`
+      : `Deseja realmente excluir os ${registros} registros selecionados?`;
+  $q.dialog({
+    message: mensagemRegistros,
+    cancel: true,
+    persistent: false,
+  }).onOk(() => {
+    const ids = obterIdsRegistrosSelecionados.value;
+    useGerenciamentoMensal.setLoading(true);
+    rendimentoService.deleteMany(ids).then(() => {
+      getReportAcumulado();
+    });
+    useGerenciamentoMensal.setLoading(false);
+    registrosSelecionados.value = [];
+  });
+}
+
+function enviarRegistrosSelecionadosParaProximoMes() {
+  abriModalCriarRegistroProximoMes.value = true;
+}
+
+const obterIdsRegistrosSelecionados = computed(() => {
+  const ids = registrosSelecionados.value?.map((x) => x.id!) ?? [];
+  return ids;
+});
+
+const existeRegistroSelecionados = computed(() => {
+  return registrosSelecionados.value.length >= 1;
+});
 </script>

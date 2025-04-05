@@ -18,7 +18,12 @@
           />
 
           <div class="">
-            <q-btn :loading="loading" class="button-entrar" color="primary" type="submit">
+            <q-btn
+              :loading="authService.loading.value"
+              class="button-entrar"
+              color="primary"
+              type="submit"
+            >
               Entrar
               <template v-slot:loading>
                 <q-spinner class="on-left" :thickness="5" />
@@ -35,61 +40,22 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import logo from 'src/assets/logo-sem-fundo-menor.png';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios, { AxiosError } from 'axios';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
-import { useQuasar } from 'quasar';
+import { obterAuthService } from 'src/services/AuthService';
 
-const $q = useQuasar();
 const router = useRouter();
 const email = ref('');
-const loading = ref(false);
 const userStore = useEmailStore();
+const authService = obterAuthService();
 
 const handleLogin = async () => {
-  try {
-    loading.value = true;
-    console.log(process.env.URL_API);
-
-    const options = {
-      method: 'POST',
-      url: process.env.URL_API + 'login',
-      data: {
-        email: email.value,
-      },
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    const result = await axios.request(options);
-
-    console.log(result);
-
-    userStore.setEmail(email.value);
-    await router.push('/verify');
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      let mensage = 'Ocorreu um erro inesperado, tente novamente mais tarde!';
-      if (error.response?.status === 400 || error.response?.status === 404) {
-        mensage = 'Certifique-se de que o email está correto, ou o cadastro esteja realizado!';
-      }
-      $q.notify({
-        message: mensage,
-        type: 'my-notif',
-        position: 'top',
-        color: 'white',
-        textColor: 'black',
-        iconColor: 'red',
-        progress: true,
-        icon: 'info',
-      });
-    }
-  } finally {
-    loading.value = false;
-  }
+  await authService.login(email.value);
+  userStore.setEmail(email.value);
+  await router.push('/verify');
 };
 </script>
 

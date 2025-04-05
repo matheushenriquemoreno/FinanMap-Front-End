@@ -5,8 +5,15 @@
         <div class="row items-center">
           <q-btn flat round dense icon="chevron_left" @click="voltarMesAnterior" />
 
-          <q-btn flat no-caps class="text-body1 q-px-md" @click="showSelector = !showSelector">
-            <div class="row items-center">
+          <q-btn
+            flat
+            no-caps
+            class="text-body1 q-px-md"
+            @click="showSelector = !showSelector"
+            :loading="loading"
+            style="width: 185px"
+          >
+            <div class="row items-center text-center">
               {{ mesAtualNome }} {{ selectedYear }}
               <q-icon name="expand_more" size="sm" class="q-ml-xs" />
             </div>
@@ -84,6 +91,11 @@ const props = defineProps({
   ano: {
     type: Number,
     required: false,
+  },
+  loading: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
 });
 

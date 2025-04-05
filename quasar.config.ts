@@ -53,7 +53,8 @@ export default defineConfig((/* ctx */) => {
       // publicPath: '/',
       // analyze: true,
       env: {
-        URL_API: "https://192.168.100.3:7171/api/",
+        URL_API: 'https://192.168.100.3:7171/api/',
+        lOGIN_URL: '/#/login',
         //URL_API: "https://localhost:7171/api/",
       },
       // rawDefine: {}

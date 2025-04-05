@@ -67,12 +67,12 @@
 import CampoSelectServer from 'src/components/CampoSelect/CampoSelectServer.vue';
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import type { Categoria, TipoCategoria } from 'src/Model/Categoria';
+import type { Categoria, TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
 import type { TransacaoCreate } from 'src/Model/Transacao';
 
 function isEmpty(obj: object | null) {
-  if (obj === null || obj === undefined) return false;
+  if (obj === null || obj === undefined) return true;
 
   return Object.keys(obj).length === 0;
 }
@@ -83,7 +83,7 @@ interface Props {
   tituloAdd: string;
   tituloEdit: string;
   transacao?: TransacaoCreate;
-  tipoCategoriaTransacao: TipoCategoria;
+  tipoCategoriaTransacao: TipoCategoriaETransacao;
   loading: boolean;
   ehEdicao: boolean;
 }
@@ -108,10 +108,9 @@ const categoriaSelecionada = ref<Categoria | null>(null);
 const dadosFormulario = ref(props.transacao);
 
 watch(localModelValue, (valor) => {
-  if (valor === true && props.ehEdicao) {
-    if (isEmpty(props.transacao)) return;
-    console.log(props.transacao);
+  if (valor === true && props.ehEdicao && isEmpty(props.transacao) == false) {
     dadosFormulario.value = props.transacao;
+
     categoriaSelecionada.value = {
       id: props.transacao.categoriaId,
       nome: props.transacao.categoriaNome,

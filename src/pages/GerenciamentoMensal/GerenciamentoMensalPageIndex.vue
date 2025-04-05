@@ -1,5 +1,15 @@
 <template>
-  <div class="row justify-center q-gutter-sm espaco-demostrativos">
+  <div class="q-pa-md q-gutter-sm">
+    <q-breadcrumbs class="text-grey" active-color="black">
+      <template v-slot:separator>
+        <q-icon size="1.2em" name="arrow_forward" color="green" />
+      </template>
+
+      <q-breadcrumbs-el icon="home" />
+      <q-breadcrumbs-el label="Gerenciamento Mensal" icon="navigation" />
+    </q-breadcrumbs>
+  </div>
+  <div class="row justify-center q-gutter-lg espaco-itens">
     <CardValores
       :valor="acumulado.valorRendimento"
       :icon="IconesGerenciamentoMensal.ICONE_RENDIMENTO"
@@ -25,7 +35,7 @@
       label="Restante"
     />
   </div>
-  <div style="margin-bottom: 5px">
+  <div class="espaco-itens">
     <MothYearSelector
       @update:period="handlePeriodChange"
       :mes="useGerenciamentoMensal.mesAtual.mes"
@@ -86,11 +96,10 @@ const acumulado = computed(() => {
 </script>
 
 <style scoped>
-.espaco-demostrativos {
-  margin-top: 10px;
-  margin-bottom: 10px;
+@media (max-width: 460px) {
 }
 
-@media (max-width: 460px) {
+.espaco-itens {
+  margin-bottom: 5px;
 }
 </style>

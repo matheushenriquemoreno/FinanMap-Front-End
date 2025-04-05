@@ -29,9 +29,13 @@
         <q-space />
 
         <div class="q-gutter-sm row items-center no-wrap">
-          <q-btn round dense flat icon="notifications">
+          <!-- <q-btn round dense flat icon="notifications">
             <q-badge color="red" text-color="white" floating> 2 </q-badge>
             <q-tooltip>Notificações</q-tooltip>
+          </q-btn> -->
+          <q-btn round flat @click="() => (abrirModalConfig = !abrirModalConfig)">
+            <q-icon name="settings" size="25px" />
+            <q-tooltip>Configurações</q-tooltip>
           </q-btn>
           <q-btn round flat>
             <q-icon name="person" size="26px" />
@@ -43,13 +47,19 @@
     <q-page-container class="q-pa-xs">
       <router-view />
     </q-page-container>
+
+    <ModalConfiguracoes v-model:model-value="abrirModalConfig" />
   </q-layout>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import ModalConfiguracoes from 'src/components/Configuracoes/ModalConfiguracoes.vue';
+
 import logo from 'src/assets/logo-sem-fundo-menor.png';
+import { ref } from 'vue';
 const router = useRouter();
+const abrirModalConfig = ref(false);
 
 defineOptions({
   name: 'MainLayout',

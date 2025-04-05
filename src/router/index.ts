@@ -32,7 +32,9 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    const isAuthenticated = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    const tamanhoMinimoAConsiderar = 100;
+    const isAuthenticated = token !== null && token !== undefined && token.length > tamanhoMinimoAConsiderar;
     if (to.path !== '/login' && to.path !== '/register' && to.path !== '/verify' && !isAuthenticated) next({ name: "LoginPage" });
     else next();
   })

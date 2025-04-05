@@ -28,7 +28,7 @@
 
           <div class="q-gutter-xs q-mt-sm">
             <q-btn
-              :loading="loading"
+              :loading="authService.loading.value"
               class="rou"
               color="primary"
               type="submit"
@@ -56,40 +56,22 @@
 import logo from 'src/assets/logo-sem-fundo-menor.png';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import type { AxiosRequestConfig } from 'axios';
-import axios from 'axios';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
+import { obterAuthService } from 'src/services/AuthService';
 
 const router = useRouter();
 const email = ref('');
 const name = ref('');
-const errorMessage = ref('');
-const loading = ref(false);
 const userStore = useEmailStore();
+const authService = obterAuthService();
 
 const handleRegister = async () => {
   try {
-    loading.value = true;
-    errorMessage.value = '';
-
-    const options: AxiosRequestConfig = {
-      method: 'POST',
-      url: process.env.URL_API + 'login/Create',
-      data: {
-        email: email.value,
-        nome: name.value,
-      },
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    const result = await axios.request(options);
-
+    await authService.register(email.value, name.value);
     userStore.setEmail(email.value);
     await router.push('/verify');
   } catch (error) {
-    errorMessage.value = 'Erro ao fazer cadastro. Tente novamente.';
-  } finally {
-    loading.value = false;
+    console.error('Erro durante o cadastro:', error);
   }
 };
 </script>

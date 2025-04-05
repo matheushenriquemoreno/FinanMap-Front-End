@@ -6,13 +6,15 @@
       class="tabela-transacao"
       :rows="despesas"
       :columns="despesasColumns"
-      row-key="descricao"
+      row-key="id"
       color="primary"
       flat
       bordered
       table-class="text-dark text-center"
       :rows-per-page-options="[$q.screen.gt.xs ? 10 : 5, 15, 20, 25, 0]"
       :loading="useGerenciamentoMensal.loading"
+      selection="multiple"
+      v-model:selected="registrosSelecionados"
     >
       <template v-slot:top-left>
         <q-input dense debounce="300" label="Descrição" color="primary" v-model="filter">
@@ -23,8 +25,21 @@
       </template>
 
       <template v-slot:top-right>
-        <section class="q-gutter-md">
+        <section class="q-gutter-sm">
           <q-btn
+            v-if="existeRegistroSelecionados"
+            color="primary"
+            icon="date_range"
+            @click="() => enviarRegistrosSelecionadosParaProximoMes()"
+          />
+          <q-btn
+            v-if="existeRegistroSelecionados"
+            color="primary"
+            icon="delete_forever"
+            @click="() => excluirRegistrosSelecionados()"
+          />
+          <q-btn
+            v-if="existeRegistroSelecionados === false"
             color="primary"
             icon="add"
             @click="() => abriModalAdicionar()"
@@ -35,8 +50,12 @@
 
       <template v-slot:body="props">
         <q-tr :props="props">
+          <q-td key="categoriaNome" :props="props">
+            <q-checkbox v-model="props.selected" />
+          </q-td>
+
           <q-td key="categoriaNome" :props="props" class="no-pointer-events">
-            <q-icon name="arrow_upward" color="green" size="xs" />
+            <q-icon name="arrow_downward" color="red" size="xs" />
             {{ props.row.categoriaNome }}
           </q-td>
           <q-td
@@ -78,7 +97,7 @@
             </q-popup-edit>
           </q-td>
           <!-- Ações -->
-          <q-td class="text-center" :props="props" key="acoes">
+          <q-td key="acoes" :props="props" class="text-center">
             <section class="q-gutter-sm" v-if="$q.screen.gt.xs">
               <q-btn
                 style="font-size: 11px"
@@ -133,25 +152,32 @@
     v-model:model-value="abriModal"
     :transacao="despesaEdit"
     :eh-edicao="ehEdicao"
-    titulo-add="Adicionar Rendimento"
-    titulo-edit="Editar Rendimento"
+    titulo-add="Adicionar Despesa"
+    titulo-edit="Editar Despesa"
     @on-submit-add="adicionar"
     @on-submit-edit="editar"
-    :tipo-categoria-transacao="TipoCategoria.Despesa"
+    :tipo-categoria-transacao="TipoCategoriaETransacao.Despesa"
     :loading="useGerenciamentoMensal.loading"
+  />
+
+  <CriarRegistroProximoMesModal
+    v-model:model-value="abriModalCriarRegistroProximoMes"
+    :ids-transacao="obterIdsRegistrosSelecionados"
+    :tipo-categoria-transacao="TipoCategoriaETransacao.Despesa"
   />
 </template>
 
 <script setup lang="ts">
 import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
 import TransacaoBaseModal from 'src/components/Transacao/TransacaoBaseModal.vue';
+import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
 
 import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
-import { TipoCategoria } from 'src/Model/Categoria';
+import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import getDespesaService from 'src/services/transacao/DespesaService';
 
@@ -219,7 +245,7 @@ async function getReportAcumulado() {
     const report = await obterAcumuladoMensalReport(
       useGerenciamentoMensal.mesAtual.ano,
       useGerenciamentoMensal.mesAtual.mes,
-      TipoCategoria.Despesa,
+      TipoCategoriaETransacao.Despesa,
     );
     useGerenciamentoMensal.setAcumuladoMensal(report);
     despesas.value = report.despesas ?? [];
@@ -285,4 +311,41 @@ function fecharModal() {
   ehEdicao.value = false;
   despesaEdit.value = {} as DespesaCreate;
 }
+
+// Ações de seleção de registros
+
+const registrosSelecionados = ref<DespesaResult[]>([]);
+const abriModalCriarRegistroProximoMes = ref(false);
+
+function excluirRegistrosSelecionados() {
+  const registros = registrosSelecionados.value.length;
+  const mensagemRegistros =
+    registros === 1
+      ? `Deseja realmente excluir o registro selecionado?`
+      : `Deseja realmente excluir os ${registros} registros selecionados?`;
+  $q.dialog({
+    message: mensagemRegistros,
+    cancel: true,
+    persistent: false,
+  }).onOk(() => {
+    const ids = obterIdsRegistrosSelecionados.value;
+    despesaservice.deleteMany(ids).then(() => {
+      getReportAcumulado();
+    });
+    registrosSelecionados.value = [];
+  });
+}
+
+function enviarRegistrosSelecionadosParaProximoMes() {
+  abriModalCriarRegistroProximoMes.value = true;
+}
+
+const obterIdsRegistrosSelecionados = computed(() => {
+  const ids = registrosSelecionados.value?.map((x) => x.id!) ?? [];
+  return ids;
+});
+
+const existeRegistroSelecionados = computed(() => {
+  return registrosSelecionados.value.length >= 1;
+});
 </script>

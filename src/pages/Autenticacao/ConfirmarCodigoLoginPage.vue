@@ -19,7 +19,7 @@
 
           <div class="q-gutter-xs q-mt-sm">
             <q-btn
-              :loading="loading"
+              :loading="authService.loading.value"
               color="primary"
               type="submit"
               size="md"
@@ -42,57 +42,21 @@
 import logo from 'src/assets/logo-sem-fundo-menor.png';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios, { AxiosError } from 'axios';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
-import { useQuasar } from 'quasar';
+import { obterAuthService } from 'src/services/AuthService';
 
-const $q = useQuasar();
+const authService = obterAuthService();
 const router = useRouter();
 const code = ref('');
 const message = ref('Digite o código enviado para seu email');
-const errorMessage = ref('');
-const loading = ref(false);
 const userStore = useEmailStore();
 
 const handleVerify = async () => {
-  try {
-    loading.value = true;
-    errorMessage.value = '';
-
-    const options = {
-      method: 'POST',
-      url: process.env.URL_API + 'login/validate-code',
-      data: {
-        email: userStore.getEmail(),
-        codigo: code.value,
-      },
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    const result = await axios.request(options);
-    localStorage.setItem('token', result.data.token);
-    message.value = 'Email verificado com sucesso!';
-    setTimeout(() => {
-      loading.value = false;
-      router.push('/');
-    }, 1500);
-  } catch (error) {
-    if (error instanceof AxiosError) {
-      if (error.response?.status === 400 || error.response?.status === 404) {
-        $q.notify({
-          message: error.response?.data.errors ?? 'Codigo informado invalido, ou expirado.',
-          type: 'my-notif',
-          position: 'top',
-          color: 'white',
-          textColor: 'black',
-          iconColor: 'red',
-          progress: true,
-          icon: 'info',
-        });
-      }
-    }
-  } finally {
-    loading.value = false;
-  }
+  const email = userStore.getEmail();
+  if (email === null) return;
+  const token = await authService.verifyCode(email, code.value);
+  localStorage.setItem('token', token);
+  message.value = 'Email verificado com sucesso!';
+  router.push('/');
 };
 </script>
