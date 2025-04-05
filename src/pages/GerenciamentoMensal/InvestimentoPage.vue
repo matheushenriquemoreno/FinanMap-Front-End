@@ -180,7 +180,6 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import getInvestimentoService from 'src/services/transacao/InvestimentoService';
 import IconesGerenciamentoMensal from 'src/helpers/IconesGerenciamentoMensal';
-import { notificar } from 'src/helpers/Notificacao';
 
 // services
 const investimentoservice = getInvestimentoService();

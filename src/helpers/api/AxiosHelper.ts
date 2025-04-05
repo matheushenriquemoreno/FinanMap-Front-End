@@ -152,6 +152,13 @@ export function handleErrorAxios(error: unknown): void {
   if (axios.isAxiosError(error)) {
     const statusCode = error.response?.status ?? null;
 
+    // Tratamento específico para erros de rede
+    if (isNetworkError(error)) {
+      const message = getNetworkErrorMessage(error);
+      notificarInfo(message);
+      return;
+    }
+
     if (statusCode === 400 || statusCode === 422 || statusCode === 404) {
       const result = error.response?.data as ApiResultError;
 

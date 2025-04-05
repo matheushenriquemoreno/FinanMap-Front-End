@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-card-section class="q-pa-xs">
+      <!-- Campo de seleção de meses -->
       <div class="row items-center justify-center">
         <div class="row items-center">
           <q-btn flat round dense icon="chevron_left" @click="voltarMesAnterior" />
@@ -13,16 +14,26 @@
             :loading="loading"
             style="width: 185px"
           >
-            <div class="row items-center text-center">
+            <div
+              :class="
+                'row items-center text-center text-weight-bold ' +
+                (mesAnoSelecionadoEhAtual ? 'text-primary' : 'text-dark')
+              "
+            >
               {{ mesAtualNome }} {{ selectedYear }}
-              <q-icon name="expand_more" size="sm" class="q-ml-xs" />
+              <q-icon
+                :color="mesAnoSelecionadoEhAtual ? 'primary' : 'dark'"
+                :name="mesAnoSelecionadoEhAtual ? 'event' : 'expand_more'"
+                size="sm"
+                class="q-ml-xs"
+              />
             </div>
           </q-btn>
 
           <q-btn flat round dense icon="chevron_right" @click="passarParaProximoMes" />
         </div>
       </div>
-
+      <!-- Dialog de seleção de meses e anos -->
       <q-dialog v-model="showSelector">
         <q-card style="min-width: 350px">
           <q-card-section class="q-pb-none">
@@ -71,7 +82,7 @@
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="Cancelar" color="dark" @click="selecionarDataAtual" v-close-popup />
+            <q-btn flat color="grey" icon="event_available" @click="selecionarDataAtual" />
             <q-btn flat label="Aplicar" color="primary" @click="aplicarSelecao" v-close-popup />
           </q-card-actions>
         </q-card>
@@ -103,6 +114,7 @@ const props = defineProps({
 const currentDate = new Date();
 const selectedMonth = ref(props.mes || currentDate.getMonth() + 1);
 const selectedYear = ref(props.ano || currentDate.getFullYear());
+
 const showSelector = ref(false);
 
 // Faz a listagem de 3 anos, pegando sempre o atual o anterior e o proximo
@@ -138,6 +150,13 @@ watch([selectedMonth, selectedYear], ([month, year]) => {
   if (showSelector.value === false) emit('update:period', { mes: month, ano: year });
 });
 
+watch([showSelector], ([value]) => {
+  if (value === false && (selectedMonth.value != props.mes || selectedYear.value != props.ano)) {
+    selectedMonth.value = props.mes!;
+    selectedYear.value = props.ano!;
+  }
+});
+
 // Métodos para navegação
 const voltarMesAnterior = () => {
   if (selectedMonth.value === 1) {
@@ -160,7 +179,15 @@ const passarParaProximoMes = () => {
 const selecionarDataAtual = () => {
   selectedMonth.value = currentDate.getMonth() + 1;
   selectedYear.value = currentDate.getFullYear();
+  aplicarSelecao();
 };
+
+const mesAnoSelecionadoEhAtual = computed(() => {
+  return (
+    selectedMonth.value === currentDate.getMonth() + 1 &&
+    selectedYear.value === currentDate.getFullYear()
+  );
+});
 
 const aplicarSelecao = () => {
   emit('update:period', { mes: selectedMonth.value, ano: selectedYear.value });
