@@ -9,11 +9,11 @@
   >
     <q-card style="width: 700px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
-        <div class="text-h6">Replicar registros em periodo especificado.</div>
+        <div class="text-h6">Replicar registros.</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
-
+      <q-separator />
       <q-card-section class="q-pt-none">
         <div class="q-pa-md">
           <span>Deseja replicar os registros selecionados para qual o periodo?</span>

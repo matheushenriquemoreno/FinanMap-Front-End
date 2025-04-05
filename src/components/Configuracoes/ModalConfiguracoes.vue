@@ -76,5 +76,5 @@ const localModelValue = computed({
 
 const splitterModel = ref(15);
 
-const tab = ref('mails');
+const tab = ref('categoria');
 </script>
