@@ -35,7 +35,8 @@
           @update:model-value="() => obterCategorias()"
         />
       </div>
-      <div v-if="categorias?.length === 0" class="q-pa-md">
+      <div v-if="loading" class="q-pa-md"><q-spinner color="primary" /> Carregando...</div>
+      <div v-else-if="categorias?.length === 0" class="q-pa-md">
         <q-badge color="grey" rounded class="q-mr-sm" />Nenhuma categoria ainda não foi cadastrada.
       </div>
       <q-list v-else bordered separator class="rounded-borders">
@@ -115,7 +116,7 @@
           </div>
         </q-card-section>
         <q-card-actions align="right" class="bg-white text-teal">
-          <q-btn flat no-caps label="Adicionar" type="submit" />
+          <q-btn flat no-caps label="Adicionar" type="submit" :loading="loading" />
         </q-card-actions>
       </q-form>
     </q-card>
@@ -134,6 +135,7 @@ const categoriaService = obterCategoriaService();
 const categorias = ref<CategoriaResult[]>();
 const $q = useQuasar();
 const openModalCreateCategoria = ref(false);
+const loading = ref(false);
 const tipoCategoriaSelecionada = ref(TipoCategoriaETransacao.Rendimento);
 const categoriaCreate = ref<CreateCategoriaDTO>({
   nome: '',
@@ -160,8 +162,15 @@ onMounted(async () => {
 });
 
 async function obterCategorias() {
-  const result = await categoriaService.obterCategoria(tipoCategoriaSelecionada.value);
-  categorias.value = result;
+  loading.value = true;
+  try {
+    const result = await categoriaService.obterCategoria(tipoCategoriaSelecionada.value);
+    categorias.value = result;
+  } finally {
+    setTimeout(() => {
+      loading.value = false;
+    }, 1000);
+  }
 }
 
 async function criarCategoria() {
@@ -169,7 +178,7 @@ async function criarCategoria() {
   tipoCategoriaSelecionada.value = categoriaCreate.value.tipo;
   categoriaCreate.value.nome = '';
   openModalCreateCategoria.value = false;
-  obterCategorias();
+  await obterCategorias();
 }
 
 function excluirCategoria(categoria: CategoriaResult) {

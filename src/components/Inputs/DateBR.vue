@@ -11,8 +11,13 @@
   >
     <template v-slot:append>
       <q-icon name="event" color="black" class="cursor-pointer">
-        <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-          <q-date v-model="modelLocalDisplay" mask="DD/MM/YYYY" today-btn>
+        <q-popup-proxy ref="proxyIten" cover transition-show="scale" transition-hide="scale">
+          <q-date
+            v-model="modelLocalDisplay"
+            mask="DD/MM/YYYY"
+            today-btn
+            @update:model-value="() => proxyIten.hide()"
+          >
             <div class="row items-center justify-end">
               <q-btn v-close-popup label="Fechar" icon="close" flat dense></q-btn>
             </div>
@@ -24,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, defineEmits } from 'vue';
+import { computed, defineProps, defineEmits, ref } from 'vue';
 import type { PropType } from 'vue';
 import { useAttrs } from 'vue';
 
@@ -69,17 +74,23 @@ const modelLocalDisplay = computed({
     if (validarData(value)) {
       const date = converterDataBRParaDate(value);
       emit('update:modelValue', date);
+    } else {
+      emit('update:modelValue', null);
     }
   },
 });
 
 const hintDisplay = computed(() => {
+  if (props.modelValue === null) return '';
+
   return props.modelValue.toLocaleDateString('pt-BR', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
 });
+
+const proxyIten = ref();
 
 /**
  * Converte um objeto Date para string no formato brasileiro (DD/MM/YYYY)
@@ -89,7 +100,7 @@ const hintDisplay = computed(() => {
 function converterDateParaFormatoBR(data: Date): string {
   // Verifica se a data é válida
   if (!(data instanceof Date) || isNaN(data.getTime())) {
-    throw new Error('Data inválida');
+    return '';
   }
 
   // Obtém dia, mês e ano

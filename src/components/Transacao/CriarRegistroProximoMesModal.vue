@@ -23,6 +23,7 @@
           <DateBR
             v-model="dadosFormulario.dataInicial"
             label="Periodo Inicial"
+            required
             :styled="{
               rounded: true,
               filled: true,
@@ -32,6 +33,7 @@
           <DateBR
             v-model="dadosFormulario.dataFinal"
             label="Periodo Final"
+            required
             :styled="{
               rounded: true,
               filled: true,

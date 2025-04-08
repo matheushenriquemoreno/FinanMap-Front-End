@@ -1,14 +1,6 @@
 <template>
-  <q-dialog v-model="localModelValue" position="top">
-    <q-card
-      style="
-        width: 1200px;
-        max-width: 90vw;
-        margin-top: 40px;
-        border-radius: 15px;
-        min-height: 450px;
-      "
-    >
+  <q-dialog v-model="localModelValue" full-height>
+    <q-card style="width: 1200px; max-width: 90vw; border-radius: 15px">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Configurações</div>
         <q-space />
@@ -17,7 +9,7 @@
 
       <q-separator />
       <q-card-section>
-        <q-splitter v-model="splitterModel" :limits="[20]" style="max-width: 100vw">
+        <q-splitter v-model="splitterModel" :limits="[20]">
           <template v-slot:before>
             <div>
               <q-tabs v-model="tab" vertical class="text-dark" inline-label>

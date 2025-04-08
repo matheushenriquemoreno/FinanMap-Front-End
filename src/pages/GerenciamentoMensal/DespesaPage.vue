@@ -11,7 +11,7 @@
       flat
       bordered
       table-class="text-dark text-center"
-      :rows-per-page-options="[$q.screen.gt.xs ? 10 : 5, 15, 20, 25, 0]"
+      :rows-per-page-options="[$q.screen.gt.xs ? 7 : 5, 9, 12, 15, 18, 21]"
       :loading="useGerenciamentoMensal.loading"
       selection="multiple"
       v-model:selected="registrosSelecionados"
