@@ -41,7 +41,12 @@ const routes: RouteRecordRaw[] = [
             component: () => import('pages/GerenciamentoMensal/InvestimentoPage.vue')
           },
         ]
-      }],
+      },
+      {
+        path: '/dashbord',
+        component: () => import('src/pages/Dashbord/dashbord-Gerenciamento-Mensal.vue'),
+      },
+    ],
   },
 ];
 

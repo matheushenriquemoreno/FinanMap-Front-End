@@ -17,12 +17,12 @@
           </q-item-section>
         </q-item>
 
-        <q-item to="/Graficos" class="menu-title" clickable v-ripple active-class="text-white">
+        <q-item to="/dashbord" class="menu-title" clickable v-ripple active-class="text-white">
           <q-item-section avatar>
             <q-avatar icon="equalizer" />
           </q-item-section>
           <q-item-section>
-            <q-item-label class="menu-title">Graficos</q-item-label>
+            <q-item-label class="menu-title">Dashbord</q-item-label>
           </q-item-section>
         </q-item>
 
