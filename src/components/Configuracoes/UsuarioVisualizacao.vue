@@ -13,9 +13,6 @@
           </div>
         </div>
       </q-card-section>
-      <!-- <q-card-actions align="right">
-        <q-btn class="q-mb-sm" label="Salvar" icon="save" color="teal" type="submit" />
-      </q-card-actions> -->
     </q-form>
   </q-card>
 </template>

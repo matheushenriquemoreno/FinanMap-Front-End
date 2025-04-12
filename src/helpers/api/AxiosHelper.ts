@@ -14,7 +14,7 @@ interface MultiStatusResponse extends ApiResultError {
 const TIMEOUT_MS = 30000;
 const ERROR_MESSAGES = {
   network: 'Atualmente o servidor está indisponível. Tente novamente mais tarde.',
-  timeout: 'O tempo limite da requisição foi excedido. Verifique sua conexão e tente novamente.',
+  timeout: 'O tempo limite da requisição foi excedido. Verifique sua conexão com a internet e tente novamente.',
   unauthorized: 'Por favor realizar o login novamente!',
   server: 'Ocorreu um erro inesperado, tente novamente mais tarde!',
   ssl: 'Ocorreu um erro de segurança na conexão. Tente novamente mais tarde.',

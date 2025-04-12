@@ -89,7 +89,7 @@
 
   <!-- modal Cadastro Categoria -->
   <q-dialog v-model="openModalCreateCategoria">
-    <q-card style="width: 300px">
+    <q-card style="width: 330px">
       <q-form @submit="criarCategoria">
         <q-card-section>
           <section class="q-mb-sm">
@@ -115,7 +115,8 @@
             />
           </div>
         </q-card-section>
-        <q-card-actions align="right" class="bg-white text-teal">
+        <q-card-actions align="between" class="bg-white text-teal">
+          <q-btn label="Fechar" no-caps flat dense v-close-popup />
           <q-btn flat no-caps label="Adicionar" type="submit" :loading="loading" />
         </q-card-actions>
       </q-form>
@@ -169,7 +170,7 @@ async function obterCategorias() {
   } finally {
     setTimeout(() => {
       loading.value = false;
-    }, 1000);
+    }, 500);
   }
 }
 
