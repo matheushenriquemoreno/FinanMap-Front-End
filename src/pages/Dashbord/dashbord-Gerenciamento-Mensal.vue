@@ -83,7 +83,6 @@
             ></apexchart>
           </q-card>
         </div>
-        <!-- Verificar -->
         <div class="col-12 q-pa-xs">
           <q-card flat class="q-pa-sm">
             <apexchart
@@ -141,6 +140,7 @@ const categoriaOptions: ApexOptions = {
     height: 350,
     stacked: true,
   },
+  colors: ['#5c52ff'],
   plotOptions: {
     bar: {
       borderRadius: 5,
@@ -151,7 +151,7 @@ const categoriaOptions: ApexOptions = {
         total: {
           enabled: true,
           formatter: function (val: string) {
-            return formatarValor(val, 'decimal');
+            return formatarValor(val, 'currency');
           },
           style: {
             fontSize: '14px',
