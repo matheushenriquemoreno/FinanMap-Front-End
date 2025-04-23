@@ -4,7 +4,8 @@
       <q-card-section>
         <div class="text-h6 text-weight-bold">Informações da Conta</div>
         <q-separator class="q-mb-sm" />
-        <div class="row">
+        <div v-if="loading" class="q-pa-md"><q-spinner color="primary" /> Carregando...</div>
+        <div class="row" v-else>
           <div class="col-sm-6 col-12 q-pa-sm">
             <q-input v-model="usuario.nome" label="Nome" readonly />
           </div>
@@ -27,14 +28,16 @@ interface UsuarioSistema {
 }
 
 const usuario = ref<UsuarioSistema>({} as UsuarioSistema);
-
+const loading = ref(false);
 onMounted(async () => {
   await buscarUsuario();
 });
 
 async function buscarUsuario() {
+  loading.value = true;
   const axios = CreateIntanceAxios();
   const result = await axios.get<UsuarioSistema>(process.env.URL_API + 'user/');
   usuario.value = result.data;
+  loading.value = false;
 }
 </script>

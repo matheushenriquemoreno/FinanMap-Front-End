@@ -1,5 +1,15 @@
 <!-- Dashboard.vue -->
 <template>
+  <div class="q-pa-md q-gutter-sm">
+    <q-breadcrumbs class="text-grey" active-color="black">
+      <template v-slot:separator>
+        <q-icon size="1.2em" name="arrow_forward" color="green" />
+      </template>
+
+      <q-breadcrumbs-el icon="home" />
+      <q-breadcrumbs-el label="Dashbord" icon="navigation" />
+    </q-breadcrumbs>
+  </div>
   <div class="dashboard">
     <div class="container">
       <section class="q-mb-md">
@@ -345,7 +355,6 @@ function formatarValor(valor: any, style: 'currency' | 'decimal' = 'currency') {
 <style scoped>
 .dashboard {
   padding: 24px;
-  background-color: #f5f7fa;
   min-height: 100vh;
   display: flex;
   flex-wrap: wrap;
