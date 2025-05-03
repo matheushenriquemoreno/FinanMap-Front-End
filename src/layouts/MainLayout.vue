@@ -67,7 +67,7 @@
           <q-avatar size="56px" class="q-mb-sm">
             <img src="/avatar.svg" />
           </q-avatar>
-          <div>Seja bem vindo</div>
+          <div>Seja bem vindo,</div>
           <div class="text-weight-bold">{{ username }}</div>
         </div>
       </div>

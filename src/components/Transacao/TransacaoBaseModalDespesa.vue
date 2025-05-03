@@ -46,6 +46,20 @@
               />
             </div>
 
+            <div>
+              <CampoSelectServer
+                :configuracoes="{
+                  labelObjeto: 'descricaoECategoria',
+                  valueObjeto: 'id',
+                  emitirSomenteValor: false,
+                  obterDados: buscarDespesas,
+                }"
+                :disable="props.ehEdicao && (props.transacao?.ehDespesaAgrupadora ?? false)"
+                v-model="despesaAgrupadora"
+                label="Selecione a despesa agrupadora"
+              />
+            </div>
+
             <q-card-actions class="text-primary" align="between">
               <q-btn flat label="Cancelar" v-close-popup />
               <q-btn
@@ -67,11 +81,12 @@
 import CampoSelectServer from 'src/components/CampoSelect/CampoSelectServer.vue';
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import type { Categoria, TipoCategoriaETransacao } from 'src/Model/Categoria';
+import type { Categoria } from 'src/Model/Categoria';
+import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
-import type { TransacaoCreate } from 'src/Model/Transacao';
+import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
 
-function isEmpty(obj: object | null) {
+function isEmpty(obj: object | null | undefined) {
   if (obj === null || obj === undefined) return true;
 
   return Object.keys(obj).length === 0;
@@ -82,15 +97,15 @@ interface Props {
   modelValue: boolean;
   tituloAdd: string;
   tituloEdit: string;
-  transacao?: TransacaoCreate;
-  tipoCategoriaTransacao: TipoCategoriaETransacao;
+  transacao?: DespesaResult;
   loading: boolean;
   ehEdicao: boolean;
+  ano: number;
+  mes: number;
 }
 
 // Definição das props com validação
 const props = withDefaults(defineProps<Props>(), {
-  transacao: () => ({}) as TransacaoCreate,
   ehEdicao: false,
 });
 
@@ -104,16 +119,17 @@ const localModelValue = computed({
 });
 
 const categoriaSelecionada = ref<Categoria | null>(null);
+const despesaAgrupadora = ref<DespesaResult | null>(null);
 
-const dadosFormulario = ref(props.transacao);
+const dadosFormulario = ref(props.transacao as DespesaCreate);
 
 watch(localModelValue, (valor) => {
   if (valor === true && props.ehEdicao && isEmpty(props.transacao) == false) {
-    dadosFormulario.value = props.transacao;
+    dadosFormulario.value = props.transacao as DespesaCreate;
 
     categoriaSelecionada.value = {
-      id: props.transacao.categoriaId,
-      nome: props.transacao.categoriaNome,
+      id: props.transacao?.categoriaId,
+      nome: props.transacao?.categoriaNome,
     } as Categoria;
   }
 });
@@ -121,9 +137,9 @@ watch(localModelValue, (valor) => {
 // Emits do componente
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
-  (e: 'update:transacao', value: TransacaoCreate): void;
-  (e: 'onSubmitEdit', dados: TransacaoCreate): void;
-  (e: 'onSubmitAdd', dados: TransacaoCreate): void;
+  (e: 'update:transacao', value: DespesaCreate): void;
+  (e: 'onSubmitEdit', dados: DespesaCreate): void;
+  (e: 'onSubmitAdd', dados: DespesaCreate): void;
   (e: 'closeModal'): void;
 }>();
 
@@ -134,7 +150,7 @@ async function buscarCategorias(value?: string) {
     process.env.URL_API + 'categorias/GetUserCategorias',
     {
       params: {
-        tipoCategoria: props.tipoCategoriaTransacao,
+        tipoCategoria: TipoCategoriaETransacao.Despesa,
         nome: value ?? '',
       },
     },
@@ -142,18 +158,33 @@ async function buscarCategorias(value?: string) {
   return result.data;
 }
 
+async function buscarDespesas(value?: string) {
+  const axios = CreateIntanceAxios();
+  const result = await axios.get<DespesaResult[]>(process.env.URL_API + 'despesas', {
+    params: {
+      ano: props.ano,
+      mes: props.mes,
+      descricao: value ?? '',
+    },
+  });
+
+  return result.data;
+}
+
 // Submeter formulário
 const submitFormulario = () => {
+  dadosFormulario.value.idDespesaAgrupadora = despesaAgrupadora.value?.id ?? '';
   if (props.ehEdicao) {
-    emit('onSubmitEdit', dadosFormulario.value);
+    emit('onSubmitEdit', dadosFormulario.value as DespesaCreate);
   } else {
-    emit('onSubmitAdd', dadosFormulario.value);
+    emit('onSubmitAdd', dadosFormulario.value as DespesaCreate);
   }
 };
 
 const closeModal = () => {
-  dadosFormulario.value = {} as TransacaoCreate;
+  dadosFormulario.value = {} as DespesaCreate;
   categoriaSelecionada.value = null;
+  despesaAgrupadora.value = null;
   emit('closeModal');
 };
 </script>

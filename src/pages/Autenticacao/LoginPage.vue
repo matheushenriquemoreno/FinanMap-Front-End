@@ -17,7 +17,7 @@
             :rules="[(val) => (val && val.length > 0) || 'E-mail obrigatório']"
           />
 
-          <div class="">
+          <div class="q-mt-xs">
             <q-btn
               :loading="authService.loading.value"
               class="button-entrar"

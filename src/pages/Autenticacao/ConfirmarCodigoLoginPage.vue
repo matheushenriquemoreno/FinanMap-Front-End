@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import logo from 'src/assets/logo-sem-fundo-menor.png';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
@@ -50,6 +50,13 @@ const router = useRouter();
 const code = ref('');
 const message = ref('Digite o código enviado para seu email');
 const userStore = useEmailStore();
+
+onMounted(() => {
+  const email = userStore.getEmail();
+  if (!email) {
+    router.push({ name: 'LoginPage' });
+  }
+});
 
 const handleVerify = async () => {
   const email = userStore.getEmail();

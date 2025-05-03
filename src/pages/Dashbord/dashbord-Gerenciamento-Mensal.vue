@@ -12,30 +12,9 @@
   </div>
   <div class="dashboard">
     <div class="container">
-      <section class="q-mb-md">
-        <q-form class="row q-gutter-md justify-center items-center">
-          <DateBR
-            v-model="dadosFormulario.dataInicial"
-            label="Periodo Inicial"
-            required
-            :styled="{
-              rounded: false,
-              filled: false,
-            }"
-          />
-          <span>A</span>
-          <DateBR
-            v-model="dadosFormulario.dataFinal"
-            label="Periodo Final"
-            required
-            :styled="{
-              rounded: false,
-              filled: false,
-            }"
-          />
-        </q-form>
-      </section>
-
+      <SectionFiltrarPeriodo
+        @filtrar="(mesInicial, mesFinal, ano) => console.log(mesInicial, mesFinal, ano)"
+      />
       <div class="row justify-center q-gutter-lg">
         <div>
           <Demostrativo
@@ -113,7 +92,7 @@ import { ref } from 'vue';
 import type { ApexOptions } from 'apexcharts';
 import Demostrativo from 'src/components/Dashbord/DemostrativoPage.vue';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
-import DateBR from 'src/components/Inputs/DateBR.vue';
+import SectionFiltrarPeriodo from './SectionFiltrarPeriodo.vue';
 import { date } from 'quasar';
 
 // Variaveis
