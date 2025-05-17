@@ -2,8 +2,6 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
-import dotenv from "dotenv";
-const env = dotenv.config({ path: ['.env', './src/.env'] }).parsed;
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -56,7 +54,8 @@ export default defineConfig((/* ctx */) => {
       // analyze: true,
 
       env: {
-        ...env
+        URL_API: 'http://finammapbackend-prd.eba-kkzv2yme.us-east-2.elasticbeanstalk.com/api/',
+        lOGIN_URL: '/#/login'
       },
       // rawDefine: {}
       // ignorePublicFolder: true,
