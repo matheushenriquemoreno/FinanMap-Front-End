@@ -3,7 +3,7 @@
 
 import { defineConfig } from '#q-app/wrappers';
 import dotenv from "dotenv";
-const env = dotenv.config({ path: `.env` }).parsed;
+const env = dotenv.config({ path: ['.env', './src/.env'] }).parsed;
 
 export default defineConfig((/* ctx */) => {
   return {
