@@ -7,7 +7,7 @@
     @hide="closeModal"
     position="top"
   >
-    <q-card style="width: 700px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
+    <q-card style="width: 550px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
         <div class="text-h6">Replicar registros.</div>
         <q-space />
@@ -20,24 +20,22 @@
         </div>
 
         <q-form class="q-gutter-md" @submit.prevent="handleCriarRegistroProximoMes">
-          <DateBR
-            v-model="dadosFormulario.dataInicial"
+          <InputSelectMesAno
             label="Periodo Inicial"
-            required
             :styled="{
               rounded: true,
               filled: true,
             }"
+            v-model:model-value="mesAno"
           />
-          <span>A</span>
-          <DateBR
-            v-model="dadosFormulario.dataFinal"
+          <q-separator />
+          <InputSelectMesAno
             label="Periodo Final"
-            required
             :styled="{
               rounded: true,
               filled: true,
             }"
+            v-model:model-value="mesAnoFinal"
           />
           <q-card-actions class="text-primary" align="between">
             <q-btn flat label="Fechar" dense v-close-popup />
@@ -52,10 +50,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useQuasar, date } from 'quasar';
-import DateBR from 'src/components/Inputs/DateBR.vue';
 import type { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import replicarTransacoesPorPeriodo from 'src/services/ReplicarTranscoes';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
+import InputSelectMesAno from 'src/components/Inputs/InputSelectMesAno.vue';
+import type { MesAno } from 'src/Model/Transacao';
 
 // Props do componente
 interface Props {
@@ -72,15 +71,8 @@ const $q = useQuasar();
 const useGerenciamentoMensal = useGerenciamentoMensalStore();
 
 // Variaveis
-const dataSelecionadaAtualmente = new Date(
-  useGerenciamentoMensal.mesAtual.ano,
-  useGerenciamentoMensal.mesAtual.mes,
-  1,
-);
-const dadosFormulario = ref({
-  dataInicial: dataSelecionadaAtualmente,
-  dataFinal: date.addToDate(dataSelecionadaAtualmente, { months: 3 }),
-});
+const mesAno = ref<MesAno>({} as MesAno);
+const mesAnoFinal = ref<MesAno>({} as MesAno);
 
 const localModelValue = computed({
   get: () => props.modelValue,
@@ -89,15 +81,9 @@ const localModelValue = computed({
 
 const loading = ref(false);
 
-watch(localModelValue, (valor) => {
-  if (valor === true) {
-    const dataSelecionadaAtualmente = new Date(
-      useGerenciamentoMensal.mesAtual.ano,
-      useGerenciamentoMensal.mesAtual.mes,
-      1,
-    );
-    dadosFormulario.value.dataInicial = dataSelecionadaAtualmente;
-    dadosFormulario.value.dataFinal = date.addToDate(dataSelecionadaAtualmente, { months: 3 });
+watch(localModelValue, (abrirModal) => {
+  if (abrirModal === true) {
+    preencherMesAnoFiltroComProximo3Meses();
   }
 });
 
@@ -112,13 +98,30 @@ const closeModal = () => {
   emit('closeModal');
 };
 
+function preencherMesAnoFiltroComProximo3Meses() {
+  const mesSelecionado = new Date(
+    useGerenciamentoMensal.mesAtual.ano,
+    useGerenciamentoMensal.mesAtual.mes,
+    1,
+  );
+
+  mesAno.value = {
+    ano: mesSelecionado.getFullYear(),
+    mes: mesSelecionado.getMonth() + 1,
+  };
+  mesAnoFinal.value = {
+    ano: date.addToDate(mesSelecionado, { months: 3 }).getFullYear(),
+    mes: date.addToDate(mesSelecionado, { months: 3 }).getMonth(),
+  };
+}
+
 async function handleCriarRegistroProximoMes() {
   try {
     loading.value = true;
     await replicarTransacoesPorPeriodo(
       props.idsTransacao,
-      dadosFormulario.value.dataInicial,
-      dadosFormulario.value.dataFinal,
+      new Date(mesAno.value.ano, mesAno.value.mes - 1, 1),
+      new Date(mesAnoFinal.value.ano, mesAnoFinal.value.mes - 1, 1),
       props.tipoCategoriaTransacao,
     );
   } finally {

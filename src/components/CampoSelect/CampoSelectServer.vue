@@ -17,7 +17,6 @@
     :rules="rules"
     :disable="disable"
     options-cover
-    stack-label
     transition-show="scale"
     transition-hide="scale"
     behavior="menu"
@@ -93,7 +92,7 @@ const preencherdados = async (filtro?: string) => {
   opcoes.value = dados;
 };
 
-const filtrarPesquisa = (val: string, update: any) => {
+const filtrarPesquisa = (val: string, update: any, abort: any) => {
   update(async () => {
     if (val === '') {
       await preencherdados();

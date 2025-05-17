@@ -2,6 +2,8 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers';
+import dotenv from "dotenv";
+const env = dotenv.config({ path: `.env` }).parsed;
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -11,7 +13,7 @@ export default defineConfig((/* ctx */) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['axios'],
+    boot: ['axios', 'apexchart'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -52,10 +54,9 @@ export default defineConfig((/* ctx */) => {
 
       // publicPath: '/',
       // analyze: true,
+
       env: {
-        URL_API: 'https://192.168.100.3:7171/api/',
-        lOGIN_URL: '/#/login',
-        //URL_API: "https://localhost:7171/api/",
+        ...env
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

@@ -3,15 +3,15 @@ import { notificar } from 'src/helpers/Notificacao';
 import { ref } from 'vue';
 
 export default class TransacaoServiceBase<CreateType, ReturnType> {
-  private baseUrl: string;
+  protected baseUrl: string;
   public loading = ref(false);
-  private axios = CreateIntanceAxios();
+  protected axios = CreateIntanceAxios();
 
   constructor(path: string) {
     this.baseUrl = process.env.URL_API + path;
   }
 
-  private async requestWithLoading<T>(requestFn: () => Promise<T>) {
+  protected async requestWithLoading<T>(requestFn: () => Promise<T>) {
     try {
       this.loading.value = true;
       return await requestFn();

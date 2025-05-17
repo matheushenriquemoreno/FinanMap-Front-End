@@ -4,6 +4,11 @@ import { ref } from 'vue';
 import { Notify } from 'quasar'
 
 
+export interface LoginResult {
+  token: string,
+  nomeUsuario: string
+}
+
 export class AuthService {
   public loading = ref(false);
   private baseUrl: string;
@@ -54,7 +59,7 @@ export class AuthService {
   }
 
   // Verificação do código recebido por email
-  async verifyCode(email: string, codigo: string): Promise<string> {
+  async verifyCode(email: string, codigo: string): Promise<LoginResult> {
     try {
       this.loading.value = true;
 
@@ -65,8 +70,8 @@ export class AuthService {
         headers: { 'Content-Type': 'application/json' },
       };
 
-      const result = await axios.request(options);
-      return result.data.token;
+      const result = await axios.request<LoginResult>(options);
+      return result.data;
     } catch (error) {
       this.handleVerifyError(error);
       throw error;

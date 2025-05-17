@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md q-gutter-sm">
+  <div class="q-pa-md q-gutter-sm flex justify-between">
     <q-breadcrumbs class="text-grey" active-color="black">
       <template v-slot:separator>
         <q-icon size="1.2em" name="arrow_forward" color="green" />
@@ -8,6 +8,9 @@
       <q-breadcrumbs-el icon="home" />
       <q-breadcrumbs-el label="Gerenciamento Mensal" icon="navigation" />
     </q-breadcrumbs>
+    <div class="text-dark text-subtitle2" v-if="$q.screen.gt.xs">
+      <q-icon name="schedule" color="dark" size="xs" /> <span>{{ dataAtual }}</span>
+    </div>
   </div>
   <div class="row justify-center q-gutter-lg espaco-itens">
     <CardValores
@@ -84,6 +87,12 @@ import MothYearSelector from 'src/components/MothYearSelector.vue';
 import CardValores from 'src/components/CardValores.vue';
 import IconesGerenciamentoMensal from 'src/helpers/IconesGerenciamentoMensal';
 
+const dataAtual = ref(getDataAtualFormatada());
+
+setInterval(() => {
+  dataAtual.value = getDataAtualFormatada();
+}, 1000);
+
 const handlePeriodChange = ({ mes, ano }: any) => {
   useGerenciamentoMensal.setMesAno(ano, mes);
 };
@@ -93,6 +102,10 @@ const useGerenciamentoMensal = useGerenciamentoMensalStore();
 const acumulado = computed(() => {
   return useGerenciamentoMensal.getAcumuladoMensal();
 });
+
+function getDataAtualFormatada() {
+  return new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR');
+}
 </script>
 
 <style scoped>

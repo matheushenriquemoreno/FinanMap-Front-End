@@ -4,7 +4,6 @@ import type { TipoCategoriaETransacao } from "src/Model/Categoria";
 import type { ReplicarTransacoesPeriodo } from "src/Model/CriarRegistro";
 
 export default async function replicarTransacoesPorPeriodo(idRegistros: string[], dataInicial: Date, dataFinal: Date, tipocategoria: TipoCategoriaETransacao) {
-
   const axios = CreateIntanceAxios();
 
   const replica: ReplicarTransacoesPeriodo = {

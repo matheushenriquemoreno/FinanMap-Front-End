@@ -1,6 +1,6 @@
 
 import { defineStore } from 'pinia'
-import type { AcumuladoMensal, Mes } from 'src/Model/Transacao'
+import type { AcumuladoMensal, MesAno } from 'src/Model/Transacao'
 import { ref } from 'vue'
 
 export const useGerenciamentoMensalStore = defineStore('GerenciamentoMensalStore ', () => {
@@ -31,14 +31,14 @@ export const useGerenciamentoMensalStore = defineStore('GerenciamentoMensalStore
 
   // Seesão Mes
 
-  const mesAtual = ref<Mes>(getMesAnoAtual());
+  const mesAtual = ref<MesAno>(getMesAnoAtual());
 
   function getMesAnoAtual() {
     const DataAtual = new Date();
     return {
       ano: DataAtual.getFullYear(),
       mes: DataAtual.getMonth() + 1,
-    } as Mes;
+    } as MesAno;
   }
 
   function setMesAno(ano: number, mes: number) {

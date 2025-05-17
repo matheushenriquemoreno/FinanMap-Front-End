@@ -48,107 +48,50 @@
         </section>
       </template>
 
+      <template v-slot:header-cell-descricao="props">
+        <q-th :props="props" style="width: 350px">
+          {{ props.col.label }}
+        </q-th>
+      </template>
+
       <template v-slot:body="props">
-        <q-tr :props="props">
-          <q-td key="categoriaNome" :props="props">
-            <q-checkbox v-model="props.selected" />
-          </q-td>
-
-          <q-td key="categoriaNome" :props="props" class="no-pointer-events">
-            <q-icon name="arrow_downward" color="red" size="xs" />
-            {{ props.row.categoriaNome }}
-          </q-td>
-          <q-td
-            class="no-pointer-events"
-            v-for="col in props.cols.filter(
-              (x: any) => x.name != 'acoes' && x.name != 'categoriaNome' && x.name != 'valor',
-            )"
-            :key="col.name"
-            :props="props"
-          >
-            {{ col.value }}
-          </q-td>
-
-          <!-- Editar Valor -->
-          <q-td key="valor" :props="props" class="cursor-pointer">
-            <ValorPadraoBR :valor="props.row.valor" />
-            <q-popup-edit
-              v-model.number="props.row.valor"
-              buttons
-              label-set="Alterar"
-              label-cancel="Fechar"
-              @save="(value) => alterarValor(props.row.id, value)"
-              :validate="(val) => val !== ''"
-              v-slot="scope"
-            >
-              <q-input
-                type="number"
-                v-model.number="scope.value"
-                min="0"
-                step="0.01"
-                dense
-                autofocus
-                label="Valor"
-                lazy-rules
-                prefix="R$ "
-                :rules="[(val) => scope.validate(val) || 'Dite um valor valido!']"
-                @keyup.enter="scope.set"
-              />
-            </q-popup-edit>
-          </q-td>
-          <!-- Ações -->
-          <q-td key="acoes" :props="props" class="text-center">
-            <section class="q-gutter-sm" v-if="$q.screen.gt.xs">
-              <q-btn
-                style="font-size: 11px"
-                round
-                size="sm"
-                color="primary"
-                icon="edit_note"
-                @click="abriModalEditarDespesa(props.row)"
-              >
-                <q-tooltip transition-show="scale" transition-hide="scale" class="bg-primary"
-                  >Editar</q-tooltip
-                >
-              </q-btn>
-              <q-btn
-                round
-                style="font-size: 11px"
-                color="red"
-                icon="delete_forever"
-                @click="excluir(props.row.id)"
-              >
-                <q-tooltip transition-show="scale" transition-hide="scale" class="bg-red"
-                  >Excluir</q-tooltip
-                >
-              </q-btn>
-            </section>
-            <section class="q-gutter-sm" v-else>
-              <q-btn-dropdown round dense color="primary">
-                <q-list bordered separator>
-                  <q-item clickable v-ripple @click="abriModalEditarDespesa(props.row)">
-                    <q-item-section class="text-weight-medium">Editar</q-item-section>
-                    <q-item-section avatar>
-                      <q-icon size="md" color="primary" name="edit_note" />
-                    </q-item-section>
-                  </q-item>
-                  <q-item clickable v-ripple @click="excluir(props.row.id)">
-                    <q-item-section class="text-weight-medium">Excluir</q-item-section>
-                    <q-item-section avatar>
-                      <q-icon size="md" color="red" name="delete_forever" />
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-btn-dropdown>
-            </section>
-          </q-td>
+        <q-tr
+          :props="props"
+          :key="props.row.id!"
+          v-if="!props.row?.idDespesaAgrupadora || props.row?.idDespesaAgrupadora === null"
+        >
+          <DespesaTableRow
+            :key="props.row.id"
+            v-bind:props="props"
+            :show-selected="true"
+            @editar="abriModalEditarDespesa"
+            @excluir="excluir"
+            @alterarValor="alterarValor"
+            @expandir="buscarDespesasAgrupadas"
+          />
         </q-tr>
+        <!-- região que vai abrir uma nova linha com toda a listagem de despesa da despesa agrupadora -->
+        <tr
+          v-show="props.expand"
+          v-for="despesa in filtrarDespesasDaAgrupadora(props.row.id, props.expand)"
+          :key="despesa.id!"
+          class="bg-grey-4"
+        >
+          <DespesaTableRow
+            :key="despesa.id!"
+            v-bind:props="getPropsRow(props, despesa)"
+            :show-selected="false"
+            @editar="abriModalEditarDespesa"
+            @excluir="excluir"
+            @alterarValor="alterarValor"
+          />
+        </tr>
       </template>
     </q-table>
   </div>
 
-  <!--Modal Adicionar/Editar Rendimento-->
-  <TransacaoBaseModal
+  <!--Modal Adicionar/Editar -->
+  <ModalDespesa
     v-model:model-value="abriModal"
     :transacao="despesaEdit"
     :eh-edicao="ehEdicao"
@@ -157,7 +100,9 @@
     @on-submit-add="adicionar"
     @on-submit-edit="editar"
     :tipo-categoria-transacao="TipoCategoriaETransacao.Despesa"
-    :loading="useGerenciamentoMensal.loading"
+    :loading="despesaservice.loading.value"
+    :ano="useGerenciamentoMensal.mesAtual.ano"
+    :mes="useGerenciamentoMensal.mesAtual.mes"
   />
 
   <CriarRegistroProximoMesModal
@@ -168,10 +113,9 @@
 </template>
 
 <script setup lang="ts">
-import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
-import TransacaoBaseModal from 'src/components/Transacao/TransacaoBaseModal.vue';
+import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
 import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
-
+import DespesaTableRow from 'src/components/Despesa/DespesaTableRow.vue';
 import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 
@@ -189,7 +133,7 @@ const $q = useQuasar();
 const filter = ref('');
 const abriModal = ref(false);
 const ehEdicao = ref(false);
-const despesaEdit = ref<DespesaCreate>({} as DespesaCreate);
+const despesaEdit = ref<DespesaResult>({} as DespesaResult);
 const despesasColumns: any[] = [
   {
     name: 'categoriaNome',
@@ -198,7 +142,7 @@ const despesasColumns: any[] = [
     align: 'center',
   },
   {
-    name: 'Descricao',
+    name: 'descricao',
     field: 'descricao',
     label: 'Descrição',
     format: (val: string) => `${val.trim()}`,
@@ -221,6 +165,7 @@ const despesasColumns: any[] = [
     align: 'center',
   },
 ];
+
 const despesas = ref<DespesaResult[]>([]);
 
 // stores
@@ -248,10 +193,12 @@ async function getReportAcumulado() {
       TipoCategoriaETransacao.Despesa,
     );
     useGerenciamentoMensal.setAcumuladoMensal(report);
+    despesas.value = [];
     despesas.value = report.despesas ?? [];
   } catch (error) {
     console.log(error);
   }
+  registrosSelecionados.value = [];
   useGerenciamentoMensal.setLoading(false);
 }
 
@@ -265,10 +212,10 @@ async function adicionar(despesa: DespesaCreate) {
 }
 
 async function editar(despesa: DespesaCreate) {
-  console.log(despesa);
   await despesaservice.update(despesa);
   fecharModal();
-  getReportAcumulado();
+  if (despesa.idDespesaAgrupadora) await buscarDespesasAgrupadas(despesa.idDespesaAgrupadora);
+  else await getReportAcumulado();
 }
 
 function excluir(id: string) {
@@ -284,21 +231,24 @@ function excluir(id: string) {
 }
 
 function abriModalEditarDespesa(despesa: DespesaResult) {
-  despesaEdit.value.categoriaId = despesa.categoriaId;
-  despesaEdit.value.categoriaNome = despesa.categoriaNome;
-  despesaEdit.value.id = despesa.id;
-  despesaEdit.value.descricao = despesa.descricao;
-  despesaEdit.value.valor = despesa.valor;
+  despesaEdit.value = despesa;
   abriModalAdicionar(true);
 }
 
 async function alterarValor(id: string, valor: number) {
   try {
+    useGerenciamentoMensal.setLoading(true);
     const result = await despesaservice.updateValor(id, valor);
+
+    const indexDespesa = despesas.value.findIndex((x) => x.id === id);
+    if (despesas.value[indexDespesa] === undefined) return;
+
+    despesas.value[indexDespesa].valor = result.valor;
     useGerenciamentoMensal.setAcumuladoMensal(result.reportAcumulado);
   } catch {
     await getReportAcumulado();
   }
+  useGerenciamentoMensal.setLoading(false);
 }
 
 function abriModalAdicionar(isEdit = false) {
@@ -309,11 +259,37 @@ function abriModalAdicionar(isEdit = false) {
 function fecharModal() {
   abriModal.value = false;
   ehEdicao.value = false;
-  despesaEdit.value = {} as DespesaCreate;
+  despesaEdit.value = {} as DespesaResult;
+}
+
+async function buscarDespesasAgrupadas(id: string, expandir = true) {
+  despesas.value = despesas.value.filter((x) => x.idDespesaAgrupadora !== id);
+
+  if (expandir) {
+    useGerenciamentoMensal.setLoading(true);
+
+    const despesasDaAgrupada = await despesaservice.getDespesasAgrupadas(id);
+    despesas.value.push(...despesasDaAgrupada);
+
+    useGerenciamentoMensal.setLoading(false);
+  }
+}
+
+function filtrarDespesasDaAgrupadora(id: string, expandir: boolean) {
+  if (expandir) {
+    return despesas.value.filter((x) => x.idDespesaAgrupadora === id);
+  }
+  return [];
+}
+
+function getPropsRow(props: any, despesa: DespesaResult) {
+  const newProps = { ...props };
+  newProps.row = despesa;
+  newProps.key = despesa.id;
+  return newProps;
 }
 
 // Ações de seleção de registros
-
 const registrosSelecionados = ref<DespesaResult[]>([]);
 const abriModalCriarRegistroProximoMes = ref(false);
 

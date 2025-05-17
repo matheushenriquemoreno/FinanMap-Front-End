@@ -1,9 +1,10 @@
 <template>
   <q-input
     v-bind="attrs"
-    :dense="styled.dense"
-    :filled="styled.filled"
-    :rounded="styled.rounded"
+    :dense="styled?.dense ?? false"
+    :filled="styled?.filled ?? false"
+    :rounded="styled?.rounded ?? false"
+    :borderless="styled?.borderless ?? false"
     :label="label"
     v-model="modelLocalDisplay"
     :rules="[(val) => validarData(val) || 'Digite uma data válida!']"
@@ -32,15 +33,9 @@
 import { computed, defineProps, defineEmits, ref } from 'vue';
 import type { PropType } from 'vue';
 import { useAttrs } from 'vue';
+import type { styles } from './types';
 
 const attrs = useAttrs();
-
-// Definição das types
-interface styles {
-  dense?: boolean;
-  filled?: boolean;
-  rounded?: boolean;
-}
 
 // Definindo props
 const props = defineProps({

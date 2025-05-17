@@ -31,9 +31,13 @@ export interface RendimentosResult extends TransacaoResult {
 // Despesa
 
 export interface DespesaCreate extends TransacaoCreate {
+  idDespesaAgrupadora: string;
 }
 
 export interface DespesaResult extends TransacaoResult {
+  ehDespesaAgrupadora: boolean;
+  idDespesaAgrupadora: string;
+  agrupadora: DespesaResult | null
 }
 
 
@@ -57,7 +61,7 @@ export interface AcumuladoMensal {
   investimentos?: InvestimentoResult[]
 }
 
-export interface Mes {
+export interface MesAno {
   ano: number,
   mes: number
 }
