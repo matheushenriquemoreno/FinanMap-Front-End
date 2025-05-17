@@ -54,6 +54,7 @@ import type { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import replicarTransacoesPorPeriodo from 'src/services/ReplicarTranscoes';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import InputSelectMesAno from 'src/components/Inputs/InputSelectMesAno.vue';
+import type { MesAno } from 'src/Model/Transacao';
 
 // Props do componente
 interface Props {
@@ -70,17 +71,8 @@ const $q = useQuasar();
 const useGerenciamentoMensal = useGerenciamentoMensalStore();
 
 // Variaveis
-const dataSelecionadaAtualmente = new Date(
-  useGerenciamentoMensal.mesAtual.ano,
-  useGerenciamentoMensal.mesAtual.mes,
-  1,
-);
-
-const mesAno = ref(useGerenciamentoMensal.mesAtual);
-const mesAnoFinal = ref({
-  ano: date.addToDate(dataSelecionadaAtualmente, { months: 3 }).getFullYear(),
-  mes: date.addToDate(dataSelecionadaAtualmente, { months: 3 }).getMonth() + 1,
-});
+const mesAno = ref<MesAno>({} as MesAno);
+const mesAnoFinal = ref<MesAno>({} as MesAno);
 
 const localModelValue = computed({
   get: () => props.modelValue,
@@ -89,13 +81,9 @@ const localModelValue = computed({
 
 const loading = ref(false);
 
-watch(localModelValue, (valor) => {
-  if (valor === true) {
-    mesAno.value = useGerenciamentoMensal.mesAtual;
-    mesAnoFinal.value = {
-      ano: date.addToDate(dataSelecionadaAtualmente, { months: 3 }).getFullYear(),
-      mes: date.addToDate(dataSelecionadaAtualmente, { months: 3 }).getMonth() + 1,
-    };
+watch(localModelValue, (abrirModal) => {
+  if (abrirModal === true) {
+    preencherMesAnoFiltroComProximo3Meses();
   }
 });
 
@@ -109,6 +97,23 @@ const closeModal = () => {
   localModelValue.value = false;
   emit('closeModal');
 };
+
+function preencherMesAnoFiltroComProximo3Meses() {
+  const mesSelecionado = new Date(
+    useGerenciamentoMensal.mesAtual.ano,
+    useGerenciamentoMensal.mesAtual.mes,
+    1,
+  );
+
+  mesAno.value = {
+    ano: mesSelecionado.getFullYear(),
+    mes: mesSelecionado.getMonth() + 1,
+  };
+  mesAnoFinal.value = {
+    ano: date.addToDate(mesSelecionado, { months: 3 }).getFullYear(),
+    mes: date.addToDate(mesSelecionado, { months: 3 }).getMonth(),
+  };
+}
 
 async function handleCriarRegistroProximoMes() {
   try {

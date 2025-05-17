@@ -11,9 +11,17 @@
         color="primary"
         round
         @click="onExpandClick"
-        :icon="propsLocal.expand ? 'remove' : 'add'"
+        :icon="propsLocal?.expand ? 'remove' : 'add'"
       >
-        <q-tooltip style="font-size: 13px" class="bg-dark">Buscar Despesas Agrupadas</q-tooltip>
+        <q-tooltip
+          v-if="propsLocal.expand === false"
+          style="font-size: 13px"
+          class="bg-dark"
+          anchor="top middle"
+          self="bottom middle"
+          :offset="[10, 10]"
+          >Buscar Despesas Agrupadas</q-tooltip
+        >
       </q-btn>
 
       <div>
@@ -25,6 +33,7 @@
 
   <q-td
     class="no-pointer-events"
+    style="white-space: normal; word-wrap: break-word; max-width: 350px"
     v-for="col in propsLocal.cols.filter(
       (x: any) => x.name != 'acoes' && x.name != 'categoriaNome' && x.name != 'valor',
     )"

@@ -1,5 +1,4 @@
 <template>
-  <!--Modal Adicionar/Editar Rendimento-->
   <q-dialog v-model="localModelValue" @before-hide="closeModal" @hide="closeModal" position="top">
     <q-card style="width: 700px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">

@@ -48,6 +48,12 @@
         </section>
       </template>
 
+      <template v-slot:header-cell-descricao="props">
+        <q-th :props="props" style="width: 350px">
+          {{ props.col.label }}
+        </q-th>
+      </template>
+
       <template v-slot:body="props">
         <q-tr
           :props="props"
@@ -64,10 +70,10 @@
             @expandir="buscarDespesasAgrupadas"
           />
         </q-tr>
-
+        <!-- região que vai abrir uma nova linha com toda a listagem de despesa da despesa agrupadora -->
         <tr
           v-show="props.expand"
-          v-for="despesa in bucarDespesasDaAgrupadora(props.row.id, props.expand)"
+          v-for="despesa in filtrarDespesasDaAgrupadora(props.row.id, props.expand)"
           :key="despesa.id!"
           class="bg-grey-4"
         >
@@ -85,7 +91,7 @@
   </div>
 
   <!--Modal Adicionar/Editar -->
-  <TransacaoBaseModalDespesa
+  <ModalDespesa
     v-model:model-value="abriModal"
     :transacao="despesaEdit"
     :eh-edicao="ehEdicao"
@@ -94,7 +100,7 @@
     @on-submit-add="adicionar"
     @on-submit-edit="editar"
     :tipo-categoria-transacao="TipoCategoriaETransacao.Despesa"
-    :loading="useGerenciamentoMensal.loading"
+    :loading="despesaservice.loading.value"
     :ano="useGerenciamentoMensal.mesAtual.ano"
     :mes="useGerenciamentoMensal.mesAtual.mes"
   />
@@ -107,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import TransacaoBaseModalDespesa from 'src/components/Transacao/TransacaoBaseModalDespesa.vue';
+import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
 import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
 import DespesaTableRow from 'src/components/Despesa/DespesaTableRow.vue';
 import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
@@ -136,7 +142,7 @@ const despesasColumns: any[] = [
     align: 'center',
   },
   {
-    name: 'Descricao',
+    name: 'descricao',
     field: 'descricao',
     label: 'Descrição',
     format: (val: string) => `${val.trim()}`,
@@ -187,6 +193,7 @@ async function getReportAcumulado() {
       TipoCategoriaETransacao.Despesa,
     );
     useGerenciamentoMensal.setAcumuladoMensal(report);
+    despesas.value = [];
     despesas.value = report.despesas ?? [];
   } catch (error) {
     console.log(error);
@@ -207,7 +214,8 @@ async function adicionar(despesa: DespesaCreate) {
 async function editar(despesa: DespesaCreate) {
   await despesaservice.update(despesa);
   fecharModal();
-  getReportAcumulado();
+  if (despesa.idDespesaAgrupadora) await buscarDespesasAgrupadas(despesa.idDespesaAgrupadora);
+  else await getReportAcumulado();
 }
 
 function excluir(id: string) {
@@ -229,11 +237,18 @@ function abriModalEditarDespesa(despesa: DespesaResult) {
 
 async function alterarValor(id: string, valor: number) {
   try {
+    useGerenciamentoMensal.setLoading(true);
     const result = await despesaservice.updateValor(id, valor);
+
+    const indexDespesa = despesas.value.findIndex((x) => x.id === id);
+    if (despesas.value[indexDespesa] === undefined) return;
+
+    despesas.value[indexDespesa].valor = result.valor;
     useGerenciamentoMensal.setAcumuladoMensal(result.reportAcumulado);
   } catch {
     await getReportAcumulado();
   }
+  useGerenciamentoMensal.setLoading(false);
 }
 
 function abriModalAdicionar(isEdit = false) {
@@ -247,28 +262,20 @@ function fecharModal() {
   despesaEdit.value = {} as DespesaResult;
 }
 
-async function buscarDespesasAgrupadas(id: string, expandir: boolean) {
+async function buscarDespesasAgrupadas(id: string, expandir = true) {
+  despesas.value = despesas.value.filter((x) => x.idDespesaAgrupadora !== id);
+
   if (expandir) {
     useGerenciamentoMensal.setLoading(true);
 
-    let despesasDaAgrupada = await despesaservice.getDespesasAgrupadas(id);
-
-    despesasDaAgrupada = despesasDaAgrupada.map((des) => {
-      return {
-        ...des,
-        idDespesaAgrupadora: id,
-      };
-    });
-
-    despesas.value = [...despesasDaAgrupada, ...despesas.value];
+    const despesasDaAgrupada = await despesaservice.getDespesasAgrupadas(id);
+    despesas.value.push(...despesasDaAgrupada);
 
     useGerenciamentoMensal.setLoading(false);
-  } else {
-    await getReportAcumulado();
   }
 }
 
-function bucarDespesasDaAgrupadora(id: string, expandir: boolean) {
+function filtrarDespesasDaAgrupadora(id: string, expandir: boolean) {
   if (expandir) {
     return despesas.value.filter((x) => x.idDespesaAgrupadora === id);
   }
