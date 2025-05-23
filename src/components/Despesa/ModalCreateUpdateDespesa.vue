@@ -120,11 +120,11 @@ const localModelValue = computed({
 const categoriaSelecionada = ref<Categoria | null>(null);
 const despesaAgrupadora = ref<DespesaResult | null>(null);
 
-const dadosFormulario = ref(props.transacao as DespesaCreate);
+const dadosFormulario = ref({} as DespesaCreate);
 
 watch(localModelValue, (valor) => {
   if (valor === true && props.ehEdicao && isEmpty(props.transacao) == false) {
-    dadosFormulario.value = props.transacao as DespesaCreate;
+    dadosFormulario.value = { ...props.transacao } as DespesaCreate;
 
     categoriaSelecionada.value = {
       id: props.transacao?.categoriaId,

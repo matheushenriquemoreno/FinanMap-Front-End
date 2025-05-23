@@ -4,17 +4,17 @@
   </q-td>
 
   <q-td key="categoriaNome">
-    <div class="flex justify-center q-gutter-md items-center">
+    <div class="coluna-nome-categoria">
       <q-btn
         v-if="propsLocal.row.ehDespesaAgrupadora"
         size="sm"
         color="primary"
         round
         @click="onExpandClick"
-        :icon="(propsLocal?.expand ?? false) ? 'remove' : 'add'"
+        :icon="propsLocal.expand ? 'remove' : 'add'"
       >
         <q-tooltip
-          v-if="propsLocal.expand === false"
+          v-if="!propsLocal.expand"
           style="font-size: 13px"
           class="bg-dark"
           anchor="top middle"
@@ -31,15 +31,8 @@
     </div>
   </q-td>
 
-  <q-td
-    class="no-pointer-events"
-    style="white-space: normal; word-wrap: break-word; max-width: 350px"
-    v-for="col in propsLocal.cols.filter(
-      (x: any) => x.name != 'acoes' && x.name != 'categoriaNome' && x.name != 'valor',
-    )"
-    :key="col.name"
-  >
-    {{ propsLocal.row[col.field] }}
+  <q-td key="descricao" class="no-pointer-events coluna-descricao">
+    {{ propsLocal.row.descricao }}
   </q-td>
 
   <!-- Editar Valor -->
@@ -121,7 +114,7 @@
 import { useQuasar } from 'quasar';
 import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
 import type { DespesaResult } from 'src/Model/Transacao';
-import type { NamedColor } from 'quasar'; // ajuste o import conforme necessário
+import type { NamedColor } from 'quasar';
 import { computed } from 'vue';
 
 const $q = useQuasar();
@@ -135,13 +128,14 @@ interface RowProps {
   cols: any;
   colsMap: any;
   selected: boolean;
-  expand: boolean;
+  expand: boolean; // Este agora vem do controle manual
   color: NamedColor;
   dark?: boolean | null;
   dense: boolean;
   __trClass: string;
   __trStyle?: string;
 }
+
 // Props
 const props = defineProps<{
   props: RowProps;
@@ -183,3 +177,21 @@ function onExpandClick() {
   emit('expandir', props.props.row.id, propsLocal.value.expand);
 }
 </script>
+
+<style scoped>
+.coluna-nome-categoria {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  column-gap: 6px;
+  justify-content: center;
+}
+
+.coluna-descricao {
+  white-space: normal;
+  word-wrap: break-word; /* Para compatibilidade antiga */
+  overflow-wrap: break-word; /* Recomendado atualmente */
+  max-width: 350px;
+  min-width: 160px;
+}
+</style>

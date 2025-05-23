@@ -150,7 +150,7 @@
   <!--Modal Adicionar/Editar Rendimento-->
   <TransacaoBaseModal
     v-model:model-value="abriModal"
-    v-model:transacao="rendimentoEdit"
+    :transacao="rendimentoEdit"
     titulo-add="Adicionar Rendimento"
     titulo-edit="Editar Rendimento"
     @on-submit-add="adicionarRendimento"
