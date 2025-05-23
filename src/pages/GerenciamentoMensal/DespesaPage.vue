@@ -57,12 +57,12 @@
       <template v-slot:body="props">
         <q-tr
           :props="props"
-          :key="props.row.id!"
+          :key="props.row.id"
           v-if="!props.row?.idDespesaAgrupadora || props.row?.idDespesaAgrupadora === null"
         >
           <DespesaTableRow
             :key="props.row.id"
-            v-bind:props="props"
+            :props="props"
             :show-selected="true"
             @editar="abriModalEditarDespesa"
             @excluir="excluir"
@@ -79,7 +79,7 @@
         >
           <DespesaTableRow
             :key="despesa.id!"
-            v-bind:props="getPropsRow(props, despesa)"
+            :props="getPropsRow(props, despesa)"
             :show-selected="false"
             @editar="abriModalEditarDespesa"
             @excluir="excluir"
@@ -241,9 +241,23 @@ async function alterarValor(id: string, valor: number) {
     const result = await despesaservice.updateValor(id, valor);
 
     const indexDespesa = despesas.value.findIndex((x) => x.id === id);
-    if (despesas.value[indexDespesa] === undefined) return;
+    if (indexDespesa === -1) return;
 
-    despesas.value[indexDespesa].valor = result.valor;
+    const despesa = despesas.value[indexDespesa]!;
+    despesa.valor = result.valor;
+
+    despesas.value[indexDespesa] = despesa;
+
+    if (despesa.idDespesaAgrupadora) {
+      const indexAgrupadora = despesas.value.findIndex((x) => x.id === despesa.idDespesaAgrupadora);
+
+      const agrupadora = despesas.value[indexAgrupadora]!;
+
+      agrupadora.valor = result.agrupadora?.valor ?? agrupadora.valor;
+
+      despesas.value[indexAgrupadora] = agrupadora;
+    }
+
     useGerenciamentoMensal.setAcumuladoMensal(result.reportAcumulado);
   } catch {
     await getReportAcumulado();

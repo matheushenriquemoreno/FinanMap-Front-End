@@ -11,7 +11,7 @@
         color="primary"
         round
         @click="onExpandClick"
-        :icon="propsLocal?.expand ? 'remove' : 'add'"
+        :icon="(propsLocal?.expand ?? false) ? 'remove' : 'add'"
       >
         <q-tooltip
           v-if="propsLocal.expand === false"
