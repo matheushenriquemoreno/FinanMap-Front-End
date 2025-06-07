@@ -73,7 +73,7 @@
       </div>
     </q-drawer>
 
-    <q-page-container class="q-pa-xs">
+    <q-page-container class="q-pa-xs" style="height: 100vh">
       <router-view />
     </q-page-container>
 

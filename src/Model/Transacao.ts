@@ -37,7 +37,8 @@ export interface DespesaCreate extends TransacaoCreate {
 export interface DespesaResult extends TransacaoResult {
   ehDespesaAgrupadora: boolean;
   idDespesaAgrupadora: string;
-  agrupadora: DespesaResult | null
+  agrupadora: DespesaResult | null;
+  despesasFilhas?: DespesaResult[];
 }
 
 
