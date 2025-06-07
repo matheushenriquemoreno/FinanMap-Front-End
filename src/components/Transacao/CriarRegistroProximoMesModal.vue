@@ -6,6 +6,7 @@
     @before-hide="closeModal"
     @hide="closeModal"
     position="top"
+    backdrop-filter="brightness(60%)"
   >
     <q-card style="width: 550px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
@@ -111,7 +112,7 @@ function preencherMesAnoFiltroComProximo3Meses() {
   };
   mesAnoFinal.value = {
     ano: date.addToDate(mesSelecionado, { months: 3 }).getFullYear(),
-    mes: date.addToDate(mesSelecionado, { months: 3 }).getMonth(),
+    mes: date.addToDate(mesSelecionado, { months: 3 }).getMonth() + 1,
   };
 }
 

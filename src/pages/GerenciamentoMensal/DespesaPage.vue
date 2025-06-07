@@ -2,6 +2,7 @@
   <!--Tabela que mostra os despesas-->
   <div class="row justify-center q-pa-sm q-mb-lg">
     <q-table
+      :key="useGerenciamentoMensal.mesAtual.ano + useGerenciamentoMensal.mesAtual.mes"
       title="Despesas"
       class="tabela-transacao"
       :rows="despesas"
@@ -69,7 +70,7 @@
         <!-- região que vai abrir uma nova linha com toda a listagem de despesa da despesa agrupadora -->
         <tr
           v-show="despesasExpandidas.has(props.row.id)"
-          v-for="despesa in filtrarDespesasDaAgrupadora(props.row.id)"
+          v-for="despesa in props.row.despesasFilhas"
           :key="despesa.id!"
           class="bg-grey-4"
         >
@@ -79,7 +80,7 @@
             :show-selected="false"
             @editar="abriModalEditarDespesa"
             @excluir="excluir"
-            @alterarValor="alterarValor"
+            @alterarValor="(id, valor) => alterarValor(id, valor, true)"
           />
         </tr>
       </template>
@@ -114,12 +115,12 @@ import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistro
 import DespesaTableRow from 'src/components/Despesa/DespesaTableRow.vue';
 import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
-
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import getDespesaService from 'src/services/transacao/DespesaService';
+import GerenciamentoMensalPageIndex from './GerenciamentoMensalPageIndex.vue';
 
 // services
 const despesaservice = getDespesaService();
@@ -180,7 +181,7 @@ watch(
   useGerenciamentoMensal.mesAtual,
   () => {
     // Limpa as categorias expandidas ao mudar de mês
-    despesasExpandidas.value.clear();
+    despesasExpandidas.value = new Set();
     getReportAcumulado();
   },
   { deep: true },
@@ -198,23 +199,27 @@ async function getReportAcumulado() {
 
     useGerenciamentoMensal.setAcumuladoMensal(report);
 
-    let despesasResult = report.despesas ?? [];
+    const resultDespesas = report.despesas ?? [];
 
     const idsExpandidos = Array.from(despesasExpandidas.value);
 
     for (const despesaId of idsExpandidos) {
       // Verificar se a despesa agrupadora ainda existe
-      const aindaExiste = despesas.value.some((d) => d.id === despesaId && d.ehDespesaAgrupadora);
-      if (aindaExiste) {
+      const despesaAgrupada = resultDespesas.find(
+        (d) => d.id === despesaId && d.ehDespesaAgrupadora,
+      );
+      if (despesaAgrupada) {
         const despesasDaAgrupada = await despesaservice.getDespesasAgrupadas(despesaId);
-        despesasResult = [...despesasResult, ...despesasDaAgrupada];
+        despesaAgrupada.despesasFilhas = despesasDaAgrupada;
       } else {
         // Remove do conjunto se não existe mais
         despesasExpandidas.value.delete(despesaId);
       }
     }
 
-    despesas.value = despesasResult;
+    // realizo a atribuição da despesa somente no final para ja mostrar a tela pronta, com as despesas agrupadas
+    // que foram carregadas anteriormente com todos os dados carregados.
+    despesas.value = resultDespesas;
   } catch (error) {
     console.log(error);
   }
@@ -255,35 +260,37 @@ function abriModalEditarDespesa(despesa: DespesaResult) {
   abriModalAdicionar(true);
 }
 
-async function alterarValor(id: string, valor: number) {
+async function alterarValor(id: string, valor: number, despesaAgrupada = false) {
   try {
     useGerenciamentoMensal.setLoading(true);
 
     const result = await despesaservice.updateValor(id, valor);
 
+    if (despesaAgrupada) {
+      const indexAgrupadora = despesas.value.findIndex(
+        (x) => x.despesasFilhas && x.despesasFilhas.some((x) => x.id === id),
+      );
+
+      const agrupadora = despesas.value[indexAgrupadora]!;
+      agrupadora.valor = result.agrupadora?.valor ?? agrupadora.valor;
+
+      const despesaFilha = agrupadora.despesasFilhas?.find((x) => x.id === id);
+      if (despesaFilha) despesaFilha.valor = result.valor;
+      return;
+    }
+
     const indexDespesa = despesas.value.findIndex((x) => x.id === id);
-    if (indexDespesa === -1) return;
 
     const despesa = despesas.value[indexDespesa]!;
 
     despesa.valor = result.valor;
 
-    despesas.value[indexDespesa] = despesa;
-
-    if (despesa.idDespesaAgrupadora) {
-      const indexAgrupadora = despesas.value.findIndex((x) => x.id === despesa.idDespesaAgrupadora);
-
-      const agrupadora = despesas.value[indexAgrupadora]!;
-      agrupadora.valor = result.agrupadora?.valor ?? agrupadora.valor;
-
-      despesas.value[indexAgrupadora] = agrupadora;
-    }
-
     useGerenciamentoMensal.setAcumuladoMensal(result.reportAcumulado);
   } catch {
     await getReportAcumulado();
+  } finally {
+    useGerenciamentoMensal.setLoading(false);
   }
-  useGerenciamentoMensal.setLoading(false);
 }
 
 function abriModalAdicionar(isEdit = false) {
@@ -304,7 +311,10 @@ async function buscarDespesasAgrupadas(id: string, expandir = true) {
 
   if (expandir) {
     const despesasDaAgrupada = await despesaservice.getDespesasAgrupadas(id);
-    despesas.value = [...despesas.value, ...despesasDaAgrupada];
+
+    const indexAgrupadora = despesas.value.findIndex((x) => x.id === id);
+    const agrupadora = despesas.value[indexAgrupadora]!;
+    agrupadora.despesasFilhas = despesasDaAgrupada;
 
     // Adicionar ao conjunto de expandidas
     despesasExpandidas.value.add(id);
