@@ -46,6 +46,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
+import { notificar } from 'src/helpers/Notificacao';
 
 const router = useRouter();
 const email = ref('');
@@ -55,6 +56,7 @@ const authService = obterAuthService();
 const handleLogin = async () => {
   await authService.login(email.value);
   userStore.setEmail(email.value);
+  notificar('Login realizado com sucesso!');
   await router.push('/verify');
 };
 </script>

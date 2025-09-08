@@ -1,4 +1,4 @@
-import { handleErrorAxios, CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
+import { handleErrorAxios, CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import type { CategoriaResult, CreateCategoriaDTO, TipoCategoriaETransacao, UpdateCategoriaDTO } from 'src/Model/Categoria';
 import { ref } from 'vue';
 

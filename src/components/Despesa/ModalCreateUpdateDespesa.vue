@@ -37,7 +37,8 @@
               :rules="[(val) => Boolean(val) || 'Campo obrigatorio']"
             />
             <div>
-              <CampoSelectServer
+              <CampoSelectComSusgestao
+                :nomeItemPrincipalCadastro="dadosFormulario.descricao"
                 :configuracoes="{
                   labelObjeto: 'nome',
                   valueObjeto: 'id',
@@ -47,12 +48,12 @@
                 v-model="categoriaSelecionada"
                 label="Selecione a categoria"
                 @model-alterado="(val) => (dadosFormulario.categoriaId = val.id)"
-                :rules="[(val) => Boolean(val) || 'Campo obrigatorio']"
+                :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']"
               />
             </div>
 
             <div>
-              <CampoSelectServer
+              <CampoSelect
                 :configuracoes="{
                   labelObjeto: 'descricaoECategoria',
                   valueObjeto: 'id',
@@ -83,12 +84,13 @@
 </template>
 
 <script setup lang="ts">
-import CampoSelectServer from 'src/components/CampoSelect/CampoSelectServer.vue';
+import CampoSelectComSusgestao from 'src/components/Transacao/CampoSelect/CampoSelectComSusgestao.vue';
+import CampoSelect from 'src/components/CampoSelect/CampoSelectServer.vue';
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { Categoria } from 'src/Model/Categoria';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
-import { CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
+import { CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
 
 function isEmpty(obj: object | null | undefined) {

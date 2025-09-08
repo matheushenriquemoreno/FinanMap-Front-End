@@ -44,6 +44,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
+import { notificar } from 'src/helpers/Notificacao';
 
 const authService = obterAuthService();
 const router = useRouter();
@@ -62,6 +63,7 @@ const handleVerify = async () => {
   const email = userStore.getEmail();
   if (email === null) return;
   const result = await authService.verifyCode(email, code.value);
+  notificar('Login realizado com sucesso!');
   localStorage.setItem('token', result.token);
   localStorage.setItem('userName', result.nomeUsuario);
   message.value = 'Email verificado com sucesso!';
