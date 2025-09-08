@@ -1,4 +1,4 @@
-import { CreateIntanceAxios, handleErrorAxios } from "src/helpers/api/AxiosHelper";
+import { CreateIntanceAxios, handleErrorAxios } from "src/services/api/AxiosHelper";
 import { notificar } from "src/helpers/Notificacao";
 import type { TipoCategoriaETransacao } from "src/Model/Categoria";
 import type { ReplicarTransacoesPeriodo } from "src/Model/CriarRegistro";

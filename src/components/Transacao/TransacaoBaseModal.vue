@@ -73,7 +73,7 @@ import CampoSelectServer from 'src/components/CampoSelect/CampoSelectServer.vue'
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { Categoria, TipoCategoriaETransacao } from 'src/Model/Categoria';
-import { CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
+import { CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import type { TransacaoCreate } from 'src/Model/Transacao';
 
 function isEmpty(obj: object | null) {

@@ -54,7 +54,7 @@ export default defineConfig((/* ctx */) => {
       // analyze: true,
 
       env: {
-        URL_API: 'http://finammapbackend-prd.eba-kkzv2yme.us-east-2.elasticbeanstalk.com/api/',
+        URL_API: 'https://api.devmoreno.online/',
         lOGIN_URL: '/#/login'
       },
       // rawDefine: {}

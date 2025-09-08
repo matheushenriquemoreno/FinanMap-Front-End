@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
+import { CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import { onMounted, ref } from 'vue';
 
 interface UsuarioSistema {

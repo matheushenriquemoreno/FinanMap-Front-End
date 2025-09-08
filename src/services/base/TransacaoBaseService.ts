@@ -1,4 +1,4 @@
-import { handleErrorAxios, CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
+import { handleErrorAxios, CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import { notificar } from 'src/helpers/Notificacao';
 import { ref } from 'vue';
 

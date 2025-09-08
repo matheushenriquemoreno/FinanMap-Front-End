@@ -58,15 +58,13 @@ body {
   max-height: 600px;
 }
 
-/* ===== DESKTOP ===== */
+/* ===== Celulares ===== */
 
-// /* Desktop Médio (1440px - 1679px) */
-// @media screen and (min-width: 1440px) {
-//   .tabela-transacao {
-//     max-height: 600px;
-//   }
-// }
-
+@media (max-width: 460px) {
+  .tabela-transacao {
+    max-height: 100vh;
+  }
+}
 /* ===== MONITORES GRANDES ===== */
 
 @media screen and (min-width: 2000px) {

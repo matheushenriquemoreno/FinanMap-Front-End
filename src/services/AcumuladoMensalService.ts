@@ -1,4 +1,4 @@
-import { handleErrorAxios, CreateIntanceAxios } from 'src/helpers/api/AxiosHelper';
+import { handleErrorAxios, CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import type { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import type { AcumuladoMensal } from 'src/Model/Transacao';
 

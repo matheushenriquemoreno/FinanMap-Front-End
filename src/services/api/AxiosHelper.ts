@@ -1,6 +1,6 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
-import { notificarErro, notificarInfo } from "../Notificacao";
+import { notificarErro, notificarInfo } from "../../helpers/Notificacao";
 
 interface ApiResultError {
   errors: string[]
