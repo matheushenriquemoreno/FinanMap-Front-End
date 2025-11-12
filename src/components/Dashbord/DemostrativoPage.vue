@@ -1,6 +1,6 @@
 <template>
-  <div class="box box1">
-    <apexchart :options="configuracoesGrafico" :series="valoresGrafico" />
+  <div class="box box1 shadow-2 rounded-borders">
+    <apexchart :options="configuracoesGrafico" :series="valoresGrafico" height="100%" />
   </div>
 </template>
 
@@ -28,8 +28,7 @@ const props = defineProps({
   },
   corGrafico: {
     type: String,
-    required: true,
-    default: '#5c52ff',
+    default: '#1d169c', // Cor primaria do projeto
   },
   mesesGrafico: {
     type: Object as PropType<string[]>,
@@ -37,22 +36,20 @@ const props = defineProps({
   },
 });
 
-const randomizeArray = function (arg: number[]) {
-  const array = arg.slice();
-  let currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
-
-  while (0 !== currentIndex) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex]!;
-    array[randomIndex] = temporaryValue!;
+const randomizeArray = (arg: number[]) => {
+  const array = [...arg];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j]!, array[i]!];
   }
-
   return array;
+};
+
+const formatarValor = (valor: number) => {
+  return valor.toLocaleString('pt-br', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 };
 
 const configuracoesGrafico = ref<ApexOptions>({
@@ -60,7 +57,7 @@ const configuracoesGrafico = ref<ApexOptions>({
     id: 'Demostrativo',
     group: 'sparklines',
     type: 'area',
-    height: 180,
+    height: 160,
     sparkline: {
       enabled: true,
     },
@@ -74,9 +71,7 @@ const configuracoesGrafico = ref<ApexOptions>({
   labels: props.mesesGrafico,
   yaxis: {
     labels: {
-      formatter: function (val: number) {
-        return formatarValor(val);
-      },
+      formatter: (val) => formatarValor(val),
     },
     min: 0,
   },
@@ -89,6 +84,7 @@ const configuracoesGrafico = ref<ApexOptions>({
     offsetX: 30,
     style: {
       fontSize: '24px',
+      fontWeight: 'bold',
     },
   },
   subtitle: {
@@ -96,6 +92,18 @@ const configuracoesGrafico = ref<ApexOptions>({
     offsetX: 30,
     style: {
       fontSize: '14px',
+      color: '#666',
+    },
+  },
+  tooltip: {
+    theme: 'dark',
+    x: {
+      show: true,
+    },
+    y: {
+      title: {
+        formatter: (seriesName) => seriesName,
+      },
     },
   },
 });
@@ -106,20 +114,15 @@ const valoresGrafico = [
     data: randomizeArray(props.dadosGrafico),
   },
 ];
-
-function formatarValor(valor: number) {
-  return valor.toLocaleString('pt-br', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
 </script>
 
 <style scoped>
 .box {
-  /* box-shadow: 0px 1px 22px -12px #607d8b; */
+  height: 190px;
   background-color: #fff;
-  /* padding: 25px 35px 25px 30px;
-  max-height: 444px; */
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 </style>
