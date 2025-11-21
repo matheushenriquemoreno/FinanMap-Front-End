@@ -194,3 +194,14 @@ const aplicarSelecao = () => {
   showSelector.value = false;
 };
 </script>
+
+<style scoped>
+/* ===== DARK MODE STYLES ===== */
+body.body--dark .text-dark {
+  color: #e0e0e0 !important; /* Branco claro para melhor visibilidade */
+}
+
+body.body--dark .text-primary {
+  color: #64b5f6 !important; /* Azul mais claro e vibrante para o mês atual */
+}
+</style>
