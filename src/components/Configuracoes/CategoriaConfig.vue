@@ -100,7 +100,7 @@
             v-model="categoriaCreate.nome"
             label="Nome"
             autogrow
-            :rules="[(val) => (val && val.length > 0) || 'Nome é obrigatório!']"
+            :rules="[(val:any) => (val && val.length > 0) || 'Nome é obrigatório!']"
           />
           <div
             class="q-pa-sm rounded-borders"

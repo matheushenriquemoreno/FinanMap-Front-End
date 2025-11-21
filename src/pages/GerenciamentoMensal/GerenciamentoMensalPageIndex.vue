@@ -8,9 +8,6 @@
       <q-breadcrumbs-el icon="home" />
       <q-breadcrumbs-el label="Gerenciamento Mensal" icon="navigation" />
     </q-breadcrumbs>
-    <div class="text-dark text-subtitle2" v-if="$q.screen.gt.xs">
-      <q-icon name="schedule" color="dark" size="xs" /> <span>{{ dataAtual }}</span>
-    </div>
   </div>
   <div class="row justify-center q-gutter-lg espaco-itens">
     <CardValores

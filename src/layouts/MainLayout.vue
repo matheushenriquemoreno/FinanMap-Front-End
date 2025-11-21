@@ -11,6 +11,7 @@
           <span class="text-white text-h6 q-ml-sm">FinanMap</span>
         </q-toolbar-title>
         <q-space />
+        <DateDisplay />
 
         <div class="q-gutter-sm row items-center no-wrap">
           <q-btn
@@ -65,14 +66,14 @@
             </q-item-section>
           </q-item>
 
-          <q-item to="/dashbord" class="menu-title" clickable v-ripple active-class="text-dark">
+          <!-- <q-item to="/dashbord" class="menu-title" clickable v-ripple active-class="text-dark">
             <q-item-section avatar>
               <q-avatar icon="equalizer" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Dashbord</q-item-label>
             </q-item-section>
-          </q-item>
+          </q-item> -->
         </q-list>
       </q-scroll-area>
 
@@ -98,6 +99,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import ModalConfiguracoes from 'src/components/Configuracoes/ModalConfiguracoes.vue';
+import DateDisplay from 'src/components/DateDisplay.vue';
 import { useThemeStore } from 'src/stores/theme-store';
 import { ref, onMounted } from 'vue';
 

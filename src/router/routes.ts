@@ -42,10 +42,10 @@ const routes: RouteRecordRaw[] = [
           },
         ]
       },
-      {
-        path: '/dashbord',
-        component: () => import('src/pages/Dashbord/dashbord-Gerenciamento-Mensal.vue'),
-      },
+      // {
+      //   path: '/dashbord',
+      //   component: () => import('src/pages/Dashbord/dashbord-Gerenciamento-Mensal.vue'),
+      // },
     ],
   },
 ];
