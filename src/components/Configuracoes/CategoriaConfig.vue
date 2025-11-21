@@ -115,7 +115,7 @@
             />
           </div>
         </q-card-section>
-        <q-card-actions align="between" class="bg-white text-teal">
+        <q-card-actions align="between" :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'">
           <q-btn label="Fechar" no-caps flat dense v-close-popup />
           <q-btn flat no-caps label="Adicionar" type="submit" :loading="loading" />
         </q-card-actions>
@@ -266,5 +266,14 @@ function openModalCriarCategoria() {
 .categoria-titulo {
   font-size: 22px;
   font-weight: 500;
+  color: var(--text-primary);
+}
+
+.descricao {
+  color: var(--text-secondary);
+}
+
+.tabela-header {
+  color: var(--text-primary);
 }
 </style>
