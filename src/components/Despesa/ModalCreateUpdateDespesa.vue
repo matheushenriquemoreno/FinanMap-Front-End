@@ -34,11 +34,10 @@
               label="Valor"
               lazy-rules
               prefix="R$ "
-              :rules="[(val) => Boolean(val) || 'Campo obrigatorio']"
+              :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']"
             />
             <div>
-              <CampoSelectComSusgestao
-                :nomeItemPrincipalCadastro="dadosFormulario.descricao"
+              <CampoSelect
                 :configuracoes="{
                   labelObjeto: 'nome',
                   valueObjeto: 'id',
@@ -47,7 +46,7 @@
                 }"
                 v-model="categoriaSelecionada"
                 label="Selecione a categoria"
-                @model-alterado="(val) => (dadosFormulario.categoriaId = val.id)"
+                @model-alterado="(val: any) => (dadosFormulario.categoriaId = val.id)"
                 :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']"
               />
             </div>

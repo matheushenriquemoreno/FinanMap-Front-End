@@ -47,7 +47,7 @@ const props = defineProps({
 .cost-card {
   display: flex;
   align-items: center;
-  background-color: #ffffff;
+  background-color: var(--bg-card);
   border-radius: 12px;
   padding: 12px 16px;
   min-width: 140px; /* Ajuste conforme necessário */
@@ -58,7 +58,8 @@ const props = defineProps({
   min-height: 60px; /* Garante espaço suficiente para o botão */
   transition:
     transform 0.3s ease-in-out,
-    box-shadow 0.3s ease-in-out;
+    box-shadow 0.3s ease-in-out,
+    background-color 0.3s ease;
 }
 
 .icon-container {
@@ -68,7 +69,8 @@ const props = defineProps({
 .icon {
   width: 50px;
   height: 50px;
-  background-color: #f0f8ff;
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s ease;
 }
 
 .close-btn {
@@ -83,8 +85,9 @@ const props = defineProps({
 .amount {
   font-size: 20px;
   font-weight: bold;
-  color: #000000;
+  color: var(--text-primary);
   margin-bottom: 4px;
+  transition: color 0.3s ease;
 }
 
 .label {
@@ -94,7 +97,8 @@ const props = defineProps({
   word-wrap: break-word;
   white-space: normal;
   font-size: 14px;
-  color: #666666;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 @media (min-width: 460px) {
@@ -160,5 +164,29 @@ E também que os cars fiquem menores possibilitando um melhor conforto de tela p
 .cost-card:hover::before {
   opacity: 1;
   transform: scale(1);
+}
+
+/* ===== DARK MODE STYLES ===== */
+body.body--dark .cost-card {
+  background-color: var(--bg-card);
+  box-shadow:
+    rgba(0, 0, 0, 0.4) 0px 1px 2px 0px,
+    rgba(0, 0, 0, 0.3) 0px 2px 6px 2px;
+}
+
+body.body--dark .cost-card .amount {
+  color: var(--text-primary);
+}
+
+body.body--dark .cost-card .label {
+  color: var(--text-secondary);
+}
+
+body.body--dark .cost-card .icon {
+  background-color: var(--bg-icon);
+}
+
+body.body--dark .cost-card:hover {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.5);
 }
 </style>

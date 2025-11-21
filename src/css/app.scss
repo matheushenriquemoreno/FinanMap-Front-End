@@ -4,17 +4,57 @@
   box-sizing: border-box;
 }
 
+
+// ===== VARIÁVEIS DE TEMA =====
+:root {
+  --bg-primary: #f7f7f7;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #646464;
+  --border-color: #ddd;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --login-gradient-start: #001f3f;
+  --login-gradient-end: #002f5f;
+}
+
+body.body--dark {
+  //--bg-primary: #181a1b;        // Background principal
+  --bg-secondary: #181a1b;      // Drawer e elementos secundários
+  --bg-card: #1e2021;           // Cards e tabelas (ligeiramente mais claro)
+  --bg-icon: rgba(255, 255, 255, 0.08); // Background dos ícones
+  --text-primary: #ffffff;       // Texto principal mais claro
+  --text-secondary: #b0b0b0;    // Texto secundário
+  --border-color: #2a2a2a;      // Bordas mais sutis
+  --shadow-color: rgba(0, 0, 0, 0.5); // Sombras mais profundas
+  --login-gradient-start: #0a1929;
+  --login-gradient-end: #1a2332;
+
+
+  //--q-dark: #181a1b;
+  --q-dark-page: #121313;
+  --q-primary: #4c44e7; // Override primary color for dark mode
+}
+
+// ===== ESTILOS GLOBAIS =====
 body {
-  background-color: #f7f7f7;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container-login {
-  background: linear-gradient(to bottom, #001f3f, #002f5f);
+  background: linear-gradient(
+    to bottom,
+    var(--login-gradient-start),
+    var(--login-gradient-end)
+  );
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   height: 100vh;
+  transition: background 0.3s ease;
 }
 
 .logo {
@@ -23,12 +63,13 @@ body {
 }
 
 .card-login {
-  background: white;
+  background: var(--bg-card);
   padding: 30px;
   border-radius: 10px;
   width: 450px;
   text-align: center;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px var(--shadow-color);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 @media (max-width: 450px) {
@@ -52,10 +93,12 @@ body {
   margin-top: 10px;
   min-width: 300px;
   border-radius: 15px;
+  background-color: var(--bg-card);
   box-shadow:
     rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   max-height: 600px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* ===== Celulares ===== */
@@ -88,3 +131,108 @@ body {
     max-height: 1000px;
   }
 }
+
+/* ===== ESTILOS PARA MODO ESCURO ===== */
+
+// Tabelas Quasar no modo escuro
+body.body--dark {
+  // Tabelas
+  .q-table {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+
+    thead tr,
+    tbody td {
+      color: var(--text-primary) !important;
+    }
+
+    th {
+      color: var(--text-primary) !important;
+      font-weight: 600;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .q-table__card {
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+    }
+  }
+
+  // Cards
+  .q-card {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  // Inputs e campos de texto
+  .q-field__control,
+  .q-field__native {
+    color: var(--text-primary) !important;
+  }
+
+  .q-field__label {
+    color: var(--text-secondary) !important;
+  }
+
+  // Menu items
+  .q-item {
+    color: var(--text-primary);
+  }
+
+  .q-item__label {
+    color: var(--text-primary) !important;
+  }
+
+  // Breadcrumbs
+  .q-breadcrumbs__el {
+    color: var(--text-secondary) !important;
+  }
+
+  // Tabs
+  .q-tab {
+    color: var(--text-secondary) !important;
+
+    &--active {
+      color: var(--text-primary) !important;
+    }
+  }
+
+  // Tooltips
+  .q-tooltip {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
+
+  // Pagination
+  .q-pagination__content {
+    color: var(--text-primary);
+  }
+
+  // Drawer menu items
+  .menu-title {
+    color: var(--text-secondary) !important;
+
+    &.q-router-link--active {
+      color: var(--text-primary) !important;
+    }
+  }
+
+  // Drawer background
+  .bg-dark-drawer {
+    background-color: var(--bg-secondary) !important;
+  }
+
+  // Header background
+  .bg-dark-header {
+    background-color: #1a1919 !important; // Preto puro para o header
+  }
+
+  // Hover em linhas da tabela mais sutil
+  .q-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+  }
+}
+
