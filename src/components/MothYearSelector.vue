@@ -202,6 +202,6 @@ body.body--dark .text-dark {
 }
 
 body.body--dark .text-primary {
-  color: #64b5f6 !important; /* Azul mais claro e vibrante para o mês atual */
+  color: #5ab6ff !important; /* Azul mais claro e vibrante para o mês atual */
 }
 </style>
