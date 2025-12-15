@@ -66,14 +66,14 @@
             </q-item-section>
           </q-item>
 
-          <!-- <q-item to="/dashbord" class="menu-title" clickable v-ripple active-class="text-dark">
+          <q-item to="/dashbord" class="menu-title" clickable v-ripple active-class="text-dark">
             <q-item-section avatar>
               <q-avatar icon="equalizer" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Dashbord</q-item-label>
             </q-item-section>
-          </q-item> -->
+          </q-item>
         </q-list>
       </q-scroll-area>
 
@@ -88,7 +88,7 @@
       </div>
     </q-drawer>
 
-    <q-page-container class="q-pa-xs" style="height: 100vh">
+    <q-page-container class="q-pa-xs">
       <router-view />
     </q-page-container>
 
