@@ -33,57 +33,88 @@
           <q-btn flat round dense icon="chevron_right" @click="passarParaProximoMes" />
         </div>
       </div>
-      <!-- Dialog de seleção de meses e anos -->
+      
+      <!-- Dialog de seleção de meses e anos - Modernizado -->
       <q-dialog v-model="showSelector">
-        <q-card style="min-width: 350px">
-          <q-card-section class="q-pb-none">
-            <div class="text-h6">Selecionar Período</div>
+        <q-card class="period-selector-card">
+          <!-- Header com título e botão de data atual -->
+          <q-card-section class="q-pb-sm">
+            <div class="row items-center justify-between">
+              <div class="text-h6 text-weight-regular">Selecionar Período</div>
+              <q-btn 
+                flat 
+                round 
+                icon="event_available" 
+                @click="selecionarDataAtual"
+                class="text-grey-6"
+              >
+                <q-tooltip class="bg-grey-7">Voltar para data atual</q-tooltip>
+              </q-btn>
+            </div>
           </q-card-section>
 
-          <q-card-section>
-            <div class="q-mb-md">
-              <div class="text-subtitle2 q-mb-sm">Ano</div>
-              <div class="row q-gutter-sm">
-                <q-btn
-                  v-for="year in years"
-                  :key="year"
-                  :color="selectedYear === year ? 'green' : 'grey-3'"
-                  :text-color="selectedYear === year ? 'white' : 'black'"
-                  no-caps
-                  unelevated
-                  dense
-                  @click="selectedYear = year"
-                >
-                  {{ year }}
-                </q-btn>
-                <q-btn round color="grey" icon="event_available" @click="selecionarDataAtual">
-                  <q-tooltip class="bg-grey">Atualiza a data para o mês atual</q-tooltip>
-                </q-btn>
+          <q-card-section class="q-pt-none">
+            <!-- Seletor de Ano -->
+            <div class="q-mb-lg">
+              <div class="text-subtitle2 q-mb-md">Ano</div>
+              <div class="year-selector">
+                <q-btn 
+                  flat 
+                  round 
+                  dense 
+                  icon="chevron_left" 
+                  @click="voltarAnoAnterior"
+                  class="year-nav-btn"
+                />
+                
+                <div class="years-container">
+                  <div
+                    v-for="year in visibleYears"
+                    :key="year"
+                    :class="['year-item', { 'year-selected': selectedYear === year }]"
+                    @click="selectedYear = year"
+                  >
+                    {{ year }}
+                  </div>
+                </div>
+                
+                <q-btn 
+                  flat 
+                  round 
+                  dense 
+                  icon="chevron_right" 
+                  @click="passarParaProximoAno"
+                  class="year-nav-btn"
+                />
               </div>
             </div>
 
+            <!-- Seletor de Mês -->
             <div>
-              <div class="text-subtitle2 q-mb-sm">Mês</div>
-              <div class="row q-gutter-sm">
-                <q-btn
+              <div class="text-subtitle2 q-mb-md">Mês</div>
+              <div class="months-grid">
+                <div
                   v-for="month in months"
                   :key="month.mes"
-                  :color="selectedMonth === month.mes ? 'green' : 'grey-3'"
-                  :text-color="selectedMonth === month.mes ? 'white' : 'black'"
-                  no-caps
-                  unelevated
-                  dense
+                  :class="['month-item', { 'month-selected': selectedMonth === month.mes }]"
                   @click="selectedMonth = month.mes"
                 >
                   {{ month.name.substring(0, 3) }}
-                </q-btn>
+                </div>
               </div>
             </div>
           </q-card-section>
 
-          <q-card-actions align="right">
-            <q-btn flat color="grey" icon="event_available" @click="selecionarDataAtual" />
-            <q-btn flat label="Aplicar" color="primary" @click="aplicarSelecao" v-close-popup />
+          <!-- Ações -->
+          <q-card-actions class="q-px-md q-pb-md" align="right">
+            <q-btn 
+              unelevated
+              label="APLICAR" 
+              color="positive"
+              class="apply-btn"
+              @click="aplicarSelecao" 
+              v-close-popup 
+            />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -117,7 +148,15 @@ const selectedYear = ref(props.ano || currentDate.getFullYear());
 
 const showSelector = ref(false);
 
-// Faz a listagem de 3 anos, pegando sempre o atual o anterior e o proximo
+// Ano base para navegação (controla qual conjunto de anos é exibido)
+const baseYear = ref(selectedYear.value);
+
+// Mostra 5 anos: baseYear-2, baseYear-1, baseYear, baseYear+1, baseYear+2
+const visibleYears = computed(() => {
+  return Array.from({ length: 5 }, (_, i) => baseYear.value - 2 + i);
+});
+
+// Mantém compatibilidade com código antigo (não usado no novo template)
 const years = computed(() => {
   return Array.from({ length: 3 }, (_, i) => selectedYear.value - 1 + i);
 });
@@ -155,9 +194,13 @@ watch([showSelector], ([value]) => {
     selectedMonth.value = props.mes!;
     selectedYear.value = props.ano!;
   }
+  // Quando abrir o seletor, centralizar os anos visíveis no ano selecionado
+  if (value === true) {
+    baseYear.value = selectedYear.value;
+  }
 });
 
-// Métodos para navegação
+// Métodos para navegação de meses
 const voltarMesAnterior = () => {
   if (selectedMonth.value === 1) {
     selectedMonth.value = 12;
@@ -176,9 +219,19 @@ const passarParaProximoMes = () => {
   }
 };
 
+// Métodos para navegação de anos
+const voltarAnoAnterior = () => {
+  baseYear.value--;
+};
+
+const passarParaProximoAno = () => {
+  baseYear.value++;
+};
+
 const selecionarDataAtual = () => {
   selectedMonth.value = currentDate.getMonth() + 1;
   selectedYear.value = currentDate.getFullYear();
+  baseYear.value = currentDate.getFullYear();
   aplicarSelecao();
 };
 
@@ -196,12 +249,179 @@ const aplicarSelecao = () => {
 </script>
 
 <style scoped>
+/* ===== CARD STYLES ===== */
+.period-selector-card {
+  min-width: 350px;
+  max-width: 550px;
+  border-radius: 16px;
+}
+
+/* ===== YEAR SELECTOR ===== */
+.year-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.year-nav-btn {
+  color: #9e9e9e;
+}
+
+.years-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.year-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #757575;
+}
+
+.year-item:hover {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.year-selected {
+  background-color: #4caf50 !important;
+  color: white !important;
+  font-size: 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* ===== MONTH SELECTOR ===== */
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+
+.month-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #e0e0e0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #424242;
+  background-color: transparent;
+}
+
+.month-item:hover {
+  border-color: #4caf50;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.month-selected {
+  background-color: #4caf50 !important;
+  border-color: #4caf50 !important;
+  color: white !important;
+  box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+}
+
+/* ===== ACTION BUTTON ===== */
+.apply-btn {
+  border-radius: 24px;
+  padding: 8px 32px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .period-selector-card {
+    min-width: 300px;
+  }
+  
+  .months-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  
+  .month-item {
+    width: 50px;
+    height: 50px;
+    font-size: 12px;
+  }
+  
+  .year-item {
+    min-width: 50px;
+    height: 50px;
+    font-size: 14px;
+  }
+  
+  .year-selected {
+    width: 65px;
+    height: 65px;
+    font-size: 18px;
+  }
+}
+
 /* ===== DARK MODE STYLES ===== */
 body.body--dark .text-dark {
-  color: #e0e0e0 !important; /* Branco claro para melhor visibilidade */
+  color: #e0e0e0 !important;
 }
 
 body.body--dark .text-primary {
-  color: #5ab6ff !important; /* Azul mais claro e vibrante para o mês atual */
+  color: #5ab6ff !important;
+}
+
+body.body--dark .period-selector-card {
+  background-color: #1e1e1e;
+}
+
+body.body--dark .year-item {
+  color: #b0b0b0;
+}
+
+body.body--dark .year-item:hover {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #66bb6a;
+}
+
+body.body--dark .month-item {
+  border-color: #424242;
+  color: #e0e0e0;
+}
+
+body.body--dark .month-item:hover {
+  border-color: #66bb6a;
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #66bb6a;
+}
+
+body.body--dark .month-selected {
+  background-color: #4caf50 !important;
+  border-color: #4caf50 !important;
+  color: white !important;
+}
+
+body.body--dark .year-selected {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+body.body--dark .year-nav-btn {
+  color: #757575;
 }
 </style>
