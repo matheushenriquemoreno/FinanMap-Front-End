@@ -46,9 +46,10 @@
                 round 
                 icon="event_available" 
                 @click="selecionarDataAtual"
-                class="text-grey-6"
+                class="text-primary"
+                size="16px" 
               >
-                <q-tooltip class="bg-grey-7">Voltar para data atual</q-tooltip>
+                <q-tooltip class="bg-grey-7" style="font-size: 14px;">Voltar para data atual</q-tooltip>
               </q-btn>
             </div>
           </q-card-section>
@@ -110,7 +111,7 @@
             <q-btn 
               unelevated
               label="APLICAR" 
-              color="positive"
+              color="primary"
               class="apply-btn"
               @click="aplicarSelecao" 
               v-close-popup 
@@ -292,11 +293,11 @@ const aplicarSelecao = () => {
 
 .year-item:hover {
   background-color: rgba(76, 175, 80, 0.1);
-  color: #4caf50;
+  color: #2f6531;
 }
 
 .year-selected {
-  background-color: #4caf50 !important;
+  background-color: #2f6531 !important;
   color: white !important;
   font-size: 20px;
   font-weight: 600;
@@ -327,14 +328,14 @@ const aplicarSelecao = () => {
 }
 
 .month-item:hover {
-  border-color: #4caf50;
+  border-color: #2f6531;
   background-color: rgba(76, 175, 80, 0.1);
-  color: #4caf50;
+  color: #2f6531;
 }
 
 .month-selected {
-  background-color: #4caf50 !important;
-  border-color: #4caf50 !important;
+  background-color: #2f6531 !important;
+  border-color: #2f6531 !important;
   color: white !important;
   box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
 }
