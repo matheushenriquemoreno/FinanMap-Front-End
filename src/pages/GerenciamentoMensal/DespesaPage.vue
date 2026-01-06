@@ -72,7 +72,7 @@
           v-show="despesasExpandidas.has(props.row.id)"
           v-for="despesa in props.row.despesasFilhas"
           :key="despesa.id!"
-          class="bg-grey-4"
+          :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-4'"
         >
           <DespesaTableRow
             :key="despesa.id!"

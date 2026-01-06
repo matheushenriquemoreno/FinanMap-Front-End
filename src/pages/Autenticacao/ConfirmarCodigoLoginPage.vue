@@ -9,11 +9,16 @@
         <q-form @submit="handleVerify" class="q-gutter-xs">
           <q-input
             filled
-            v-model.trim="code"
+            v-model="code"
             type="text"
             placeholder="Digite o código de verificação"
             lazy-rules
             dense
+            @update:model-value="(value) => {
+              if(value && typeof value === 'string') {
+                code = value.toUpperCase().trim();
+              }
+            }"
             :rules="[(val) => (val && val.length > 0) || 'código de verificação obrigatório']"
           />
 
