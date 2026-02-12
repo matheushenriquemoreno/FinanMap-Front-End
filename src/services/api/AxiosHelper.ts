@@ -42,7 +42,7 @@ export function CreateIntanceAxios() {
 
   AxiosInstance.interceptors.response.use(
     (response) => response, // Se a resposta for bem-sucedida, retorna normalmente
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
 
       // Tratamento específico para erros de rede
       if (isNetworkError(error)) {
@@ -52,6 +52,37 @@ export function CreateIntanceAxios() {
       }
 
       // Tratamento baseado em status HTTP
+      const originalRequest = error.config as any;
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          // Importação dinâmica para evitar dependência circular se houver
+          const { obterAuthService } = await import('../../services/AuthService');
+          const authService = obterAuthService();
+          const refreshToken = localStorage.getItem('refreshToken');
+
+          if (refreshToken) {
+            const result = await authService.refreshToken(refreshToken);
+
+            localStorage.setItem('token', result.token);
+            localStorage.setItem('refreshToken', result.refreshToken); // Atualiza com o novo refresh token
+            if (result.nomeUsuario) {
+              localStorage.setItem('userName', result.nomeUsuario);
+            }
+
+            // Atualiza o header da requisição original
+            originalRequest.headers.Authorization = `Bearer ${result.token}`;
+
+            // Reenvia a requisição original
+            return AxiosInstance(originalRequest);
+          }
+        } catch (refreshError) {
+          // Se falhar o refresh, deixa cair no tratamento padrão de 401 (logout)
+        }
+      }
+
       return handleHttpStatusError(error);
     }
   );
@@ -132,6 +163,8 @@ function handleHttpStatusError(error: AxiosError): Promise<never> {
   if (statusCode === 401 || statusCode === 403) {
     notificarInfo(ERROR_MESSAGES.unauthorized);
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userName");
     window.location.href = process.env.LOGIN_URL ?? '/login';
   }
   // Erros do lado do servidor

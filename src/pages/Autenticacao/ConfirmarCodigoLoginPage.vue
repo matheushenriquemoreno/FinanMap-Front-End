@@ -70,6 +70,7 @@ const handleVerify = async () => {
   const result = await authService.verifyCode(email, code.value);
   notificar('Login realizado com sucesso!');
   localStorage.setItem('token', result.token);
+  localStorage.setItem('refreshToken', result.refreshToken);
   localStorage.setItem('userName', result.nomeUsuario);
   message.value = 'Email verificado com sucesso!';
   router.push('/');
