@@ -6,6 +6,8 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
+import { isTokenExpired } from '../helpers/JwtHelper';
+import { refreshTokenManager } from '../services/RefreshTokenManager';
 
 /*
  * If not building with SSR mode, you can
@@ -31,13 +33,40 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
+    const publicPages = ['/login', '/register', '/verify'];
+    const authRequired = !publicPages.includes(to.path);
     const token = localStorage.getItem('token');
-    const tamanhoMinimoAConsiderar = 100;
-    const isAuthenticated = token !== null && token !== undefined && token.length > tamanhoMinimoAConsiderar;
-    if (to.path !== '/login' && to.path !== '/register' && to.path !== '/verify' && !isAuthenticated) next({ name: "LoginPage" });
-    else next();
-  })
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (authRequired) {
+      if (!token) {
+        return next({ name: 'LoginPage' });
+      }
+
+      const isExpired = isTokenExpired(token);
+
+      if (isExpired) {
+        if (refreshToken) {
+          try {
+            // Usa o RefreshTokenManager que garante apenas um refresh por vez
+            await refreshTokenManager.refreshIfNeeded();
+            return next();
+          } catch (error) {
+            // Falha no refresh, redirecionar para login
+            refreshTokenManager.clearTokens();
+            return next({ name: 'LoginPage' });
+          }
+        } else {
+          // Token expirado e sem refresh token
+          return next({ name: 'LoginPage' });
+        }
+      }
+    }
+
+    next();
+  });
 
   return Router;
 });
+

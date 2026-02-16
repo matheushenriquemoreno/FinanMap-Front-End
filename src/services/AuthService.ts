@@ -1,4 +1,3 @@
-// src/services/AuthService.ts
 import axios, { AxiosError } from 'axios';
 import { ref } from 'vue';
 import { Notify } from 'quasar'
@@ -6,6 +5,7 @@ import { Notify } from 'quasar'
 
 export interface LoginResult {
   token: string,
+  refreshToken: string,
   nomeUsuario: string
 }
 
@@ -78,6 +78,24 @@ export class AuthService {
     } finally {
       this.loading.value = false;
     }
+  }
+
+  // Renovação do token usando refresh token
+  async refreshToken(refreshToken: string): Promise<LoginResult> {
+    const options = {
+      method: 'POST',
+      url: this.baseUrl + 'login/refresh',
+      data: { refreshToken },
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    // Importante: garantir que não envie header de Authorization se o axios global estiver configurado
+    // Aqui estamos usando axios.request direto, que por padrão não envia headers globais a menos que configurado
+    // Mas como CreateIntanceAxios configura interceptors em uma *instância*, o axios global deve estar limpo.
+    // Confirmaremos no teste.
+
+    const result = await axios.request<LoginResult>(options);
+    return result.data;
   }
 
   // Tratamento de erros específicos do login

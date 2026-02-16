@@ -37,6 +37,33 @@
           <q-btn round flat>
             <q-icon name="person" size="26px" />
             <q-tooltip>Conta</q-tooltip>
+            <q-menu>
+              <q-list style="min-width: 200px">
+                <!-- Seção de informações do usuário -->
+                <q-item class="q-pa-md">
+                  <q-item-section avatar>
+                    <q-avatar>
+                      <img src="/avatar.svg" />
+                    </q-avatar>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>{{ username }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+                
+                <q-separator />
+                
+                <!-- Botão de logout -->
+                <q-item clickable v-ripple @click="handleLogout">
+                  <q-item-section avatar>
+                    <q-icon name="logout" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Sair</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
           </q-btn>
         </div>
       </q-toolbar>
@@ -113,6 +140,16 @@ const leftDrawerOpen = ref(false);
 const router = useRouter();
 const abrirModalConfig = ref(false);
 const username = localStorage.getItem('userName')?.split(' ', 2).join(' ');
+
+function handleLogout() {
+  // Remove todos os dados de autenticação do localStorage
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userName');
+  
+  // Redireciona para a página de login
+  router.push({ name: 'LoginPage' });
+}
 
 onMounted(() => {
   themeStore.initTheme();
