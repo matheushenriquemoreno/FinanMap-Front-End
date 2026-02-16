@@ -6,6 +6,8 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
+import { isTokenExpired } from '../helpers/JwtHelper';
+import { refreshTokenManager } from '../services/RefreshTokenManager';
 
 /*
  * If not building with SSR mode, you can
@@ -47,22 +49,12 @@ export default defineRouter(function (/* { store, ssrContext } */) {
       if (isExpired) {
         if (refreshToken) {
           try {
-            // Importação dinâmica para evitar dependência circular
-            const { obterAuthService } = await import('../services/AuthService');
-            const authService = obterAuthService();
-            const result = await authService.refreshToken(refreshToken);
-
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('refreshToken', result.refreshToken);
-            if (result.nomeUsuario) {
-              localStorage.setItem('userName', result.nomeUsuario);
-            }
+            // Usa o RefreshTokenManager que garante apenas um refresh por vez
+            await refreshTokenManager.refreshIfNeeded();
             return next();
           } catch (error) {
             // Falha no refresh, redirecionar para login
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('userName');
+            refreshTokenManager.clearTokens();
             return next({ name: 'LoginPage' });
           }
         } else {
@@ -78,41 +70,3 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   return Router;
 });
 
-function parseJwt(token: string) {
-  try {
-    const parts = token.split('.');
-    if (parts.length < 2) return null;
-    let base64Url = parts[1] ?? '';
-    const padding = base64Url.length % 4;
-    if (padding) {
-      base64Url += '='.repeat(4 - padding);
-    }
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      window
-        .atob(base64)
-        .split('')
-        .map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join('')
-    );
-
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    return null;
-  }
-}
-
-const MILLISECONDS_TO_SECONDS = 1000;
-const TOKEN_REFRESH_THRESHOLD_SECONDS = 300; // 5 minutos antes de expirar
-
-function isTokenExpired(token: string): boolean {
-  const decoded = parseJwt(token);
-  if (!decoded || !decoded.exp) {
-    return true; // Se não conseguir decodificar, considera expirado
-  }
-
-  const currentTime = Date.now() / MILLISECONDS_TO_SECONDS;
-  return decoded.exp < currentTime + TOKEN_REFRESH_THRESHOLD_SECONDS;
-}

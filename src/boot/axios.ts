@@ -1,5 +1,6 @@
 import { defineBoot } from '#q-app/wrappers';
 import axios, { type AxiosInstance } from 'axios';
+import { tokenRenewalService } from '../services/TokenRenewalService';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -26,6 +27,10 @@ export default defineBoot(({ app }) => {
   app.config.globalProperties.$api = api;
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
+
+  // Inicia o serviço de renovação automática de token
+  tokenRenewalService.start();
 });
 
 export { api };
+

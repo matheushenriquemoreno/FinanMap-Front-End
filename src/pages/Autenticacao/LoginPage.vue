@@ -56,7 +56,7 @@ const authService = obterAuthService();
 const handleLogin = async () => {
   await authService.login(email.value);
   userStore.setEmail(email.value);
-  notificar('Login realizado com sucesso!');
+  notificar('Código enviado para o seu e-mail!');
   await router.push('/verify');
 };
 </script>

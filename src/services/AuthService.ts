@@ -1,4 +1,3 @@
-// src/services/AuthService.ts
 import axios, { AxiosError } from 'axios';
 import { ref } from 'vue';
 import { Notify } from 'quasar'
