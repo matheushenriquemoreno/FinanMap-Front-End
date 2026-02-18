@@ -8,6 +8,8 @@
       </p>
     </div>
 
+    <!-- Banner Modo Compartilhado -->
+    <BannerModoCompartilhado />
     <!-- Controls Toolbar -->
     <div class="row items-center q-mb-md justify-between wrap q-gutter-y-sm">
       <!-- Tabs for Category Type -->
@@ -150,6 +152,7 @@ import { useQuasar } from 'quasar';
 import type { CategoriaResult, CreateCategoriaDTO } from 'src/Model/Categoria';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import obterCategoriaService from 'src/services/CategoriaService';
+import BannerModoCompartilhado from 'src/components/Compartilhamento/BannerModoCompartilhado.vue';
 import { onMounted, ref } from 'vue';
 
 // Variaveis

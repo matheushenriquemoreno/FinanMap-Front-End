@@ -36,9 +36,10 @@
   </q-td>
 
   <!-- Editar Valor -->
-  <q-td key="valor" class="cursor-pointer">
+  <q-td key="valor" :class="podeEditar ? 'cursor-pointer' : ''">
     <ValorPadraoBR :valor="propsLocal.row.valor" />
     <q-popup-edit
+      v-if="podeEditar"
       v-model.number="propsLocal.row.valor"
       buttons
       label-set="Alterar"
@@ -64,7 +65,7 @@
   </q-td>
   <!-- Ações -->
   <q-td key="acoes" class="text-center">
-    <section class="q-gutter-sm" v-if="$q.screen.gt.xs">
+    <section class="q-gutter-sm" v-if="$q.screen.gt.xs && podeEditar">
       <q-btn
         style="font-size: 11px"
         round
@@ -89,7 +90,7 @@
         >
       </q-btn>
     </section>
-    <section class="q-gutter-sm" v-else>
+    <section class="q-gutter-sm" v-else-if="!$q.screen.gt.xs && podeEditar">
       <q-btn-dropdown round dense color="primary">
         <q-list bordered separator>
           <q-item clickable v-ripple @click="editarDespesa">
@@ -107,6 +108,7 @@
         </q-list>
       </q-btn-dropdown>
     </section>
+    <div v-else class="text-grey-6 text-caption">Somente leitura</div>
   </q-td>
 </template>
 
@@ -140,7 +142,10 @@ interface RowProps {
 const props = defineProps<{
   props: RowProps;
   showSelected: boolean;
+  podeEditar?: boolean;
 }>();
+
+const { podeEditar = true } = props;
 
 const propsLocal = computed({
   get() {

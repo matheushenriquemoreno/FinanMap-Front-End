@@ -9,9 +9,13 @@
       <q-breadcrumbs-el label="Dashboard" icon="dashboard" />
     </q-breadcrumbs>
   </div>
-  
+<div class="q-px-md">
+    <BannerModoCompartilhado />
+  </div>
+
   <q-page padding :class="$q.dark.isActive ? 'bg-dark-page' : 'bg-grey-2'">
     <div class="content-limit">
+
       <!-- Filter Section -->
       <SectionFiltrarPeriodo />
 
@@ -41,6 +45,7 @@
 
 <script setup lang="ts">
 import SectionFiltrarPeriodo from 'src/components/Dashbord/SectionFiltrarPeriodo.vue';
+import BannerModoCompartilhado from 'src/components/Compartilhamento/BannerModoCompartilhado.vue';
 import DashboardSummaryCards from 'src/components/Dashbord/DashboardSummaryCards.vue';
 import DashboardCategoryChart from 'src/components/Dashbord/DashboardCategoryChart.vue';
 import DashboardCategoryDistributionChart from 'src/components/Dashbord/DashboardCategoryDistributionChart.vue';

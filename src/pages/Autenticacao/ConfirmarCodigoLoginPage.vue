@@ -72,6 +72,7 @@ const handleVerify = async () => {
   localStorage.setItem('token', result.token);
   localStorage.setItem('refreshToken', result.refreshToken);
   localStorage.setItem('userName', result.nomeUsuario);
+  localStorage.setItem('userEmail', email);
   message.value = 'Email verificado com sucesso!';
   router.push('/');
 };

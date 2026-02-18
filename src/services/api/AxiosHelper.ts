@@ -33,6 +33,14 @@ export function CreateIntanceAxios() {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
+
+      // Adicionar header x-proprietario-id se estiver em modo compartilhado
+      const proprietarioIdAtivo = localStorage.getItem("proprietarioIdAtivo");
+      if (proprietarioIdAtivo) {
+        // console.log('Adicionando contexto ao header:', proprietarioIdAtivo);
+        config.headers['X-Proprietario-Id'] = proprietarioIdAtivo;
+      }
+
       return config;
     },
     (error: AxiosError) => {
@@ -176,6 +184,8 @@ function handleHttpStatusError(error: AxiosError): Promise<never> {
     notificarInfo(ERROR_MESSAGES.tooManyRequests);
   }
 
+  HandlerErrorStatusCode(error, statusCode);
+
   return Promise.reject(error);
 }
 
@@ -192,20 +202,23 @@ export function handleErrorAxios(error: unknown): void {
       return;
     }
 
-    if (statusCode === 400 || statusCode === 422 || statusCode === 404) {
-      const result = error.response?.data as ApiResultError;
-
-      notificarInfo(result.errors.join('\n'))
-    }
-    else if (statusCode === 207) {
-
-      const result = error.response?.data as MultiStatusResponse;
-
-      notificarInfo(`Solicitação com sucesso parcial, houve ${result.quantidadeSucesso} sucessos e ${result.quantidadeErros} erros.`)
-      notificarErro(result.errors.join('\n'))
-    }
+    HandlerErrorStatusCode(error, statusCode);
 
     return;
   }
 }
 
+function HandlerErrorStatusCode(error: AxiosError, statusCode: number | null) {
+  if (statusCode === 400 || statusCode === 422 || statusCode === 404) {
+    const result = error.response?.data as ApiResultError;
+
+    notificarErro(result.errors.join('\n'));
+  }
+  else if (statusCode === 207) {
+
+    const result = error.response?.data as MultiStatusResponse;
+
+    notificarInfo(`Solicitação com sucesso parcial, houve ${result.quantidadeSucesso} sucessos e ${result.quantidadeErros} erros.`);
+    notificarErro(result.errors.join('\n'));
+  }
+}

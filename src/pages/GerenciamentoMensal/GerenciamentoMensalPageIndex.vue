@@ -9,6 +9,9 @@
       <q-breadcrumbs-el label="Gerenciamento Mensal" icon="navigation" />
     </q-breadcrumbs>
   </div>
+  <div class="q-px-md">
+    <BannerModoCompartilhado />
+  </div>
   <div class="row justify-center q-gutter-lg espaco-itens">
     <CardValores
       :valor="acumulado.valorRendimento"
@@ -82,6 +85,7 @@ import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-stor
 import { computed, ref } from 'vue';
 import MothYearSelector from 'src/components/MothYearSelector.vue';
 import CardValores from 'src/components/CardValores.vue';
+import BannerModoCompartilhado from 'src/components/Compartilhamento/BannerModoCompartilhado.vue';
 import IconesGerenciamentoMensal from 'src/helpers/IconesGerenciamentoMensal';
 
 const dataAtual = ref(getDataAtualFormatada());

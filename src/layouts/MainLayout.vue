@@ -11,6 +11,10 @@
           <span class="text-white text-h6 q-ml-sm">FinanMap</span>
         </q-toolbar-title>
         <q-space />
+        
+        <!-- Seletor de Contexto de Compartilhamento -->
+        <ContextoSelector v-if="$q.screen.gt.sm" class="q-mr-md" />
+        
         <DateDisplay />
 
         <div class="q-gutter-sm row items-center no-wrap">
@@ -116,7 +120,7 @@
     </q-drawer>
 
     <q-page-container class="q-pa-xs">
-      <router-view />
+      <router-view :key="compartilhamentoStore.contextoAtivo?.proprietarioId || 'meus-dados'" />
     </q-page-container>
 
     <ModalConfiguracoes v-model:model-value="abrirModalConfig" />
@@ -127,10 +131,13 @@
 import { useRouter } from 'vue-router';
 import ModalConfiguracoes from 'src/components/Configuracoes/ModalConfiguracoes.vue';
 import DateDisplay from 'src/components/DateDisplay.vue';
+import ContextoSelector from 'src/components/Compartilhamento/ContextoSelector.vue';
 import { useThemeStore } from 'src/stores/theme-store';
+import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { ref, onMounted } from 'vue';
 
 const themeStore = useThemeStore();
+const compartilhamentoStore = useCompartilhamentoStore();
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -151,8 +158,12 @@ function handleLogout() {
   router.push({ name: 'LoginPage' });
 }
 
-onMounted(() => {
+onMounted(async () => {
   themeStore.initTheme();
+  
+  // Carregar compartilhamentos e restaurar contexto do localStorage
+  await compartilhamentoStore.carregarCompartilhamentos();
+  compartilhamentoStore.restaurarContextoDoLocalStorage();
 });
 
 defineOptions({

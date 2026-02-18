@@ -27,19 +27,19 @@
       <template v-slot:top-right>
         <section class="q-gutter-md">
           <q-btn
-            v-if="existeRegistroSelecionados"
+            v-if="existeRegistroSelecionados && compartilhamentoStore.podeEditar"
             color="primary"
             icon="date_range"
             @click="() => enviarRegistrosSelecionadosParaProximoMes()"
           />
           <q-btn
-            v-if="existeRegistroSelecionados"
+            v-if="existeRegistroSelecionados && compartilhamentoStore.podeEditar"
             color="primary"
             icon="delete_forever"
             @click="() => excluirRegistrosSelecionados()"
           />
           <q-btn
-            v-if="existeRegistroSelecionados === false"
+            v-if="existeRegistroSelecionados === false && compartilhamentoStore.podeEditar"
             color="primary"
             icon="add"
             @click="() => abriModalAdicionar()"
@@ -70,9 +70,10 @@
           </q-td>
 
           <!-- Editar Valor -->
-          <q-td key="valor" :props="props" class="cursor-pointer">
+          <q-td key="valor" :props="props" :class="compartilhamentoStore.podeEditar ? 'cursor-pointer' : ''">
             <ValorPadraoBR :valor="props.row.valor" />
             <q-popup-edit
+              v-if="compartilhamentoStore.podeEditar"
               v-model.number="props.row.valor"
               buttons
               label-set="Alterar"
@@ -98,7 +99,7 @@
           </q-td>
           <!-- Ações -->
           <q-td class="text-center" :props="props" key="acoes">
-            <section class="q-gutter-sm" v-if="$q.screen.gt.xs">
+            <section class="q-gutter-sm" v-if="$q.screen.gt.xs && compartilhamentoStore.podeEditar">
               <q-btn
                 style="font-size: 11px"
                 round
@@ -123,7 +124,7 @@
                 >
               </q-btn>
             </section>
-            <section class="q-gutter-sm" v-else>
+            <section class="q-gutter-sm" v-else-if="!$q.screen.gt.xs && compartilhamentoStore.podeEditar">
               <q-btn-dropdown round dense color="primary">
                 <q-list bordered separator>
                   <q-item clickable v-ripple @click="abriModalEditarInvestimento(props.row)">
@@ -141,6 +142,7 @@
                 </q-list>
               </q-btn-dropdown>
             </section>
+            <div v-else class="text-grey-6 text-caption">Somente leitura</div>
           </q-td>
         </q-tr>
       </template>
@@ -176,6 +178,7 @@ import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
+import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import getInvestimentoService from 'src/services/transacao/InvestimentoService';
@@ -225,6 +228,7 @@ const investimentos = ref<InvestimentoResult[]>([]);
 
 // stores
 const useGerenciamentoMensal = useGerenciamentoMensalStore();
+const compartilhamentoStore = useCompartilhamentoStore();
 
 // Methods Lifecycle
 onMounted(async () => {

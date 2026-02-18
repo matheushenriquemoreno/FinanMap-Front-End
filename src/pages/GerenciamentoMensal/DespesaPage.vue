@@ -28,19 +28,19 @@
       <template v-slot:top-right>
         <section class="q-gutter-sm">
           <q-btn
-            v-if="existeRegistroSelecionados"
+            v-if="existeRegistroSelecionados && compartilhamentoStore.podeEditar"
             color="primary"
             icon="date_range"
             @click="() => enviarRegistrosSelecionadosParaProximoMes()"
           />
           <q-btn
-            v-if="existeRegistroSelecionados"
+            v-if="existeRegistroSelecionados && compartilhamentoStore.podeEditar"
             color="primary"
             icon="delete_forever"
             @click="() => excluirRegistrosSelecionados()"
           />
           <q-btn
-            v-if="existeRegistroSelecionados === false"
+            v-if="existeRegistroSelecionados === false && compartilhamentoStore.podeEditar"
             color="primary"
             icon="add"
             @click="() => abriModalAdicionar()"
@@ -61,6 +61,7 @@
             :key="props.row.id"
             v-bind:props="props"
             :show-selected="true"
+            :pode-editar="compartilhamentoStore.podeEditar"
             @editar="abriModalEditarDespesa"
             @excluir="excluir"
             @alterarValor="alterarValor"
@@ -78,6 +79,7 @@
             :key="despesa.id!"
             :props="getPropsRow(props, despesa)"
             :show-selected="false"
+            :pode-editar="compartilhamentoStore.podeEditar"
             @editar="abriModalEditarDespesa"
             @excluir="excluir"
             @alterarValor="(id, valor) => alterarValor(id, valor, true)"
@@ -117,6 +119,7 @@ import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
+import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import getDespesaService from 'src/services/transacao/DespesaService';
@@ -171,6 +174,7 @@ const despesas = ref<DespesaResult[]>([]);
 
 // stores
 const useGerenciamentoMensal = useGerenciamentoMensalStore();
+const compartilhamentoStore = useCompartilhamentoStore();
 
 // Methods Lifecycle
 onMounted(async () => {
