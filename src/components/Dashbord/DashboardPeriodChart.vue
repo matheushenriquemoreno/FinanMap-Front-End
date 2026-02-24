@@ -25,9 +25,11 @@ import { ref, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
+const service = obterDashboardService();
 const loading = ref(false);
 
 const series = ref<any[]>([]);
@@ -122,41 +124,40 @@ function formatarValor(valor: any, style: 'currency' | 'decimal' = 'currency') {
 
 async function fetchData() {
   loading.value = true;
-  await new Promise((resolve) => setTimeout(resolve, 900));
+  try {
+    const resultado = await service.obterEvolucao(
+      store.dataInicial,
+      store.dataFinal
+    );
 
-  // Generate month labels based on filter
-  const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  categories.value = [];
-  for (let i = store.mesInicial - 1; i < store.mesFinal; i++) {
-    const month = monthNames[i];
-    if (month) categories.value.push(month);
+    categories.value = resultado.map((item) => item.label);
+
+    series.value = [
+      {
+        name: 'Rendimentos',
+        group: 'Total',
+        data: resultado.map((item) => item.rendimento),
+      },
+      {
+        name: 'Despesas',
+        group: 'Total',
+        data: resultado.map((item) => item.despesa),
+      },
+      {
+        name: 'Investimentos',
+        group: 'Total',
+        data: resultado.map((item) => item.investimento),
+      },
+    ];
+  } catch {
+    // Erro já tratado pelo handleErrorAxios no service
+  } finally {
+    loading.value = false;
   }
-
-  const length = categories.value.length;
-  
-  series.value = [
-    {
-      name: 'Rendimentos',
-      group: 'Total',
-      data: Array.from({ length }, () => Math.floor(Math.random() * 10000) + 5000),
-    },
-    {
-      name: 'Despesas',
-      group: 'Total',
-      data: Array.from({ length }, () => Math.floor(Math.random() * 8000) + 2000),
-    },
-    {
-      name: 'Investimentos',
-      group: 'Total',
-      data: Array.from({ length }, () => Math.floor(Math.random() * 3000) + 1000),
-    },
-  ];
-
-  loading.value = false;
 }
 
 watch(
-  () => [store.mesInicial, store.mesFinal, store.ano],
+  () => [store.dataInicial, store.dataFinal],
   () => {
     fetchData();
   },

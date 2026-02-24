@@ -35,9 +35,11 @@ import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
+const service = obterDashboardService();
 const loading = ref(false);
 
 const tipoCategoriaSelecionada = ref(TipoCategoriaETransacao.Rendimento);
@@ -56,6 +58,12 @@ const series = ref([
 
 const categories = ref<string[]>([]);
 
+const computedMax = computed(() => {
+  if (!series.value[0]?.data.length) return 100;
+  const max = Math.max(...series.value[0].data);
+  return max === 0 ? 100 : max * 1.25;
+});
+
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
     type: 'bar',
@@ -67,14 +75,24 @@ const chartOptions = computed<ApexOptions>(() => ({
     bar: {
       borderRadius: 5,
       horizontal: true,
+      dataLabels: {
+        position: 'top', // joga pro fim da barra
+      },
     },
   },
   dataLabels: {
     enabled: true,
+    textAnchor: 'start',
+    offsetX: 10, // afasta da barra para a área vazia
     formatter: (val: number) => formatarValor(val, 'currency'),
+    style: {
+      colors: [$q.dark.isActive ? '#fff' : '#333'],
+      fontSize: '11px',
+    }
   },
   xaxis: {
     categories: categories.value,
+    max: computedMax.value,
     labels: {
       formatter: (val: string) => formatarValor(val, 'currency'),
       style: {
@@ -92,6 +110,9 @@ const chartOptions = computed<ApexOptions>(() => ({
   },
   grid: {
     borderColor: $q.dark.isActive ? '#404040' : '#e0e0e0',
+    padding: {
+      right: 80, // espaço extra na direita para garantir que labels grandes caibam
+    }
   },
   tooltip: {
     theme: $q.dark.isActive ? 'dark' : 'light',
@@ -132,22 +153,27 @@ function formatarValor(valor: any, style: 'currency' | 'decimal' = 'currency') {
 
 async function fetchData() {
   loading.value = true;
-  await new Promise((resolve) => setTimeout(resolve, 600));
+  try {
+    const resultado = await service.obterCategorias(
+      store.dataInicial,
+      store.dataFinal,
+      tipoCategoriaSelecionada.value
+    );
 
-  // Mock data
-  const mockCategories = ['Saúde', 'Transporte', 'Alimentação', 'Educação', 'Moradia'];
-  categories.value = mockCategories;
-  
-  series.value = [{
-    name: 'Valor',
-    data: mockCategories.map(() => Math.floor(Math.random() * 5000) + 500)
-  }];
-
-  loading.value = false;
+    categories.value = resultado.map((item) => item.categoria);
+    series.value = [{
+      name: 'Valor',
+      data: resultado.map((item) => item.valor),
+    }];
+  } catch {
+    // Erro já tratado pelo handleErrorAxios no service
+  } finally {
+    loading.value = false;
+  }
 }
 
 watch(
-  () => [store.mesInicial, store.mesFinal, store.ano],
+  () => [store.dataInicial, store.dataFinal],
   () => {
     fetchData();
   },

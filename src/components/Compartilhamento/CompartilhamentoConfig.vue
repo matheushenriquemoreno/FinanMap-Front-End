@@ -1,152 +1,226 @@
 <template>
-  <div class="compartilhamento-config">
-    <q-card flat bordered>
-      <q-card-section>
-        <div class="text-h6">Compartilhamento de Dados</div>
-        <div class="text-caption text-grey">
-          Gerencie quem tem acesso aos seus dados financeiros
+  <div class="compartilhamento-config q-pa-sm">
+    <!-- Cabeçalho -->
+    <div class="q-mb-lg flex items-center q-gutter-x-sm">
+      <q-avatar color="primary" text-color="white" icon="share" font-size="24px" size="48px" />
+      <div>
+        <div class="text-h5 text-weight-bold">Compartilhamento de Dados</div>
+        <div class="text-caption text-grey-7">
+          Gerencie quem tem acesso aos seus dados financeiros com segurança.
         </div>
-      </q-card-section>
+      </div>
+    </div>
 
-      <q-separator />
+    <div class="row q-col-gutter-lg q-mb-lg">
+      <div class="col-12">
+        <!-- Formulário de Convite -->
+        <q-card flat bordered class="rounded-borders-xl shadow-1">
+          <q-card-section class="q-pb-none">
+            <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm">
+              <q-icon name="person_add" size="sm" color="primary" />
+              <span>Convidar Novo Usuário</span>
+            </div>
+          </q-card-section>
 
-      <!-- Seção: Convidar novo usuário -->
-      <q-card-section>
-        <div class="text-subtitle2 q-mb-md">Convidar Usuário</div>
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <q-input
-              v-model="novoConvite.email"
-              label="E-mail do usuário"
-              type="email"
-              outlined
-              dense
-              :dark="$q.dark.isActive"
-            />
-          </div>
-          <div class="col-12 col-md-4">
-            <q-select
-              v-model="novoConvite.permissao"
-              :options="opcoesPermissao"
-              label="Permissão"
-              outlined
-              dense
-              emit-value
-              map-options
-              :dark="$q.dark.isActive"
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <q-btn
-              color="primary"
-              label="Convidar"
-              icon="send"
-              @click="enviarConvite"
-              :loading="loadingConvite"
-              :disable="!novoConvite.email"
-              class="full-width"
-            />
-          </div>
-        </div>
-      </q-card-section>
-
-      <q-separator />
-
-      <!-- Seção: Meus Compartilhamentos (onde sou o dono) -->
-      <q-card-section>
-        <div class="text-subtitle2 q-mb-md">Meus Compartilhamentos</div>
-        <q-list bordered separator v-if="compartilhamentoStore.meusCompartilhamentos.length > 0">
-          <q-item v-for="comp in compartilhamentoStore.meusCompartilhamentos" :key="comp.id">
-            <q-item-section avatar>
-              <q-avatar color="primary" text-color="white" icon="person" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ comp.convidadoEmail }}</q-item-label>
-              <q-item-label caption>
-                {{ statusTexto(comp.status) }} • {{ permissaoTexto(comp.permissao) }}
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <div class="row q-gutter-sm">
-                <q-btn
-                  v-if="comp.status === StatusConvite.Aceito"
-                  flat
+          <q-card-section>
+            <div class="row q-col-gutter-md items-center">
+              <div class="col-12 col-md-5">
+                <q-input
+                  v-model="novoConvite.email"
+                  label="E-mail do usuário"
+                  type="email"
+                  outlined
                   dense
-                  round
-                  icon="edit"
-                  @click="editarPermissao(comp)"
+                  hide-bottom-space
+                  :dark="$q.dark.isActive"
+                  color="primary"
                 >
-                  <q-tooltip>Alterar permissão</q-tooltip>
-                </q-btn>
-                <q-btn
-                  flat
+                  <template v-slot:prepend>
+                    <q-icon name="mail" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 col-md-4">
+                <q-select
+                  v-model="novoConvite.permissao"
+                  :options="opcoesPermissao"
+                  label="Permissão"
+                  outlined
                   dense
-                  round
-                  icon="delete"
-                  color="negative"
-                  @click="confirmarRevogacao(comp.id)"
+                  emit-value
+                  map-options
+                  hide-bottom-space
+                  :dark="$q.dark.isActive"
+                  color="primary"
                 >
-                  <q-tooltip>Revogar acesso</q-tooltip>
+                  <template v-slot:prepend>
+                    <q-icon name="vpn_key" />
+                  </template>
+                </q-select>
+              </div>
+              <div class="col-12 col-md-3">
+                <q-btn
+                  color="primary"
+                  icon="send"
+                  unelevated
+                  @click="enviarConvite"
+                  :loading="loadingConvite"
+                  :disable="!novoConvite.email"
+                  class="full-width"
+                  style="border-radius: 8px; height: 40px"
+                >
+                  <q-tooltip>Enviar Convite</q-tooltip>
                 </q-btn>
               </div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-        <div v-else class="text-center text-grey q-pa-md">
-          Nenhum compartilhamento criado ainda
-        </div>
-      </q-card-section>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
 
-      <q-separator />
+    <div class="row q-col-gutter-lg">
+      <!-- Lado Esquerdo: Meus Compartilhamentos -->
+      <div class="col-12">
+        <!-- Meus Compartilhamentos -->
+        <q-card flat bordered class="rounded-borders-xl shadow-1 full-height">
+          <q-card-section>
+            <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm q-mb-md">
+              <q-icon name="manage_accounts" size="sm" color="primary" />
+              <span>Pessoas com Acesso</span>
+            </div>
 
-      <!-- Seção: Convites Recebidos -->
-      <q-card-section>
-        <div class="text-subtitle2 q-mb-md">Convites Recebidos</div>
-        <q-list bordered separator v-if="compartilhamentoStore.convitesPendentes.length > 0">
-          <q-item v-for="convite in compartilhamentoStore.convitesPendentes" :key="convite.id">
-            <q-item-section avatar>
-              <q-avatar color="orange" text-color="white" icon="mail" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ convite.proprietarioNome }}</q-item-label>
-              <q-item-label caption>
-                {{ convite.proprietarioEmail }} • {{ permissaoTexto(convite.permissao) }}
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <div class="row q-gutter-sm">
-                <q-btn
-                  flat
-                  dense
-                  label="Aceitar"
-                  color="positive"
-                  @click="responderConvite(convite.id, true)"
-                />
-                <q-btn
-                  flat
-                  dense
-                  label="Recusar"
-                  color="negative"
-                  @click="responderConvite(convite.id, false)"
-                />
+            <q-list separator v-if="compartilhamentoStore.meusCompartilhamentos.length > 0">
+              <q-item v-for="comp in compartilhamentoStore.meusCompartilhamentos" :key="comp.id" class="q-py-sm">
+                <q-item-section avatar>
+                  <q-avatar color="blue-1" text-color="primary" icon="person" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium text-body1">{{ comp.convidadoEmail }}</q-item-label>
+                  <q-item-label caption class="q-mt-xs flex items-center q-gutter-x-sm">
+                    <q-badge :color="corStatus(comp.status)" rounded class="q-px-sm q-py-xs text-weight-medium">
+                      {{ statusTexto(comp.status) }}
+                    </q-badge>
+                    <q-badge outline :color="comp.permissao === NivelPermissao.Editar ? 'purple' : 'info'" class="q-px-sm q-py-xs">
+                      <q-icon :name="comp.permissao === NivelPermissao.Editar ? 'edit' : 'visibility'" size="xs" class="q-mr-xs" />
+                      {{ permissaoTexto(comp.permissao) }}
+                    </q-badge>
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <div class="row q-gutter-sm">
+                    <q-btn
+                      v-if="comp.status === StatusConvite.Aceito"
+                      flat
+                      dense
+                      round
+                      icon="edit"
+                      color="grey-7"
+                      @click="editarPermissao(comp)"
+                    >
+                      <q-tooltip>Alterar permissão</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      icon="delete_outline"
+                      color="negative"
+                      @click="confirmarRevogacao(comp.id)"
+                    >
+                      <q-tooltip>Revogar acesso</q-tooltip>
+                    </q-btn>
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            
+            <!-- Empty State -->
+            <div v-else class="column items-center justify-center q-py-xl text-grey-6">
+              <q-icon name="folder_shared" size="64px" class="q-mb-sm opacity-50" color="grey-4" />
+              <div class="text-h6 text-weight-regular">Nenhum acesso concedido</div>
+              <div class="text-caption">Você ainda não compartilhou seus dados com ninguém.</div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Lado Direito: Convites Recebidos -->
+      <div class="col-12">
+        <q-card flat bordered class="rounded-borders-xl shadow-1 full-height">
+          <q-card-section class="bg-orange-1 text-orange-9" :class="{ 'bg-grey-9 text-orange-4': $q.dark.isActive }">
+            <div class="text-subtitle1 text-weight-bold flex items-center justify-between q-gutter-x-sm">
+              <div class="flex items-center q-gutter-x-sm">
+                <q-icon name="mark_email_unread" size="sm" />
+                <span>Convites Recebidos</span>
               </div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-        <div v-else class="text-center text-grey q-pa-md">
-          Nenhum convite pendente
-        </div>
-      </q-card-section>
-    </q-card>
+              <q-badge color="orange" v-if="compartilhamentoStore.convitesPendentes.length > 0">
+                {{ compartilhamentoStore.convitesPendentes.length }}
+              </q-badge>
+            </div>
+          </q-card-section>
+          
+          <q-separator />
+
+          <q-card-section class="q-pa-none">
+            <q-list separator v-if="compartilhamentoStore.convitesPendentes.length > 0">
+              <q-item v-for="convite in compartilhamentoStore.convitesPendentes" :key="convite.id" class="q-py-md">
+                <q-item-section avatar top class="q-mt-sm">
+                  <q-avatar color="orange-2" text-color="orange-10" icon="mail" />
+                </q-item-section>
+                
+                <q-item-section>
+                  <q-item-label class="text-weight-bold text-body1">{{ convite.proprietarioNome }}</q-item-label>
+                  <q-item-label caption lines="1" class="text-grey-7">{{ convite.proprietarioEmail }}</q-item-label>
+                  <div class="q-mt-sm">
+                    <q-badge outline color="orange-8" class="q-px-sm q-py-xs">
+                       Acesso de {{ permissaoTexto(convite.permissao) }}
+                    </q-badge>
+                  </div>
+                  
+                  <div class="row q-gutter-sm q-mt-md">
+                    <q-btn
+                      unelevated
+                      dense
+                      label="Aceitar"
+                      color="positive"
+                      icon="check"
+                      class="col q-py-xs"
+                      @click="responderConvite(convite.id, true)"
+                    />
+                    <q-btn
+                      outline
+                      dense
+                      label="Recusar"
+                      color="negative"
+                      class="col q-py-xs"
+                      @click="responderConvite(convite.id, false)"
+                    />
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+
+            <!-- Empty State -->
+            <div v-else class="column items-center justify-center q-py-xl text-grey-6">
+              <q-icon name="drafts" size="64px" class="q-mb-sm opacity-50" color="grey-4" />
+              <div class="text-subtitle1 text-weight-regular">Caixa de entrada vazia</div>
+              <div class="text-caption">Não há convites pendentes no momento.</div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
 
     <!-- Dialog para editar permissão -->
     <q-dialog v-model="dialogEditarPermissao">
-      <q-card style="min-width: 350px">
-        <q-card-section>
-          <div class="text-h6">Alterar Permissão</div>
+      <q-card style="min-width: 350px" class="rounded-borders-xl shadow-2">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6 text-weight-bold">Alterar Permissão</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="q-pt-md">
           <q-select
             v-model="permissaoEditando"
             :options="opcoesPermissao"
@@ -155,14 +229,19 @@
             emit-value
             map-options
             :dark="$q.dark.isActive"
-          />
+            color="primary"
+          >
+            <template v-slot:prepend>
+              <q-icon name="admin_panel_settings" />
+            </template>
+          </q-select>
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancelar" color="grey" v-close-popup />
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
           <q-btn
-            flat
-            label="Salvar"
+            unelevated
+            label="Salvar Alterações"
             color="primary"
             @click="salvarPermissao"
             :loading="loadingEditarPermissao"
@@ -208,6 +287,19 @@ function statusTexto(status: StatusConvite): string {
       return 'Recusado';
     default:
       return 'Desconhecido';
+  }
+}
+
+function corStatus(status: StatusConvite): string {
+  switch (status) {
+    case StatusConvite.Pendente:
+      return 'warning';
+    case StatusConvite.Aceito:
+      return 'positive';
+    case StatusConvite.Recusado:
+      return 'negative';
+    default:
+      return 'grey';
   }
 }
 
@@ -307,5 +399,11 @@ function confirmarRevogacao(compartilhamentoId: string) {
 <style scoped>
 .compartilhamento-config {
   max-width: 100%;
+}
+.rounded-borders-xl {
+  border-radius: 16px;
+}
+.opacity-50 {
+  opacity: 0.5;
 }
 </style>

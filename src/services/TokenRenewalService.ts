@@ -74,8 +74,13 @@ class TokenRenewalService {
       await refreshTokenManager.refreshIfNeeded();
     } catch (error) {
       console.error('[TokenRenewalService] Erro ao verificar token:', error);
-      this.stop();
-      this.handleRenewalFailure();
+      
+      if (refreshTokenManager.shouldClearTokenOnRefreshError(error)) {
+        this.stop();
+        this.handleRenewalFailure();
+      } else {
+        console.warn('[TokenRenewalService] Falha temporária (rede/servidor). Mantendo serviço ativo.');
+      }
     }
   }
 

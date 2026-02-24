@@ -86,8 +86,16 @@ export function CreateIntanceAxios() {
             // Reenvia a requisição original
             return AxiosInstance(originalRequest);
           }
-        } catch (refreshError) {
-          // Se falhar o refresh, deixa cair no tratamento padrão de 401 (logout)
+        } catch (refreshError: any) {
+          // Importação dinâmica do RefreshTokenManager para checar o erro
+          const { refreshTokenManager } = await import('../../services/RefreshTokenManager');
+          
+          if (!refreshTokenManager.shouldClearTokenOnRefreshError(refreshError)) {
+            // Se for erro de rede ou 5xx durante o refresh, não desloga.
+            // Apenas rejeita a requisição atual.
+            return Promise.reject(refreshError instanceof Error ? refreshError : new Error(String(refreshError)));
+          }
+          // Se for erro de autenticação no refresh, deixa cair no tratamento padrão de 401 (logout)
         }
       }
 

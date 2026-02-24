@@ -53,9 +53,14 @@ export default defineRouter(function (/* { store, ssrContext } */) {
             await refreshTokenManager.refreshIfNeeded();
             return next();
           } catch (error) {
-            // Falha no refresh, redirecionar para login
-            refreshTokenManager.clearTokens();
-            return next({ name: 'LoginPage' });
+            // Falha no refresh. Verifica se deve limpar o token
+            if (refreshTokenManager.shouldClearTokenOnRefreshError(error)) {
+              refreshTokenManager.clearTokens();
+              return next({ name: 'LoginPage' });
+            } else {
+              // Erro de rede ou servidor (500), permite prosseguir (a requisição deve falhar no componente e mostrar erro genérico)
+              return next();
+            }
           }
         } else {
           // Token expirado e sem refresh token

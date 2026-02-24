@@ -102,6 +102,34 @@ class RefreshTokenManager {
         localStorage.removeItem('userName');
         console.log('[RefreshTokenManager] Tokens limpos do localStorage');
     }
+
+    /**
+     * Verifica se o erro no refresh deve causar logout
+     * Retorna true para erros 4xx (autenticação inválida, etc)
+     * Retorna false para erros de rede ou 5xx (servidor fora do ar)
+     */
+    public shouldClearTokenOnRefreshError(error: any): boolean {
+        // Importando de forma estática no início do arquivo ou verificando dinamicamente
+        // Assumindo que podemos checar a estrutura do AxiosError genérico
+        const isAxiosError = error && typeof error === 'object' && error.isAxiosError === true;
+        
+        if (isAxiosError) {
+            const status = error.response?.status;
+            
+            // Se for erro de rede (sem resposta) ou erro 5xx, não limpa o token
+            if (!error.response || (status && status >= 500)) {
+                return false;
+            }
+            
+            // Para erros 4xx (como 401, 400, 403) limpa o token
+            if (status && status >= 400 && status < 500) {
+                return true;
+            }
+        }
+        
+        // Em caso de dúvida (erros desconhecidos), o padrão é limpar por segurança
+        return true;
+    }
 }
 
 // Exporta a instância única
