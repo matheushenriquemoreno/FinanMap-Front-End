@@ -100,8 +100,9 @@
                     <q-badge :color="corStatus(comp.status)" rounded class="q-px-sm q-py-xs text-weight-medium">
                       {{ statusTexto(comp.status) }}
                     </q-badge>
+                    
                     <q-badge outline :color="comp.permissao === NivelPermissao.Editar ? 'purple' : 'info'" class="q-px-sm q-py-xs">
-                      <q-icon :name="comp.permissao === NivelPermissao.Editar ? 'edit' : 'visibility'" size="xs" class="q-mr-xs" />
+                      <q-icon  :name="comp.permissao === NivelPermissao.Editar ? 'edit' : 'visibility'" size="xs" class="q-mr-xs" />
                       {{ permissaoTexto(comp.permissao) }}
                     </q-badge>
                   </q-item-label>

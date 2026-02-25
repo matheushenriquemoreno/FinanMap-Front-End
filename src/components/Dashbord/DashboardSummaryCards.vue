@@ -7,6 +7,7 @@
         :meses-grafico="meses"
         :dados-grafico="dadosGrafico.rendimento"
         nome-valor-grafico="Rendimento"
+        cor-grafico="#21ba45"
         :loading="loading"
       />
     </div>
@@ -17,6 +18,7 @@
         :meses-grafico="meses"
         :dados-grafico="dadosGrafico.despesa"
         nome-valor-grafico="Despesa"
+        cor-grafico="#c10015"
         :loading="loading"
       />
     </div>
@@ -27,6 +29,7 @@
         :meses-grafico="meses"
         :dados-grafico="dadosGrafico.investimento"
         nome-valor-grafico="Investimento"
+        cor-grafico="#31ccec"
         :loading="loading"
       />
     </div>

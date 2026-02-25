@@ -1,32 +1,59 @@
 <template>
-  <q-card flat bordered :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
+  <q-card
+    flat
+    bordered
+    class="chart-card"
+    :class="$q.dark.isActive ? 'bg-dark chart-card--dark' : 'bg-white chart-card--light'"
+  >
     <q-card-section>
-      <div class="text-h6" :class="$q.dark.isActive ? 'text-white' : 'text-black'">
-        Distribuição de Categorias
+      <div class="row items-center justify-between">
+        <div>
+          <div
+            class="text-h6 text-weight-bold"
+            :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
+          >
+            Distribuição de Categorias
+          </div>
+          <div
+            class="text-caption q-mt-xs"
+            :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'"
+          >
+            Participação percentual de cada categoria
+          </div>
+        </div>
+        <q-btn-toggle
+          v-model="tipoCategoriaSelecionada"
+          toggle-color="primary"
+          :color="$q.dark.isActive ? 'dark' : 'white'"
+          :text-color="$q.dark.isActive ? 'grey-4' : 'grey-8'"
+          rounded
+          unelevated
+          :options="categoriasOptions"
+          @update:model-value="fetchData"
+          size="13px"
+        />
       </div>
-      <q-option-group
-        v-model="tipoCategoriaSelecionada"
-        :options="categoriasOptions"
-        :color="$q.dark.isActive ? 'secondary' : 'primary'"
-        :class="$q.dark.isActive ? 'text-white' : ''"
-        inline
-        dense
-        @update:model-value="fetchData"
-      />
     </q-card-section>
+
     <q-card-section class="q-pt-none flex flex-center">
       <div v-if="loading" class="flex flex-center" style="height: 350px; width: 100%">
         <q-spinner color="primary" size="3em" />
+      </div>
+      <div v-else-if="semDados" class="flex flex-center column" style="height: 350px; width: 100%; gap: 12px">
+        <q-icon name="donut_large" size="48px" :color="$q.dark.isActive ? 'grey-7' : 'grey-4'" />
+        <span :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
+          Nenhum dado para o período
+        </span>
       </div>
       <div v-else style="width: 100%; display: flex; justify-content: center;">
         <apexchart
           type="donut"
           height="350"
           width="100%"
-          style="max-width: 450px;"
+          style="max-width: 460px;"
           :options="chartOptions"
           :series="series"
-        ></apexchart>
+        />
       </div>
     </q-card-section>
   </q-card>
@@ -54,73 +81,75 @@ const categoriasOptions = [
 
 const series = ref<number[]>([]);
 const labels = ref<string[]>([]);
+const semDados = computed(() => series.value.length === 0);
 
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
     type: 'donut',
-    foreColor: $q.dark.isActive ? '#fff' : '#333',
+    background: 'transparent',
     toolbar: { show: false },
+    animations: {
+      enabled: true,
+      easing: 'easeinout',
+      speed: 900,
+      animateGradually: { enabled: true, delay: 100 },
+      dynamicAnimation: { enabled: true, speed: 600 },
+    },
+  },
+  theme: {
+    mode: $q.dark.isActive ? 'dark' : 'light',
   },
   labels: labels.value,
   legend: {
     position: 'bottom',
-    labels: {
-        colors: $q.dark.isActive ? '#fff' : '#333',
-    },
-    markers: {
-      shape: 'circle',
-    },
-    itemMargin: {
-      horizontal: 10,
-      vertical: 5
-    }
+    labels: { colors: $q.dark.isActive ? '#ccc' : '#555' },
+    markers: { shape: 'circle', offsetX: -4 },
+    itemMargin: { horizontal: 16, vertical: 8 },
+    fontSize: '13px',
+    fontWeight: 500,
   },
   plotOptions: {
     pie: {
       donut: {
-        size: '70%',
+        size: '68%',
         labels: {
           show: true,
           name: {
             show: true,
-            color: $q.dark.isActive ? '#aaaaaa' : '#666666',
+            color: $q.dark.isActive ? '#aaa' : '#666',
+            fontSize: '13px',
           },
           value: {
             show: true,
-            color: $q.dark.isActive ? '#ffffff' : '#000000',
+            color: $q.dark.isActive ? '#fff' : '#1a1a1a',
+            fontSize: '18px',
+            fontWeight: 700,
             formatter: (val: string) => formatarValor(val),
           },
           total: {
             show: true,
             showAlways: false,
             label: 'Total',
-            color: $q.dark.isActive ? '#aaaaaa' : '#666666',
-            formatter: function (w: any) {
+            color: $q.dark.isActive ? '#aaa' : '#666',
+            formatter: (w: any) => {
               const total = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
               return formatarValor(total);
-            }
-          }
-        }
-      }
-    }
+            },
+          },
+        },
+      },
+    },
   },
   dataLabels: {
-    enabled: true,
-    formatter: function (val: number) {
-      return val.toFixed(1) + '%';
-    },
-    dropShadow: {
-      enabled: true,
-      top: 1,
-      left: 1,
-      blur: 1,
-      opacity: 0.45
-    }
+    enabled: false,
+    formatter: (val: number) => val.toFixed(1) + '%',
+    dropShadow: { enabled: true, top: 1, left: 1, blur: 1, opacity: 0.4 },
+    style: { fontSize: '11px', fontWeight: 600 },
   },
   stroke: {
     show: true,
-    colors: $q.dark.isActive ? ['#1d1d1d'] : ['#ffffff'], 
-    width: 2
+    colors: [$q.dark.isActive ? '#1a1a1a' : '#ffffff'],
+    width: 2,
   },
   tooltip: {
     theme: $q.dark.isActive ? 'dark' : 'light',
@@ -131,10 +160,7 @@ const chartOptions = computed<ApexOptions>(() => ({
 function formatarValor(valor: any) {
   const valorNumerico = parseFloat(valor);
   if (isNaN(valorNumerico)) return valor;
-  return valorNumerico.toLocaleString('pt-br', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+  return valorNumerico.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
 }
 
 async function fetchData() {
@@ -145,7 +171,6 @@ async function fetchData() {
       store.dataFinal,
       tipoCategoriaSelecionada.value
     );
-
     labels.value = resultado.map((item) => item.categoria);
     series.value = resultado.map((item) => item.valor);
   } catch {
@@ -157,9 +182,23 @@ async function fetchData() {
 
 watch(
   () => [store.dataInicial, store.dataFinal],
-  () => {
-    fetchData();
-  },
+  () => fetchData(),
   { immediate: true }
 );
 </script>
+
+<style scoped>
+.chart-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease;
+}
+
+.chart-card--light {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+}
+
+.chart-card--dark {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+}
+</style>

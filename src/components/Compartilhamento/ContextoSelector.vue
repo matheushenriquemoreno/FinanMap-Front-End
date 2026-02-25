@@ -3,7 +3,7 @@
     <!-- Seletor de Contexto -->
     <div 
       class="row no-wrap items-center text-grey-9 rounded-borders cursor-pointer q-py-xs q-pl-md q-pr-xs transition-hover relative-position" 
-      :style="$q.dark.isActive ? 'border: 1px solid transparent; background-color: #1e1e1e' : 'border: 1px solid transparent; background-color: #ffffff'"
+      style="border: 1px solid transparent; background-color: #ffffff"
     >
       <div class="row items-center" @click="toggleMenu">
           <q-icon :name="contextoIcon" size="20px" class="q-mr-sm" />
@@ -68,7 +68,7 @@
     <!-- Modal de Compartilhamento -->
     <compartilhamento-modal
       v-model="showCompartilhamentoModal"
-      :titulo-contexto="contextoLabel"
+      titulo-contexto="Meus Dados"
     />
   </div>
 </template>
