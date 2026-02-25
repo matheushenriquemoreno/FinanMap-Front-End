@@ -39,6 +39,37 @@ export interface DespesaResult extends TransacaoResult {
   idDespesaAgrupadora: string;
   agrupadora: DespesaResult | null;
   despesasFilhas?: DespesaResult[];
+  
+  despesaOrigemId?: string;
+  isParcelado: boolean;
+  isRecorrente: boolean;
+  parcelaAtual?: number;
+  totalParcelas?: number;
+}
+
+export enum ModificadorLote {
+  ApenasEsta = 0,
+  EstaEProximas = 1,
+  TodasDoLote = 2
+}
+
+export interface LancarDespesaLoteDTO {
+  descricao: string;
+  valorTotal: number;
+  categoriaId: string;
+  anoInicial: number;
+  mesInicial: number;
+  isParcelado: boolean;
+  quantidadeMeses: number;
+  isRecorrenteFixa: boolean;
+  idDespesaAgrupadora?: string;
+}
+
+export interface AtualizarLoteDespesaDTO {
+  novoValor: number;
+  novaDescricao: string;
+  novaCategoriaId: string;
+  modificador: ModificadorLote;
 }
 
 
