@@ -1,7 +1,7 @@
 <template>
   <div class="text-start">
     <span class="periodo-label"> {{ label }} </span>
-    <div class="flex justify-center items-center q-gutter-sm gap-1">
+    <div class="flex justify-center  q-gutter-sm gap-1">
       <div style="width: 45%; min-width: 220px">
         <InputSelectMes label="Mês" v-model:model-value="modelLocal.mes" :styled="styled" />
       </div>
@@ -20,8 +20,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import { computed, defineProps, defineEmits } from 'vue';
-import { useAttrs } from 'vue';
+import { computed, useAttrs } from 'vue';
 import type { styles } from './types';
 
 import InputSelectAno from './InputSelectAno.vue';

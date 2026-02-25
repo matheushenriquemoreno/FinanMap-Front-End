@@ -99,6 +99,7 @@
           <div class="content-wrapper">
             <InformacoesConta v-if="tab === 'conta'" />
             <CategoriaConfig v-else-if="tab === 'categoria'" />
+            <CompartilhamentoConfig v-else-if="tab === 'compartilhamento'" />
           </div>
         </q-scroll-area>
       </div>
@@ -111,6 +112,7 @@ import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import CategoriaConfig from './CategoriaConfig.vue';
 import InformacoesConta from './InformacoesConta.vue';
+import CompartilhamentoConfig from '../Compartilhamento/CompartilhamentoConfig.vue';
 
 // props
 const props = defineProps({
@@ -141,6 +143,7 @@ const isMobile = computed(() => $q.screen.lt.md);
 
 const menuItems = [
   { label: 'Categorias', value: 'categoria', icon: 'category' },
+  { label: 'Compartilhamento', value: 'compartilhamento', icon: 'share' },
   { label: 'Conta', value: 'conta', icon: 'person' },
 ];
 
