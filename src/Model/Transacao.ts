@@ -76,6 +76,7 @@ export interface AtualizarLoteDespesaDTO {
 // Investimento
 
 export interface InvestimentoCreate extends TransacaoCreate {
+  metaFinanceiraId?: string;
 }
 
 export interface InvestimentoResult extends TransacaoResult {
