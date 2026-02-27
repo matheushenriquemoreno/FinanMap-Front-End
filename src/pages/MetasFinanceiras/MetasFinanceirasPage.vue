@@ -139,20 +139,36 @@ async function contribuir(dto: ContribuicaoDTO) {
 
         modalContribuirAberto.value = false;
 
+        // Atualiza a meta na listagem local
+        const index = metas.value.findIndex(m => m.id === metaSelecionada.value?.id);
+        if (index !== -1 && resultado.metaAtualizada) {
+            metas.value[index] = resultado.metaAtualizada;
+        }
+
+        // Atualiza a meta selecionada (caso esteja aberta no modal, embora o modal de contribuição feche)
+        if (resultado.metaAtualizada) {
+            metaSelecionada.value = resultado.metaAtualizada;
+        }
+
+        // Recarrega apenas o resumo do painel superior, pois os totais mudaram
+        service.obterResumo().then(resResumo => {
+            if (resResumo) resumo.value = resResumo;
+        });
+
         // Exibir notificação de incentivo se houve marco
         if (resultado.notificacao) {
             $q.notify({
                 type: 'positive',
                 message: resultado.notificacao.mensagem,
-                timeout: 5000,
-                position: 'top',
-                icon: 'emoji_events'
+                timeout: 10000,
+                position: 'center',
+                icon: 'emoji_events',
+                progress: true,
+                actions: [{ icon: 'close', color: 'dark' }]
             });
         } else {
             $q.notify({ type: 'positive', message: 'Contribuição registrada!' });
         }
-
-        carregarDados();
     } catch (error: any) {
         // Apenas console, notificação já é exibida no AxiosHelper
     }
@@ -173,12 +189,22 @@ function removerContribuicao(contribuicaoId: string) {
                 await service.removerContribuicao(metaSelecionada.value.id, contribuicaoId);
                 $q.notify({ type: 'positive', message: 'Contribuição removida.' });
 
-                // Recarrega a meta selecionada para manter o modal de detalhes atualizado
-                const [metaAtualizada] = await Promise.all([
-                    service.obterPorId(metaSelecionada.value.id),
-                    carregarDados(),
-                ]);
+                // Busca a meta atualizada no back-end
+                const metaAtualizada = await service.obterPorId(metaSelecionada.value.id);
+
+                // Atualiza a meta selecionada para manter o modal de detalhes atualizado
                 metaSelecionada.value = metaAtualizada;
+
+                // Atualiza a meta na listagem local
+                const index = metas.value.findIndex(m => m.id === metaAtualizada.id);
+                if (index !== -1) {
+                    metas.value[index] = metaAtualizada;
+                }
+
+                // Recarrega apenas o resumo pois os totais mudaram
+                service.obterResumo().then(resResumo => {
+                    if (resResumo) resumo.value = resResumo;
+                });
             } catch (error) {
                 // AxiosHelper handles the errors
             }

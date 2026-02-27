@@ -70,24 +70,36 @@
                     <div class="text-subtitle2 text-bold q-mb-sm">
                         Histórico de Contribuições ({{ meta.contribuicoes.length }})
                     </div>
-                    <q-list separator dense class="historico-list">
-                        <q-item v-for="contribuicao in meta.contribuicoes" :key="contribuicao.id">
-                            <q-item-section avatar>
-                                <q-icon v-if="contribuicao.origem === 'Investimento'" name="trending_up" color="green"
-                                    size="sm">
-                                    <q-tooltip>Vinculado ao investimento: {{ contribuicao.nomeInvestimento
-                                        }}</q-tooltip>
-                                </q-icon>
-                                <q-icon v-else color="green" name="arrow_upward" size="sm" />
+                    <q-list separator class="historico-list">
+                        <q-item v-for="contribuicao in meta.contribuicoes" :key="contribuicao.id" class="q-py-md">
+                            <q-item-section avatar top>
+                                <q-avatar :color="contribuicao.origem === 'Investimento' ? 'primary' : 'positive'"
+                                    text-color="white" size="42px">
+                                    <q-icon
+                                        :name="contribuicao.origem === 'Investimento' ? 'show_chart' : 'arrow_outward'" />
+                                </q-avatar>
                             </q-item-section>
                             <q-item-section>
-                                <q-item-label>R$ {{ formatarValor(contribuicao.valor) }}</q-item-label>
-                                <q-item-label caption>{{ formatarData(contribuicao.data) }}</q-item-label>
+                                <q-item-label class="text-subtitle2 text-bold">
+                                    R$ {{ formatarValor(contribuicao.valor) }}
+                                </q-item-label>
+                                <q-item-label caption class="row items-center q-mt-xs">
+                                    <q-icon name="event" size="13px" class="q-mr-xs" />
+                                    {{ formatarData(contribuicao.data) }}
+                                </q-item-label>
+                                <q-item-label v-if="contribuicao.origem === 'Investimento'" class="q-mt-sm">
+                                    <q-badge color="primary" class="q-px-sm q-py-xs"
+                                        style="border-radius: 6px; font-weight: normal; font-size: 11px;">
+                                        <q-icon name="account_balance" size="13px" class="q-mr-xs" />
+                                        <span>Investimento - <span class="text-bold">{{ contribuicao.nomeInvestimento
+                                                }}</span></span>
+                                    </q-badge>
+                                </q-item-label>
                             </q-item-section>
-                            <q-item-section side>
-                                <q-btn flat dense round icon="delete" color="red-4"
+                            <q-item-section side top>
+                                <q-btn flat round icon="delete_outline" color="red-5" size="sm"
                                     @click="emit('removerContribuicao', contribuicao.id)">
-                                    <q-tooltip>Remover contribuição</q-tooltip>
+                                    <q-tooltip class="bg-red-5">Remover contribuição</q-tooltip>
                                 </q-btn>
                             </q-item-section>
                         </q-item>

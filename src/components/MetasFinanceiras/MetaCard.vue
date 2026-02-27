@@ -20,15 +20,15 @@
 
             <div class="meta-card__valores q-mt-md">
                 <span class="text-body2 text-bold">R$ {{ formatarValor(meta.valorAtual) }}</span>
-                <span class="text-body2 text-grey-5">R$ {{ formatarValor(meta.valorAlvo) }}</span>
+                <span class="text-body2" style="opacity: 0.7">R$ {{ formatarValor(meta.valorAlvo) }}</span>
             </div>
 
             <q-linear-progress :value="meta.percentualProgresso / 100" :color="corProgresso" track-color="grey-3"
                 rounded size="10px" class="q-mt-sm" />
 
             <div class="meta-card__info q-mt-xs">
-                <span class="text-caption text-grey-6">{{ meta.percentualProgresso?.toFixed(0) || 0 }}%</span>
-                <span class="text-caption text-grey-6">
+                <span class="text-caption" style="opacity: 0.7">{{ meta.percentualProgresso?.toFixed(0) || 0 }}%</span>
+                <span class="text-caption" style="opacity: 0.7">
                     <q-icon name="calendar_today" size="12px" class="q-mr-xs" />
                     {{ meta.diasRestantes >= 0 ? `${meta.diasRestantes} dias restantes` :
                         `${Math.abs(meta.diasRestantes)} dias atrasada` }}
@@ -49,7 +49,7 @@
         <q-card-actions align="center">
             <q-btn v-if="!meta.concluida" flat no-caps icon="add" label="Contribuir" color="primary"
                 @click="emit('contribuir')" />
-            <q-btn flat no-caps icon="visibility" label="Detalhes" color="grey-7" @click="emit('detalhes')" />
+            <q-btn flat no-caps icon="visibility" label="Detalhes" color="secondary" @click="emit('detalhes')" />
         </q-card-actions>
     </q-card>
 </template>

@@ -1,6 +1,6 @@
 <template>
     <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
-        <q-card style="min-width: 380px; border-radius: 16px;">
+        <q-card style="width: 380px; border-radius: 16px;">
             <q-card-section class="q-pb-none">
                 <div class="row items-center justify-between">
                     <div>
@@ -21,7 +21,8 @@
                         <q-select v-if="vincularInvestimento" v-model="investimentoSelecionado"
                             :options="investimentosDisponiveis" option-label="descricao" option-value="id" outlined
                             rounded dense class="q-mt-sm" label="Selecionar Investimento"
-                            :loading="loadingInvestimentos" @update:model-value="preencherValorInvestimento">
+                            :loading="loadingInvestimentos" @update:model-value="preencherValorInvestimento"
+                            :rules="[val => !!val || 'Investimento é obrigatório']">
                             <template v-slot:option="{ opt, itemProps }">
                                 <q-item v-bind="itemProps">
                                     <q-item-section>
@@ -42,15 +43,17 @@
 
                     <!-- Valor: readonly do investimento OU input manual -->
                     <q-input v-if="vincularInvestimento && investimentoSelecionado" :model-value="valor" outlined
-                        rounded dense type="number" label="Valor do Investimento (R$)" readonly prefix="R$ "
-                        class="valor-readonly" />
+                        rounded dense type="number" label="Valor do Investimento (R$)" readonly prefix="R$ " />
 
                     <q-input v-if="!vincularInvestimento" v-model.number="valor" outlined rounded dense type="number"
                         label="Valor da Contribuição (R$)" :rules="[val => val > 0 || 'Valor deve ser positivo']"
                         autofocus />
 
-                    <q-input v-model="data" outlined rounded dense type="date" label="Data da contribuição"
-                        :rules="[val => !!val || 'Data é obrigatória']" />
+                    <div>
+                        <ModernDateInput v-model="data" dialogTitle="Data da contribuição" label="Data da contribuição"
+                            :rules="[(val: any) => !!val || 'Data é obrigatória']" />
+                    </div>
+
 
                     <!-- Resumo visual -->
                     <q-banner v-if="meta && valor && valor > 0" class="bg-blue-1 text-blue-9" rounded dense>
@@ -60,8 +63,10 @@
                         ({{ novoPercentual }}%)
                     </q-banner>
 
-                    <q-btn type="submit" label="Confirmar Contribuição" color="primary" rounded unelevated
-                        class="full-width" :disable="meta?.concluida" />
+                    <div class="q-mt-md">
+                        <q-btn type="submit" label="Confirmar Contribuição" color="primary" rounded unelevated
+                            class="full-width" :disable="meta?.concluida" />
+                    </div>
                 </q-form>
             </q-card-section>
         </q-card>
@@ -70,6 +75,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import ModernDateInput from 'src/components/Inputs/ModernDateInput.vue';
 import { useQuasar } from 'quasar';
 import type { MetaFinanceiraResult, ContribuicaoDTO } from 'src/Model/MetaFinanceira';
 import getInvestimentoService from 'src/services/transacao/InvestimentoService';
@@ -116,12 +122,17 @@ watch(() => props.modelValue, (aberto) => {
         data.value = new Date().toISOString().slice(0, 10);
         vincularInvestimento.value = false;
         investimentoSelecionado.value = null;
-        carregarInvestimentosDoMes();
+        investimentosDisponiveis.value = []; // Limpamos a lista antiga caso a modal seja fechada/aberta
     }
 });
 
 watch(vincularInvestimento, (novoValor) => {
-    if (!novoValor) {
+    if (novoValor) {
+        // Se ativou o toggle e ainda não carregamos na sessão atual, busca na API
+        if (investimentosDisponiveis.value.length === 0) {
+            carregarInvestimentosDoMes();
+        }
+    } else {
         investimentoSelecionado.value = null;
     }
 });

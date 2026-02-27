@@ -1,13 +1,7 @@
 <template>
   <!--Modal Adicionar/Editar Rendimento-->
-  <q-dialog
-    persistent
-    v-model="localModelValue"
-    @before-hide="closeModal"
-    @hide="closeModal"
-    position="top"
-    backdrop-filter="brightness(60%)"
-  >
+  <q-dialog persistent v-model="localModelValue" @before-hide="closeModal" @hide="closeModal" position="top"
+    backdrop-filter="brightness(60%)">
     <q-card style="width: 550px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
         <div class="text-h6">Replicar registros.</div>
@@ -21,23 +15,15 @@
         </div>
 
         <q-form class="q-gutter-md" @submit.prevent="handleCriarRegistroProximoMes">
-          <InputSelectMesAno
-            label="Periodo Inicial"
-            :styled="{
-              rounded: true,
-              filled: true,
-            }"
-            v-model:model-value="mesAno"
-          />
+          <InputSelectMesAno label="Periodo Inicial" :styled="{
+            rounded: true,
+            filled: true,
+          }" v-model:model-value="mesAno" />
           <q-separator />
-          <InputSelectMesAno
-            label="Periodo Final"
-            :styled="{
-              rounded: true,
-              filled: true,
-            }"
-            v-model:model-value="mesAnoFinal"
-          />
+          <InputSelectMesAno label="Periodo Final" :styled="{
+            rounded: true,
+            filled: true,
+          }" v-model:model-value="mesAnoFinal" />
           <q-card-actions class="text-primary" align="between">
             <q-btn flat label="Fechar" dense v-close-popup />
             <q-btn flat icon-right="add" dense label="Replicar" type="submit" :loading="loading" />
@@ -100,19 +86,26 @@ const closeModal = () => {
 };
 
 function preencherMesAnoFiltroComProximo3Meses() {
-  const mesSelecionado = new Date(
+  // Pega o momento atual do painel selecionado pelo usuário
+  const mesAtualPainel = new Date(
     useGerenciamentoMensal.mesAtual.ano,
-    useGerenciamentoMensal.mesAtual.mes,
+    useGerenciamentoMensal.mesAtual.mes - 1, // Atenção: Em JS o mês começa do 0 (Jan = 0, Fev = 1)
     1,
   );
 
+  // Mês Inicial: Próximo mês
+  const dataInicial = date.addToDate(mesAtualPainel, { months: 1 });
+
+  // Mês Final: +2 meses depois da Inícial (Para contabilizar 3 meses no total)
+  const dataFinal = date.addToDate(dataInicial, { months: 2 });
+
   mesAno.value = {
-    ano: mesSelecionado.getFullYear(),
-    mes: mesSelecionado.getMonth() + 1,
+    ano: dataInicial.getFullYear(),
+    mes: dataInicial.getMonth() + 1, // Voltamos para formato Humano (1-12)
   };
   mesAnoFinal.value = {
-    ano: date.addToDate(mesSelecionado, { months: 3 }).getFullYear(),
-    mes: date.addToDate(mesSelecionado, { months: 3 }).getMonth() + 1,
+    ano: dataFinal.getFullYear(),
+    mes: dataFinal.getMonth() + 1,
   };
 }
 

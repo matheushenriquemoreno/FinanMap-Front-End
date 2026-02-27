@@ -26,8 +26,8 @@
                     <!-- Data Limite -->
                     <div>
                         <label class="text-subtitle2 text-bold q-mb-xs">Data Limite</label>
-                        <q-input v-model="form.dataLimite" outlined rounded dense type="date"
-                            :rules="[val => !!val || 'Data é obrigatória']" />
+                        <ModernDateInput v-model="form.dataLimite" dialogTitle="Data Limite"
+                            :rules="[(val: any) => !!val || 'Data é obrigatória']" />
                     </div>
 
                     <!-- Categoria (seleção visual com ícones) -->
@@ -44,8 +44,10 @@
                     </div>
 
                     <!-- Botão Criar -->
-                    <q-btn type="submit" label="Criar Meta 🎯" color="primary" rounded unelevated
-                        class="full-width q-mt-md" size="lg" />
+                    <div class="q-mt-md">
+                        <q-btn type="submit" label="Criar Meta 🎯" color="primary" rounded unelevated class="full-width"
+                            size="lg" dense />
+                    </div>
                 </q-form>
             </q-card-section>
         </q-card>
@@ -54,6 +56,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import ModernDateInput from 'src/components/Inputs/ModernDateInput.vue';
 import {
     CategoriaIconeMeta,
     CATEGORIA_META_CONFIG,
