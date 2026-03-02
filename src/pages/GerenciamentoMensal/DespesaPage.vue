@@ -98,6 +98,7 @@
     titulo-edit="Editar Despesa"
     @on-submit-add="adicionar"
     @on-submit-edit="editar"
+    @on-submit-add-lote="adicionarEmLote"
     :tipo-categoria-transacao="TipoCategoriaETransacao.Despesa"
     :loading="despesaservice.loading.value"
     :ano="useGerenciamentoMensal.mesAtual.ano"
@@ -115,7 +116,8 @@
 import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
 import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
 import DespesaTableRow from 'src/components/Despesa/DespesaTableRow.vue';
-import type { DespesaCreate, DespesaResult } from 'src/Model/Transacao';
+import type { DespesaCreate, DespesaResult, LancarDespesaLoteDTO, AtualizarLoteDespesaDTO } from 'src/Model/Transacao';
+import { ModificadorLote } from 'src/Model/Transacao';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
@@ -241,22 +243,84 @@ async function adicionar(despesa: DespesaCreate) {
   getReportAcumulado();
 }
 
-async function editar(despesa: DespesaCreate) {
-  await despesaservice.update(despesa);
+async function adicionarEmLote(dto: LancarDespesaLoteDTO) {
+  await despesaservice.criarEmLote(dto);
+  abriModal.value = false;
+  getReportAcumulado();
+}
+
+function abrirDialogModificadorLote(acao: string, transacao: DespesaResult): Promise<ModificadorLote | null> {
+  return new Promise((resolve) => {
+    $q.dialog({
+      title: `Opções de ${acao} em Lote`,
+      message: 'Esta despesa faz parte de um parcelamento ou recorrência. Deseja aplicar a alteração a:',
+      options: {
+        type: 'radio',
+        model: String(ModificadorLote.ApenasEsta),
+        items: [
+          { label: 'Apenas esta despesa', value: String(ModificadorLote.ApenasEsta) },
+          { label: 'Esta e as próximas (futuras)', value: String(ModificadorLote.EstaEProximas), disable: transacao.isParcelado && transacao.parcelaAtual === transacao.totalParcelas },
+          { label: 'Todas as despesas do lote', value: String(ModificadorLote.TodasDoLote) },
+        ]
+      },
+      cancel: true,
+      persistent: true
+    }).onOk((data: ModificadorLote) => {
+      resolve(data);
+    }).onCancel(() => {
+      resolve(null);
+    });
+  });
+}
+
+async function editar(despesaUpdate: DespesaCreate) {
+  const original = despesas.value.find(d => d.id === despesaUpdate.id) || 
+                   despesas.value.flatMap(d => d.despesasFilhas || []).find(d => d.id === despesaUpdate.id) ||
+                   despesaEdit.value;
+
+  if (original?.despesaOrigemId) {
+    const modificador = await abrirDialogModificadorLote('Edição', original);
+    if (modificador === null) return;
+    
+    const dtoLote: AtualizarLoteDespesaDTO = {
+      novoValor: Number(despesaUpdate.valor),
+      novaDescricao: despesaUpdate.descricao,
+      novaCategoriaId: despesaUpdate.categoriaId,
+      modificador: modificador
+    };
+
+    await despesaservice.atualizarLote(despesaUpdate.id!, dtoLote);
+  } else {
+    await despesaservice.update(despesaUpdate);
+  }
+  
   fecharModal();
   getReportAcumulado();
 }
 
 function excluir(id: string) {
-  $q.dialog({
-    message: 'Deseja realmente excluir essa despesa?',
-    cancel: true,
-    persistent: false,
-  }).onOk(() => {
-    despesaservice.delete(id).then(() => {
-      getReportAcumulado();
+  const despesaParaExcluir = despesas.value.find(d => d.id === id) || 
+                             despesas.value.flatMap(d => d.despesasFilhas || []).find(d => d.id === id);
+
+  if (despesaParaExcluir?.despesaOrigemId) {
+    abrirDialogModificadorLote('Exclusão', despesaParaExcluir).then((modificador) => {
+      if (modificador !== null) {
+        despesaservice.excluirLote(id, modificador).then(() => {
+          getReportAcumulado();
+        });
+      }
     });
-  });
+  } else {
+    $q.dialog({
+      message: 'Deseja realmente excluir essa despesa?',
+      cancel: true,
+      persistent: false,
+    }).onOk(() => {
+      despesaservice.delete(id).then(() => {
+        getReportAcumulado();
+      });
+    });
+  }
 }
 
 function abriModalEditarDespesa(despesa: DespesaResult) {

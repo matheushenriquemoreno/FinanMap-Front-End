@@ -1,6 +1,9 @@
 <template>
   <q-td key="categoriaNome">
-    <q-checkbox v-if="showSelected" v-model="propsLocal.selected" />
+    <q-checkbox v-if="showSelected && !propsLocal.row.despesaOrigemId" v-model="propsLocal.selected" />
+    <q-icon v-else-if="showSelected && propsLocal.row.despesaOrigemId" name="lock" color="grey" size="xs">
+      <q-tooltip>Despesas em lote devem ser excluídas individualmente</q-tooltip>
+    </q-icon>
   </q-td>
 
   <q-td key="categoriaNome">
@@ -32,14 +35,21 @@
   </q-td>
 
   <q-td key="descricao" class="no-pointer-events coluna-descricao">
-    {{ propsLocal.row.descricao }}
+    <span>{{ propsLocal.row.descricao }}</span>
+    <q-badge v-if="propsLocal.row.isParcelado" color="indigo" class="q-ml-sm align-middle">
+      {{ propsLocal.row.parcelaAtual }}/{{ propsLocal.row.totalParcelas }}
+      <q-tooltip>Compra Parcelada</q-tooltip>
+    </q-badge>
+    <q-icon v-if="propsLocal.row.isRecorrente" name="autorenew" color="deep-orange" size="xs" class="q-ml-sm align-middle cursor-pointer">
+      <q-tooltip>Despesa Recorrente</q-tooltip>
+    </q-icon>
   </q-td>
 
   <!-- Editar Valor -->
-  <q-td key="valor" :class="podeEditar ? 'cursor-pointer' : ''">
+  <q-td key="valor" :class="podeEditar && !propsLocal.row.despesaOrigemId ? 'cursor-pointer' : ''">
     <ValorPadraoBR :valor="propsLocal.row.valor" />
     <q-popup-edit
-      v-if="podeEditar"
+      v-if="podeEditar && !propsLocal.row.despesaOrigemId"
       v-model.number="propsLocal.row.valor"
       buttons
       label-set="Alterar"
@@ -58,10 +68,13 @@
         label="Valor"
         lazy-rules
         prefix="R$ "
-        :rules="[(val) => scope.validate(val) || 'Dite um valor valido!']"
+        :rules="[(val) => scope.validate(val) || 'Digite um valor valido!']"
         @keyup.enter="scope.set"
       />
     </q-popup-edit>
+    <q-tooltip v-if="podeEditar && propsLocal.row.despesaOrigemId">
+      Edite através do botão de ação da linha para lote
+    </q-tooltip>
   </q-td>
   <!-- Ações -->
   <q-td key="acoes" class="text-center">

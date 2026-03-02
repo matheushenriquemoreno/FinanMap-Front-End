@@ -11,30 +11,18 @@
           <span class="text-white text-h6 q-ml-sm">FinanMap</span>
         </q-toolbar-title>
         <q-space />
-        
+
         <!-- Seletor de Contexto de Compartilhamento -->
         <ContextoSelector v-if="$q.screen.gt.sm" class="q-mr-md" />
-        
+
         <DateDisplay />
 
         <div class="q-gutter-sm row items-center no-wrap">
-          <q-btn
-            round
-            dense
-            flat
-            color="grey-4"
-            @click="themeStore.toggleTheme()"
-          >
+          <q-btn round dense flat color="grey-4" @click="themeStore.toggleTheme()">
             <q-icon :name="themeStore.isDark ? 'light_mode' : 'dark_mode'" size="25px" />
             <q-tooltip>{{ themeStore.isDark ? 'Modo Claro' : 'Modo Escuro' }}</q-tooltip>
           </q-btn>
-          <q-btn
-            round
-            dense
-            flat
-            color="grey-4"
-            @click="() => (abrirModalConfig = !abrirModalConfig)"
-          >
+          <q-btn round dense flat color="grey-4" @click="() => (abrirModalConfig = !abrirModalConfig)">
             <q-icon name="settings" size="25px" />
             <q-tooltip>Configurações</q-tooltip>
           </q-btn>
@@ -54,9 +42,9 @@
                     <q-item-label>{{ username }}</q-item-label>
                   </q-item-section>
                 </q-item>
-                
+
                 <q-separator />
-                
+
                 <!-- Botão de logout -->
                 <q-item clickable v-ripple @click="handleLogout">
                   <q-item-section avatar>
@@ -73,20 +61,13 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      :breakpoint="1100"
-      :class="themeStore.isDark ? 'bg-dark' : 'bg-grey-1'"
-      :width="$q.screen.gt.xs ? 300 : 260"
-    >
-      <q-scroll-area
-        :style="{
-          height: 'calc(100% - 150px)',
-          marginTop: '150px',
-          borderRight: themeStore.isDark ? 'none' : '1px solid #ddd'
-        }"
-      >
+    <q-drawer v-model="leftDrawerOpen" show-if-above :breakpoint="1100"
+      :class="themeStore.isDark ? 'bg-dark' : 'bg-grey-1'" :width="$q.screen.gt.xs ? 300 : 260">
+      <q-scroll-area :style="{
+        height: 'calc(100% - 150px)',
+        marginTop: '150px',
+        borderRight: themeStore.isDark ? 'none' : '1px solid #ddd'
+      }">
         <q-list padding>
           <q-item to="/" class="menu-title" clickable v-ripple active-class="text-dark">
             <q-item-section avatar>
@@ -103,6 +84,15 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>Dashbord</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item to="/metas" class="menu-title" clickable v-ripple active-class="text-dark">
+            <q-item-section avatar>
+              <q-avatar icon="emoji_events" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Metas Financeiras</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
@@ -153,14 +143,14 @@ function handleLogout() {
   localStorage.removeItem('token');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('userName');
-  
+
   // Redireciona para a página de login
   router.push({ name: 'LoginPage' });
 }
 
 onMounted(async () => {
   themeStore.initTheme();
-  
+
   // Carregar compartilhamentos e restaurar contexto do localStorage
   await compartilhamentoStore.carregarCompartilhamentos();
   compartilhamentoStore.restaurarContextoDoLocalStorage();

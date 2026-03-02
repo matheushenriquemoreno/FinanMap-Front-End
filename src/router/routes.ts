@@ -46,6 +46,11 @@ const routes: RouteRecordRaw[] = [
         path: '/dashbord',
         component: () => import('src/pages/Dashbord/dashbord-Gerenciamento-Mensal.vue'),
       },
+      {
+        path: '/metas',
+        name: 'MetasFinanceirasPage',
+        component: () => import('src/pages/MetasFinanceiras/MetasFinanceirasPage.vue'),
+      },
     ],
   },
 ];
