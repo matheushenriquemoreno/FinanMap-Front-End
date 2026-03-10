@@ -12,8 +12,8 @@
         <div>
           <q-form @submit.prevent="submitFormulario" class="q-gutter-xs">
             <q-input rounded filled v-model="dadosFormulario.descricao" label="Descricao" lazy-rules hint="" />
-            <q-input rounded filled type="number" min="0" step="0.01" v-model="dadosFormulario.valor" label="Valor"
-              lazy-rules prefix="R$ " :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']" />
+            <MoneyInputBR v-model="valorNumerico" filled rounded :dense="false" :outlined="false" label="Valor"
+              lazy-rules :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']" />
             <div>
               <CampoSelect :configuracoes="{
                 labelObjeto: 'nome',
@@ -90,6 +90,7 @@
 <script setup lang="ts">
 import CampoSelectComSusgestao from 'src/components/Transacao/CampoSelect/CampoSelectComSusgestao.vue';
 import CampoSelect from 'src/components/CampoSelect/CampoSelectServer.vue';
+import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import { computed, ref, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import type { Categoria } from 'src/Model/Categoria';
@@ -133,6 +134,17 @@ const categoriaSelecionada = ref<Categoria | null>(null);
 const despesaAgrupadora = ref<DespesaResult | null>(null);
 
 const dadosFormulario = ref({} as DespesaCreate);
+
+const valorNumerico = computed({
+  get: () => {
+    const v = dadosFormulario.value.valor;
+    if (v === undefined || v === null) return null;
+    return Number(v);
+  },
+  set: (val: number | null) => {
+    dadosFormulario.value.valor = val as any;
+  },
+});
 
 const modoLote = ref(false);
 const tipoLote = ref<'parcelado' | 'recorrente'>('parcelado');

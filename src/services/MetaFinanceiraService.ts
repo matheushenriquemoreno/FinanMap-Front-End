@@ -4,6 +4,7 @@ import type {
   CreateMetaFinanceiraDTO,
   UpdateMetaFinanceiraDTO,
   ContribuicaoDTO,
+  UpdateContribuicaoDTO,
   MetaFinanceiraResult,
   ResumoMetasDTO,
   ResultContribuicaoResponse,
@@ -87,6 +88,19 @@ class MetaFinanceiraService {
   async removerContribuicao(metaId: string, contribuicaoId: string): Promise<void> {
     return this.requestWithLoading(async () => {
       await this.axios.delete(`${this.baseUrl}/${metaId}/contribuicoes/${contribuicaoId}`);
+    });
+  }
+
+  async editarContribuicao(
+    metaId: string,
+    dto: UpdateContribuicaoDTO
+  ): Promise<ResultContribuicaoResponse> {
+    return this.requestWithLoading(async () => {
+      const response = await this.axios.put<ResultContribuicaoResponse>(
+        `${this.baseUrl}/${metaId}/contribuicoes`,
+        dto
+      );
+      return response.data;
     });
   }
 }

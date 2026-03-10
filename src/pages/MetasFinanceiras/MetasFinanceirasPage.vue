@@ -48,7 +48,10 @@
         <ModalContribuir v-model="modalContribuirAberto" :meta="metaSelecionada" @contribuir="contribuir" />
 
         <ModalDetalhesMeta v-model="modalDetalhesAberto" :meta="metaSelecionada"
-            @remover-contribuicao="removerContribuicao" />
+            @remover-contribuicao="removerContribuicao" @editar-contribuicao="abrirModalEditar" />
+
+        <ModalEditarContribuicao v-model="modalEditarAberto" :contribuicao="contribuicaoSelecionada"
+            @salvar="salvarEdicaoContribuicao" />
     </q-page>
 </template>
 
@@ -61,12 +64,15 @@ import type {
     ResumoMetasDTO,
     CreateMetaFinanceiraDTO,
     ContribuicaoDTO,
+    ContribuicaoResult,
+    UpdateContribuicaoDTO,
 } from 'src/Model/MetaFinanceira';
 import PainelResumoMetas from 'src/components/MetasFinanceiras/PainelResumoMetas.vue';
 import MetaCard from 'src/components/MetasFinanceiras/MetaCard.vue';
 import ModalCriarMeta from 'src/components/MetasFinanceiras/ModalCriarMeta.vue';
 import ModalContribuir from 'src/components/MetasFinanceiras/ModalContribuir.vue';
 import ModalDetalhesMeta from 'src/components/MetasFinanceiras/ModalDetalhesMeta.vue';
+import ModalEditarContribuicao from 'src/components/MetasFinanceiras/ModalEditarContribuicao.vue';
 import { notificarErro } from 'src/helpers/Notificacao';
 
 const $q = useQuasar();
@@ -82,7 +88,9 @@ const loading = ref(false);
 const modalCriarAberto = ref(false);
 const modalContribuirAberto = ref(false);
 const modalDetalhesAberto = ref(false);
+const modalEditarAberto = ref(false);
 const metaSelecionada = ref<MetaFinanceiraResult | null>(null);
+const contribuicaoSelecionada = ref<ContribuicaoResult | null>(null);
 
 onMounted(() => {
     carregarDados();
@@ -106,6 +114,18 @@ async function carregarDados() {
     }
 }
 
+// ===== Utilitário de atualização local =====
+function atualizarEstadoAposOperacao(metaAtualizada: MetaFinanceiraResult) {
+    metaSelecionada.value = metaAtualizada;
+    const index = metas.value.findIndex(m => m.id === metaAtualizada.id);
+    if (index !== -1) {
+        metas.value[index] = metaAtualizada;
+    }
+    service.obterResumo().then(resResumo => {
+        if (resResumo) resumo.value = resResumo;
+    });
+}
+
 function abrirModalCriar() {
     modalCriarAberto.value = true;
 }
@@ -118,6 +138,11 @@ function abrirModalContribuir(meta: MetaFinanceiraResult) {
 function abrirModalDetalhes(meta: MetaFinanceiraResult) {
     metaSelecionada.value = meta;
     modalDetalhesAberto.value = true;
+}
+
+function abrirModalEditar(contribuicao: ContribuicaoResult) {
+    contribuicaoSelecionada.value = contribuicao;
+    modalEditarAberto.value = true;
 }
 
 async function criarMeta(dto: CreateMetaFinanceiraDTO) {
@@ -139,21 +164,9 @@ async function contribuir(dto: ContribuicaoDTO) {
 
         modalContribuirAberto.value = false;
 
-        // Atualiza a meta na listagem local
-        const index = metas.value.findIndex(m => m.id === metaSelecionada.value?.id);
-        if (index !== -1 && resultado.metaAtualizada) {
-            metas.value[index] = resultado.metaAtualizada;
-        }
-
-        // Atualiza a meta selecionada (caso esteja aberta no modal, embora o modal de contribuição feche)
         if (resultado.metaAtualizada) {
-            metaSelecionada.value = resultado.metaAtualizada;
+            atualizarEstadoAposOperacao(resultado.metaAtualizada);
         }
-
-        // Recarrega apenas o resumo do painel superior, pois os totais mudaram
-        service.obterResumo().then(resResumo => {
-            if (resResumo) resumo.value = resResumo;
-        });
 
         // Exibir notificação de incentivo se houve marco
         if (resultado.notificacao) {
@@ -189,27 +202,30 @@ function removerContribuicao(contribuicaoId: string) {
                 await service.removerContribuicao(metaSelecionada.value.id, contribuicaoId);
                 $q.notify({ type: 'positive', message: 'Contribuição removida.' });
 
-                // Busca a meta atualizada no back-end
                 const metaAtualizada = await service.obterPorId(metaSelecionada.value.id);
-
-                // Atualiza a meta selecionada para manter o modal de detalhes atualizado
-                metaSelecionada.value = metaAtualizada;
-
-                // Atualiza a meta na listagem local
-                const index = metas.value.findIndex(m => m.id === metaAtualizada.id);
-                if (index !== -1) {
-                    metas.value[index] = metaAtualizada;
-                }
-
-                // Recarrega apenas o resumo pois os totais mudaram
-                service.obterResumo().then(resResumo => {
-                    if (resResumo) resumo.value = resResumo;
-                });
+                atualizarEstadoAposOperacao(metaAtualizada);
             } catch (error) {
                 // AxiosHelper handles the errors
             }
         })();
     });
+}
+
+async function salvarEdicaoContribuicao(dto: UpdateContribuicaoDTO) {
+    if (!metaSelecionada.value) return;
+
+    try {
+        const resultado = await service.editarContribuicao(metaSelecionada.value.id, dto);
+        modalEditarAberto.value = false;
+
+        if (resultado.metaAtualizada) {
+            atualizarEstadoAposOperacao(resultado.metaAtualizada);
+        }
+
+        $q.notify({ type: 'positive', message: 'Contribuição atualizada!' });
+    } catch (error) {
+        // AxiosHelper handles the errors
+    }
 }
 
 function excluirMeta(id: string) {
