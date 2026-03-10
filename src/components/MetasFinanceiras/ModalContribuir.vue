@@ -42,12 +42,14 @@
                     </div>
 
                     <!-- Valor: readonly do investimento OU input manual -->
-                    <q-input v-if="vincularInvestimento && investimentoSelecionado" :model-value="valor" outlined
-                        rounded dense type="number" label="Valor do Investimento (R$)" readonly prefix="R$ " />
+                    <MoneyInputBR v-if="vincularInvestimento && investimentoSelecionado" :model-value="valor"
+                        label="Valor do Investimento (R$)" readonly />
 
-                    <q-input v-if="!vincularInvestimento" v-model.number="valor" outlined rounded dense type="number"
-                        label="Valor da Contribuição (R$)" :rules="[val => val > 0 || 'Valor deve ser positivo']"
-                        autofocus />
+                    <MoneyInputBR v-if="!vincularInvestimento" v-model="valor" label="Valor da Contribuição (R$)"
+                        :rules="[val => val > 0 || val]" autofocus />
+
+                    <q-input v-model="descricao" outlined rounded dense type="text" label="Descrição (opcional)"
+                        maxlength="200" hint="Ex: Salário de Janeiro, Freelance, Bônus..." />
 
                     <div>
                         <ModernDateInput v-model="data" dialogTitle="Data da contribuição" label="Data da contribuição"
@@ -76,6 +78,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import ModernDateInput from 'src/components/Inputs/ModernDateInput.vue';
+import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import { useQuasar } from 'quasar';
 import type { MetaFinanceiraResult, ContribuicaoDTO } from 'src/Model/MetaFinanceira';
 import getInvestimentoService from 'src/services/transacao/InvestimentoService';
@@ -95,6 +98,7 @@ const emit = defineEmits<{
 
 const valor = ref<number | null>(null);
 const data = ref(new Date().toISOString().slice(0, 10));
+const descricao = ref('');
 
 const vincularInvestimento = ref(false);
 const investimentoSelecionado = ref<InvestimentoResult | null>(null);
@@ -120,6 +124,7 @@ watch(() => props.modelValue, (aberto) => {
     if (aberto) {
         valor.value = null;
         data.value = new Date().toISOString().slice(0, 10);
+        descricao.value = '';
         vincularInvestimento.value = false;
         investimentoSelecionado.value = null;
         investimentosDisponiveis.value = []; // Limpamos a lista antiga caso a modal seja fechada/aberta
@@ -156,6 +161,10 @@ function submeter() {
         valor: valor.value,
         data: data.value,
     };
+
+    if (descricao.value) {
+        dto.descricao = descricao.value;
+    }
 
     if (vincularInvestimento.value && investimentoSelecionado.value) {
         if (investimentoSelecionado.value.id) {

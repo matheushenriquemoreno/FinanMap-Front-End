@@ -12,8 +12,8 @@
         <div>
           <q-form @submit.prevent="submitFormulario" class="q-gutter-xs">
             <q-input rounded filled v-model="dadosFormulario.descricao" label="Descricao" lazy-rules hint="" />
-            <q-input rounded filled type="number" min="0" step="0.01" v-model="dadosFormulario.valor" label="Valor"
-              lazy-rules prefix="R$ " :rules="[(val) => Boolean(val) || 'Campo obrigatorio']" />
+            <MoneyInputBR v-model="valorNumerico" filled rounded :dense="false" :outlined="false" label="Valor"
+              lazy-rules :rules="[(val) => Boolean(val) || 'Campo obrigatorio']" />
             <div>
               <CampoSelectServer :configuracoes="{
                 labelObjeto: 'nome',
@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 import CampoSelectServer from 'src/components/CampoSelect/CampoSelectServer.vue';
+import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import { computed, ref, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import type { Categoria } from 'src/Model/Categoria';
@@ -112,6 +113,18 @@ const localModelValue = computed({
 const categoriaSelecionada = ref<Categoria | null>(null);
 
 const dadosFormulario = ref(props.transacao);
+
+// Computed bidirecional para converter o valor entre number (MoneyInputBR) e o formulário
+const valorNumerico = computed({
+  get: () => {
+    const v = dadosFormulario.value.valor;
+    if (v === undefined || v === null) return null;
+    return Number(v);
+  },
+  set: (val: number | null) => {
+    dadosFormulario.value.valor = val as any;
+  },
+});
 
 watch(localModelValue, (valor) => {
   if (valor === true) {

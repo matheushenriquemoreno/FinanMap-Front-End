@@ -19,8 +19,8 @@
                     <!-- Valor Alvo -->
                     <div>
                         <label class="text-subtitle2 text-bold q-mb-xs">Valor Alvo (R$)</label>
-                        <q-input v-model.number="form.valorAlvo" outlined rounded dense type="number"
-                            placeholder="10.000,00" :rules="[val => val > 0 || 'Valor deve ser positivo']" />
+                        <MoneyInputBR v-model="form.valorAlvo" label="" placeholder="10.000,00"
+                            :rules="[val => val > 0 || 'Valor deve ser positivo']" />
                     </div>
 
                     <!-- Data Limite -->
@@ -57,6 +57,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import ModernDateInput from 'src/components/Inputs/ModernDateInput.vue';
+import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import {
     CategoriaIconeMeta,
     CATEGORIA_META_CONFIG,

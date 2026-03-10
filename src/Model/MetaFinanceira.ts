@@ -41,8 +41,15 @@ export enum OrigemContribuicao {
 export interface ContribuicaoDTO {
   valor: number;
   data: string; // ISO date string
+  descricao?: string;
   investimentoId?: string;
   nomeInvestimento?: string;
+}
+
+export interface UpdateContribuicaoDTO {
+  contribuicaoId: string;
+  valor: number;
+  descricao?: string;
 }
 
 // ========== DTOs de Resultado ==========
@@ -51,6 +58,7 @@ export interface ContribuicaoResult {
   id: string;
   valor: number;
   data: string;
+  descricao?: string;
   investimentoId?: string;
   nomeInvestimento?: string;
   origem: string; // 'Manual' | 'Investimento'

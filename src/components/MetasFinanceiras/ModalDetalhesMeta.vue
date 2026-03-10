@@ -83,6 +83,10 @@
                                 <q-item-label class="text-subtitle2 text-bold">
                                     R$ {{ formatarValor(contribuicao.valor) }}
                                 </q-item-label>
+                                <q-item-label v-if="contribuicao.descricao" caption class="q-mt-xs">
+                                    <q-icon name="notes" size="13px" class="q-mr-xs" />
+                                    {{ contribuicao.descricao }}
+                                </q-item-label>
                                 <q-item-label caption class="row items-center q-mt-xs">
                                     <q-icon name="event" size="13px" class="q-mr-xs" />
                                     {{ formatarData(contribuicao.data) }}
@@ -97,10 +101,16 @@
                                 </q-item-label>
                             </q-item-section>
                             <q-item-section side top>
-                                <q-btn flat round icon="delete_outline" color="red-5" size="sm"
-                                    @click="emit('removerContribuicao', contribuicao.id)">
-                                    <q-tooltip class="bg-red-5">Remover contribuição</q-tooltip>
-                                </q-btn>
+                                <div class="row q-gutter-xs">
+                                    <q-btn flat round icon="edit" color="blue-5" size="sm"
+                                        @click="emit('editarContribuicao', contribuicao)">
+                                        <q-tooltip class="bg-blue-5">Editar contribuição</q-tooltip>
+                                    </q-btn>
+                                    <q-btn flat round icon="delete_outline" color="red-5" size="sm"
+                                        @click="emit('removerContribuicao', contribuicao.id)">
+                                        <q-tooltip class="bg-red-5">Remover contribuição</q-tooltip>
+                                    </q-btn>
+                                </div>
                             </q-item-section>
                         </q-item>
                     </q-list>
@@ -121,7 +131,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { MetaFinanceiraResult } from 'src/Model/MetaFinanceira';
+import type { MetaFinanceiraResult, ContribuicaoResult } from 'src/Model/MetaFinanceira';
 import { CATEGORIA_META_CONFIG, CategoriaIconeMeta } from 'src/Model/MetaFinanceira';
 import { formatarValor, formatarData } from 'src/helpers/FormatUtils';
 
@@ -132,6 +142,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void;
     (e: 'removerContribuicao', contribuicaoId: string): void;
+    (e: 'editarContribuicao', contribuicao: ContribuicaoResult): void;
 }>();
 
 const categoriaConfig = computed(() => {
