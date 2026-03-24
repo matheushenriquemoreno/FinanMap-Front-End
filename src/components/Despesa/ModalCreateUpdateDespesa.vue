@@ -51,18 +51,18 @@
                 </div>
               </div>
 
-              <q-banner v-if="tipoLote && Boolean(dadosFormulario.valor)" class="bg-grey-2 q-mb-md rounded-borders">
+              <q-banner v-if="tipoLote && Boolean(dadosFormulario.valor)" :class="[$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-grey-2 text-black', 'q-mb-md rounded-borders']">
                 <template v-slot:avatar>
-                  <q-icon name="info" color="primary" />
+                  <q-icon name="info" :color="$q.dark.isActive ? 'white' : 'primary'" />
                 </template>
                 <div class="text-caption">
                   {{ resumoLote }}
                 </div>
               </q-banner>
 
-              <q-banner v-if="modoLote && despesaAgrupadora" class="bg-blue-1 q-mb-md rounded-borders">
+              <q-banner v-if="modoLote && despesaAgrupadora" :class="[$q.dark.isActive ? 'bg-blue-9 text-white' : 'bg-blue-1 text-black', 'q-mb-md rounded-borders']">
                 <template v-slot:avatar>
-                  <q-icon name="account_tree" color="blue" />
+                  <q-icon name="account_tree" :color="$q.dark.isActive ? 'white' : 'blue'" />
                 </template>
                 <div class="text-caption">
                   As {{ quantidadeMeses }} despesas serão automaticamente vinculadas a
@@ -158,11 +158,15 @@ const opcoesTipoLote = [
 const resumoLote = computed(() => {
   if (!dadosFormulario.value.valor || !quantidadeMeses.value) return '';
 
+  const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const valorTotal = Number(dadosFormulario.value.valor);
+  const valorTotalFormatado = formatadorMoeda.format(valorTotal);
+
   if (tipoLote.value === 'parcelado') {
-    const valorParcela = (dadosFormulario.value.valor / quantidadeMeses.value).toFixed(2);
-    return `Serão criadas ${quantidadeMeses.value} despesas de R$ ${valorParcela}. O valor total da compra é R$ ${dadosFormulario.value.valor}.`;
+    const valorParcelaFormatado = formatadorMoeda.format(valorTotal / quantidadeMeses.value);
+    return `Serão criadas ${quantidadeMeses.value} despesas de ${valorParcelaFormatado}. O valor total da compra é ${valorTotalFormatado}.`;
   } else {
-    return `A despesa de R$ ${dadosFormulario.value.valor} será repetida nos próximos ${quantidadeMeses.value} meses.`;
+    return `A despesa de ${valorTotalFormatado} será repetida nos próximos ${quantidadeMeses.value} meses.`;
   }
 });
 
