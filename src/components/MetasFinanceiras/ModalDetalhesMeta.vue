@@ -1,6 +1,6 @@
 <template>
-    <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
-        <q-card style="min-width: 480px; max-width: 600px; border-radius: 16px;">
+    <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" :maximized="$q.screen.lt.sm">
+        <q-card :style="$q.screen.gt.xs ? 'min-width: 480px; max-width: 600px; border-radius: 16px;' : 'width: 100%; border-radius: 0; min-height: 100vh; display: flex; flex-direction: column;'">
             <q-card-section class="q-pb-none">
                 <div class="row items-center justify-between">
                     <div>
@@ -26,18 +26,17 @@
                         </div>
                     </div>
 
-                    <div class="row justify-between q-mt-sm">
-                        <div>
-                            <div class="text-caption text-grey-6">Valor Atual</div>
-                            <div class="text-subtitle2 text-bold text-positive">R$ {{ formatarValor(meta.valorAtual) }}
-                            </div>
+                    <div class="row q-col-gutter-sm q-mt-sm">
+                        <div class="col-4">
+                            <div class="text-caption text-grey-6 text-no-wrap">Valor Atual</div>
+                            <div class="text-subtitle2 text-bold text-positive">R$ {{ formatarValor(meta.valorAtual) }}</div>
                         </div>
-                        <div class="text-center">
-                            <div class="text-caption text-grey-6">Data Limite</div>
+                        <div class="col-4 text-center">
+                            <div class="text-caption text-grey-6 text-no-wrap">Data Limite</div>
                             <div class="text-subtitle2 text-bold">{{ formatarData(meta.dataLimite) }}</div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-caption text-grey-6">Valor Alvo</div>
+                        <div class="col-4 text-right">
+                            <div class="text-caption text-grey-6 text-no-wrap">Valor Alvo</div>
                             <div class="text-subtitle2 text-bold">R$ {{ formatarValor(meta.valorAlvo) }}</div>
                         </div>
                     </div>
@@ -66,13 +65,13 @@
             <!-- Lista de Contribuições -->
             <template v-if="meta && meta.contribuicoes && meta.contribuicoes.length > 0">
                 <q-separator />
-                <q-card-section>
+                <q-card-section class="col">
                     <div class="text-subtitle2 text-bold q-mb-sm">
                         Histórico de Contribuições ({{ meta.contribuicoes.length }})
                     </div>
                     <q-list separator class="historico-list">
-                        <q-item v-for="contribuicao in meta.contribuicoes" :key="contribuicao.id" class="q-py-md">
-                            <q-item-section avatar top>
+                        <q-item v-for="contribuicao in meta.contribuicoes" :key="contribuicao.id" class="q-py-md q-px-sm">
+                            <q-item-section avatar top v-if="$q.screen.gt.xs">
                                 <q-avatar :color="contribuicao.origem === 'Investimento' ? 'primary' : 'positive'"
                                     text-color="white" size="42px">
                                     <q-icon
@@ -80,9 +79,17 @@
                                 </q-avatar>
                             </q-item-section>
                             <q-item-section>
-                                <q-item-label class="text-subtitle2 text-bold">
-                                    R$ {{ formatarValor(contribuicao.valor) }}
-                                </q-item-label>
+                                <div class="row items-center justify-between no-wrap">
+                                    <q-item-label class="text-subtitle2 text-bold">
+                                        R$ {{ formatarValor(contribuicao.valor) }}
+                                    </q-item-label>
+                                    <div class="row q-gutter-xs" v-if="$q.screen.lt.sm">
+                                        <q-btn flat round icon="edit" color="blue-5" size="sm"
+                                            @click="emit('editarContribuicao', contribuicao)" />
+                                        <q-btn flat round icon="delete_outline" color="red-5" size="sm"
+                                            @click="emit('removerContribuicao', contribuicao.id)" />
+                                    </div>
+                                </div>
                                 <q-item-label v-if="contribuicao.descricao" caption class="q-mt-xs">
                                     <q-icon name="notes" size="13px" class="q-mr-xs" />
                                     {{ contribuicao.descricao }}
@@ -93,14 +100,14 @@
                                 </q-item-label>
                                 <q-item-label v-if="contribuicao.origem === 'Investimento'" class="q-mt-sm">
                                     <q-badge color="primary" class="q-px-sm q-py-xs"
-                                        style="border-radius: 6px; font-weight: normal; font-size: 11px;">
+                                        style="border-radius: 6px; font-weight: normal; font-size: 11px; max-width: 100%; white-space: normal; text-align: left;">
                                         <q-icon name="account_balance" size="13px" class="q-mr-xs" />
                                         <span>Investimento - <span class="text-bold">{{ contribuicao.nomeInvestimento
                                                 }}</span></span>
                                     </q-badge>
                                 </q-item-label>
                             </q-item-section>
-                            <q-item-section side top>
+                            <q-item-section side top v-if="$q.screen.gt.xs">
                                 <div class="row q-gutter-xs">
                                     <q-btn flat round icon="edit" color="blue-5" size="sm"
                                         @click="emit('editarContribuicao', contribuicao)">
@@ -163,5 +170,10 @@ const corProgresso = computed(() => {
 .historico-list {
     max-height: 300px;
     overflow-y: auto;
+
+    @media (max-width: 599px) {
+        max-height: none;
+        flex: 1;
+    }
 }
 </style>
