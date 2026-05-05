@@ -1,6 +1,6 @@
 <template>
     <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" :maximized="$q.screen.lt.sm">
-        <q-card :style="$q.screen.gt.xs ? 'min-width: 480px; max-width: 600px; border-radius: 16px;' : 'width: 100%; border-radius: 0; min-height: 100vh; display: flex; flex-direction: column;'">
+        <q-card :style="$q.screen.gt.xs ? 'min-width: 480px; max-width: 600px; border-radius: 16px;' : 'width: 100%; height: 100%; max-height: 100vh; border-radius: 0; display: flex; flex-direction: column;'">
             <q-card-section class="q-pb-none">
                 <div class="row items-center justify-between">
                     <div>
@@ -65,11 +65,11 @@
             <!-- Lista de Contribuições -->
             <template v-if="meta && meta.contribuicoes && meta.contribuicoes.length > 0">
                 <q-separator />
-                <q-card-section class="col">
-                    <div class="text-subtitle2 text-bold q-mb-sm">
+                <q-card-section class="col" style="display: flex; flex-direction: column; min-height: 0;">
+                    <div class="text-subtitle2 text-bold q-mb-sm" style="flex-shrink: 0;">
                         Histórico de Contribuições ({{ meta.contribuicoes.length }})
                     </div>
-                    <q-list separator class="historico-list">
+                    <q-list separator class="historico-list col">
                         <q-item v-for="contribuicao in meta.contribuicoes" :key="contribuicao.id" class="q-py-md q-px-sm">
                             <q-item-section avatar top v-if="$q.screen.gt.xs">
                                 <q-avatar :color="contribuicao.origem === 'Investimento' ? 'primary' : 'positive'"
