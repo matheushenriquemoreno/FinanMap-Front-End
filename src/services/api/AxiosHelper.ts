@@ -66,25 +66,24 @@ export function CreateIntanceAxios() {
         originalRequest._retry = true;
 
         try {
-          // Importação dinâmica para evitar dependência circular se houver
-          const { obterAuthService } = await import('../../services/AuthService');
-          const authService = obterAuthService();
-          const refreshToken = localStorage.getItem('refreshToken');
+          const { refreshTokenManager } = await import('../../services/RefreshTokenManager');
+          
+          const result = await refreshTokenManager.refreshIfNeeded();
 
-          if (refreshToken) {
-            const result = await authService.refreshToken(refreshToken);
-
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('refreshToken', result.refreshToken); // Atualiza com o novo refresh token
-            if (result.nomeUsuario) {
-              localStorage.setItem('userName', result.nomeUsuario);
-            }
-
+          if (result) {
             // Atualiza o header da requisição original
             originalRequest.headers.Authorization = `Bearer ${result.token}`;
 
             // Reenvia a requisição original
             return AxiosInstance(originalRequest);
+          } else {
+            // Se result for null, não foi necessário renovar (talvez outra aba já tenha feito).
+            // Tenta enviar com o token atual do storage
+            const tokenAtual = localStorage.getItem('token');
+            if (tokenAtual) {
+              originalRequest.headers.Authorization = `Bearer ${tokenAtual}`;
+              return AxiosInstance(originalRequest);
+            }
           }
         } catch (refreshError: any) {
           // Importação dinâmica do RefreshTokenManager para checar o erro
@@ -175,13 +174,17 @@ function handleHttpStatusError(error: AxiosError): Promise<never> {
     return Promise.reject(error);
   }
 
-  // Erros de autenticação/autorização
-  if (statusCode === 401 || statusCode === 403) {
+  // Erros de autenticação
+  if (statusCode === 401) {
     notificarInfo(ERROR_MESSAGES.unauthorized);
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("userName");
     window.location.href = process.env.LOGIN_URL ?? '/login';
+  }
+  // Erros de autorização (permissão insuficiente)
+  else if (statusCode === 403) {
+    notificarErro('Você não tem permissão para realizar esta ação.');
   }
   // Erros do lado do servidor
   else if (statusCode >= 500) {

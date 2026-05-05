@@ -47,7 +47,7 @@
 
         <q-separator />
         <q-card-actions align="center">
-            <q-btn v-if="!meta.concluida" flat no-caps icon="add" label="Contribuir" color="primary"
+            <q-btn flat no-caps icon="add" label="Contribuir" color="primary"
                 @click="emit('contribuir')" />
             <q-btn flat no-caps icon="visibility" label="Detalhes" color="secondary" @click="emit('detalhes')" />
         </q-card-actions>

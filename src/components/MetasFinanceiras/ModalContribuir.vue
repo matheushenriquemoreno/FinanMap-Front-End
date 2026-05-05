@@ -67,7 +67,7 @@
 
                     <div class="q-mt-md">
                         <q-btn type="submit" label="Confirmar Contribuição" color="primary" rounded unelevated
-                            class="full-width" :disable="meta?.concluida" />
+                            class="full-width" />
                     </div>
                 </q-form>
             </q-card-section>
@@ -151,7 +151,7 @@ function preencherValorInvestimento(investimento: InvestimentoResult) {
 const novoPercentual = computed(() => {
     if (!props.meta || props.meta.valorAlvo <= 0) return 0;
     const contributionValue = valor.value || 0;
-    return Math.min(100, Math.round(((props.meta.valorAtual + contributionValue) / props.meta.valorAlvo) * 100));
+    return Math.round(((props.meta.valorAtual + contributionValue) / props.meta.valorAlvo) * 100);
 });
 
 function submeter() {
