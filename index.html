@@ -17,8 +17,96 @@
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Inline critical loading screen (shown before Vue hydrates) -->
+    <style>
+      #app-initial-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1040 35%, #0d1b3e 65%, #06071a 100%);
+        transition: opacity 0.5s ease;
+      }
+      #app-initial-loader.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #app-initial-loader img {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        filter: drop-shadow(0 0 20px rgba(77, 120, 255, 0.4));
+        animation: _pulse 2.5s ease-in-out infinite;
+      }
+      #app-initial-loader .loader-title {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #fff 0%, #a8b4ff 50%, #7c8cff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+      }
+      #app-initial-loader .loader-spinner {
+        width: 40px;
+        height: 40px;
+        border: 2.5px solid transparent;
+        border-top-color: #4d78ff;
+        border-radius: 50%;
+        animation: _spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      }
+      @keyframes _pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+      }
+      @keyframes _spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
+    <!-- Initial loader rendered immediately by the browser -->
+    <div id="app-initial-loader">
+      <img src="/favicon.ico" alt="FinanMap" />
+      <p class="loader-title">FinanMap</p>
+      <div class="loader-spinner"></div>
+    </div>
+
     <!-- quasar:entry-point -->
+
+    <script>
+      // Remove the initial loader once the Vue app is mounted
+      (function() {
+        var observer = new MutationObserver(function(mutations) {
+          // Look for Vue's root element being populated
+          var appEl = document.getElementById('q-app') || document.querySelector('[data-v-app]');
+          if (appEl && appEl.children.length > 0) {
+            var loader = document.getElementById('app-initial-loader');
+            if (loader) {
+              loader.classList.add('fade-out');
+              setTimeout(function() { loader.remove(); }, 500);
+            }
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Fallback: remove after 8 seconds regardless
+        setTimeout(function() {
+          var loader = document.getElementById('app-initial-loader');
+          if (loader) {
+            loader.classList.add('fade-out');
+            setTimeout(function() { loader.remove(); }, 500);
+          }
+        }, 8000);
+      })();
+    </script>
   </body>
 </html>

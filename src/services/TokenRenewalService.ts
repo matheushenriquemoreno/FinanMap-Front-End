@@ -15,6 +15,18 @@ class TokenRenewalService {
   }
 
   /**
+   * Trata o evento de mudança de visibilidade da aba.
+   * Útil para dispositivos móveis (como iOS) que suspendem a execução
+   * de timers quando o navegador vai para background.
+   */
+  private handleVisibilityChange = (): void => {
+    if (document.visibilityState === 'visible' && this.isRunning) {
+      console.log('[TokenRenewalService] Aba voltou a ficar visível. Verificando token...');
+      void this.checkAndRenewToken();
+    }
+  };
+
+  /**
    * Obtém a instância única do serviço
    */
   public static getInstance(): TokenRenewalService {
@@ -43,6 +55,9 @@ class TokenRenewalService {
     this.intervalId = setInterval(() => {
       this.checkAndRenewToken();
     }, CHECK_INTERVAL_MS);
+
+    // Adiciona listener para garantir a renovação quando o usuário volta para o app (especialmente no iOS)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
   /**
@@ -53,6 +68,8 @@ class TokenRenewalService {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.isRunning = false;
   }
 
