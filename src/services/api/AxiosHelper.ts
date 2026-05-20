@@ -1,6 +1,7 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 import { notificarErro, notificarInfo } from "../../helpers/Notificacao";
+import { refreshTokenManager } from "../RefreshTokenManager";
 
 interface ApiResultError {
   errors: string[]
@@ -28,7 +29,18 @@ export function CreateIntanceAxios() {
   });
 
   AxiosInstance.interceptors.request.use(
-    (config) => {
+    async (config) => {
+      try {
+        await refreshTokenManager.refreshIfNeeded();
+      } catch (error) {
+        console.error('[AxiosHelper] Erro durante o refresh no interceptor de requisição:', error);
+        if (refreshTokenManager.shouldClearTokenOnRefreshError(error)) {
+          refreshTokenManager.clearTokens();
+          window.location.href = process.env.LOGIN_URL ?? '/login';
+          return Promise.reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      }
+
       const token = localStorage.getItem("token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -66,8 +78,6 @@ export function CreateIntanceAxios() {
         originalRequest._retry = true;
 
         try {
-          const { refreshTokenManager } = await import('../../services/RefreshTokenManager');
-          
           const result = await refreshTokenManager.refreshIfNeeded();
 
           if (result) {
@@ -86,9 +96,6 @@ export function CreateIntanceAxios() {
             }
           }
         } catch (refreshError: any) {
-          // Importação dinâmica do RefreshTokenManager para checar o erro
-          const { refreshTokenManager } = await import('../../services/RefreshTokenManager');
-          
           if (!refreshTokenManager.shouldClearTokenOnRefreshError(refreshError)) {
             // Se for erro de rede ou 5xx durante o refresh, não desloga.
             // Apenas rejeita a requisição atual.
