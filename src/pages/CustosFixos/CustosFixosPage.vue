@@ -5,17 +5,65 @@
       <div class="custos-header__info">
         <q-icon name="receipt_long" size="40px" color="white" />
         <div>
-          <h4 class="text-h4 text-bold text-white q-mb-none" style="line-height: 1;">Custos Fixos</h4>
-          <span class="text-subtitle1 text-white-70">Gerencie seus compromissos financeiros recorrentes</span>
+          <h4 class="text-h4 text-bold text-white q-mb-none" style="line-height: 1">
+            Custos Fixos
+          </h4>
+          <span class="text-subtitle1 text-white-70"
+            >Gerencie seus compromissos financeiros recorrentes</span
+          >
         </div>
       </div>
-      <q-btn color="white" text-color="primary" icon="add" label="Novo Custo Fixo" rounded unelevated
-        @click="abrirModalCriar" />
+      <q-btn
+        color="white"
+        text-color="primary"
+        icon="add"
+        label="Novo Custo Fixo"
+        rounded
+        unelevated
+        @click="abrirModalCriar"
+      />
+    </div>
+
+    <!-- ===== FILTROS ===== -->
+    <div class="row q-col-gutter-md q-mb-lg items-center" v-if="custosFixos.length > 0">
+      <div class="col-12 col-sm-6">
+        <q-input
+          v-model="filtroNome"
+          dense
+          outlined
+          placeholder="Buscar custo fixo pelo nome..."
+          color="primary"
+          clearable
+          class="buscar-input"
+        >
+          <template v-slot:prepend>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </div>
+      <div class="col-12 col-sm-6 flex justify-end-sm">
+        <q-btn-toggle
+          v-model="filtroStatus"
+          toggle-color="primary"
+          color="grey-2"
+          text-color="grey-7"
+          toggle-text-color="white"
+          unelevated
+          rounded
+          dense
+          class="status-toggle"
+          :options="[
+            { label: 'Todos', value: 'todos' },
+            { label: 'Ativos', value: 'ativos' },
+            { label: 'Inativos', value: 'inativos' },
+          ]"
+        />
+      </div>
     </div>
 
     <!-- ===== LISTAGEM DE CUSTOS FIXOS ===== -->
-    <div class="custos-grid q-mt-lg" v-if="custosFixos.length > 0 || loading">
-      <template v-if="loading">
+    <div class="custos-container q-mt-lg">
+      <div class="custos-grid-list" v-if="loading">
         <!-- Skeleton Loaders -->
         <q-card v-for="i in 3" :key="'skeleton-' + i" flat bordered class="q-pa-md skeleton-card">
           <div class="row items-center q-mb-md">
@@ -31,36 +79,61 @@
             <q-skeleton type="QBtn" width="80px" />
           </div>
         </q-card>
-      </template>
+      </div>
 
       <template v-else>
-        <CustoFixoCard
-          v-for="custo in custosFixos"
-          :key="custo.id"
-          :custo="custo"
-          @excluir="excluirCustoFixo"
-          @editar="abrirModalEditar"
-          @status-alterado="carregarDados"
-        />
-      </template>
-    </div>
+        <!-- Transições suaves na listagem dos cards -->
+        <transition-group
+          name="list"
+          tag="div"
+          class="custos-grid-list"
+          v-if="custosFixosFiltrados.length > 0"
+        >
+          <CustoFixoCard
+            v-for="custo in custosFixosFiltrados"
+            :key="custo.id"
+            :custo="custo"
+            @excluir="excluirCustoFixo"
+            @editar="abrirModalEditar"
+            @status-alterado="carregarDados"
+          />
+        </transition-group>
 
-    <!-- Empty state -->
-    <div v-if="!loading && custosFixos.length === 0" class="custos-empty text-center q-pa-xl">
-      <q-icon name="receipt_long" size="80px" color="grey-4" />
-      <p class="text-h6 text-grey-6 q-mt-md">Nenhum custo fixo cadastrado ainda</p>
-      <p class="text-body2 text-grey-5">Clique em "Novo Custo Fixo" para registrar suas despesas recorrentes!</p>
+        <!-- Sem resultados da busca -->
+        <div v-else-if="custosFixos.length > 0" class="text-center q-pa-xl text-busca-vazia">
+          <q-icon name="search_off" size="80px" color="grey-4" />
+          <p class="text-h6 text-grey-6 q-mt-md">Nenhum custo fixo encontrado</p>
+          <p class="text-body2 text-grey-5">
+            Tente ajustar seus filtros de busca ou limpar o campo de texto!
+          </p>
+        </div>
+
+        <!-- Empty state original -->
+        <div v-else class="custos-empty text-center q-pa-xl">
+          <q-icon name="receipt_long" size="80px" color="grey-4" />
+          <p class="text-h6 text-grey-6 q-mt-md">Nenhum custo fixo cadastrado ainda</p>
+          <p class="text-body2 text-grey-5">
+            Clique em "Novo Custo Fixo" para registrar suas despesas recorrentes!
+          </p>
+        </div>
+      </template>
     </div>
 
     <!-- ===== MODAIS ===== -->
     <ModalCriarCustoFixo v-model="modalCriarAberto" @criar="criarCustoFixo" />
-    <ModalEditarCustoFixo v-model="modalEditarAberto" :custo="custoSelecionado" @salvar="atualizarCustoFixo" />
+    <ModalEditarCustoFixo
+      v-model="modalEditarAberto"
+      :custo="custoSelecionado"
+      @salvar="atualizarCustoFixo"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
+import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import getCustoFixoService from 'src/services/CustoFixoService';
 import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
@@ -69,6 +142,8 @@ import ModalEditarCustoFixo from 'src/components/CustosFixos/ModalEditarCustoFix
 import { notificarErro } from 'src/helpers/Notificacao';
 
 const $q = useQuasar();
+const router = useRouter();
+const compartilhamentoStore = useCompartilhamentoStore();
 const service = getCustoFixoService();
 
 const custosFixos = ref<CustoFixoResult[]>([]);
@@ -77,8 +152,46 @@ const modalCriarAberto = ref(false);
 const modalEditarAberto = ref(false);
 const custoSelecionado = ref<CustoFixoResult | null>(null);
 
+// Filtros locais
+const filtroNome = ref('');
+const filtroStatus = ref<'todos' | 'ativos' | 'inativos'>('todos');
+
+// Verifica se o usuário está acessando os dados de forma compartilhada
+function verificarModoCompartilhado() {
+  if (compartilhamentoStore.emModoCompartilhado) {
+    router.replace('/');
+  }
+}
+
 onMounted(() => {
+  verificarModoCompartilhado();
   carregarDados();
+});
+
+// Acompanha mudanças no modo compartilhado para redirecionar se o usuário alternar de contexto
+watch(
+  () => compartilhamentoStore.emModoCompartilhado,
+  (novoValor) => {
+    if (novoValor) {
+      verificarModoCompartilhado();
+    }
+  },
+);
+
+// Filtro em memória
+const custosFixosFiltrados = computed(() => {
+  return custosFixos.value.filter((custo) => {
+    const nomeNormalizado = custo.nome.toLowerCase();
+    const termoBusca = filtroNome.value ? filtroNome.value.toLowerCase().trim() : '';
+    const bateNome = !termoBusca || nomeNormalizado.includes(termoBusca);
+
+    const bateStatus =
+      filtroStatus.value === 'todos' ||
+      (filtroStatus.value === 'ativos' && custo.ativo) ||
+      (filtroStatus.value === 'inativos' && !custo.ativo);
+
+    return bateNome && bateStatus;
+  });
 });
 
 async function carregarDados() {
@@ -101,9 +214,13 @@ async function criarCustoFixo(dto: CustoFixoCreate) {
   try {
     await service.criar(dto);
     modalCriarAberto.value = false;
-    $q.notify({ type: 'positive', message: 'Custo fixo criado com sucesso! 🎯' });
+    $q.notify({
+      type: 'positive',
+      message: 'Custo fixo criado com sucesso! 🎯',
+      position: 'top-right',
+    });
     carregarDados();
-  } catch (error: any) {
+  } catch {
     notificarErro('Erro ao criar o custo fixo. Verifique os campos.');
   }
 }
@@ -117,9 +234,13 @@ async function atualizarCustoFixo(dto: UpdateCustoFixoDTO) {
   try {
     await service.atualizar(dto);
     modalEditarAberto.value = false;
-    $q.notify({ type: 'positive', message: 'Custo fixo atualizado com sucesso! 🎯' });
+    $q.notify({
+      type: 'positive',
+      message: 'Custo fixo atualizado com sucesso! 🎯',
+      position: 'top-right',
+    });
     carregarDados();
-  } catch (error: any) {
+  } catch {
     notificarErro('Erro ao atualizar o custo fixo. Verifique os campos.');
   }
 }
@@ -130,11 +251,25 @@ function excluirCustoFixo(id: string) {
     message: 'Deseja realmente excluir este custo fixo?',
     cancel: true,
     persistent: false,
+    ok: {
+      flat: true,
+      color: 'negative',
+      label: 'Excluir',
+    },
+    cancel: {
+      flat: true,
+      color: 'primary',
+      label: 'Cancelar',
+    },
   }).onOk(() => {
     void (async () => {
       try {
         await service.excluir(id);
-        $q.notify({ type: 'positive', message: 'Custo fixo excluído com sucesso!' });
+        $q.notify({
+          type: 'positive',
+          message: 'Custo fixo excluído com sucesso! 🎯',
+          position: 'top-right',
+        });
         await carregarDados();
       } catch (error) {
         // Tratos automáticos do AxiosHelper
@@ -148,6 +283,10 @@ function excluirCustoFixo(id: string) {
 .custos-page {
   max-width: 1200px;
   margin: 0 auto;
+
+  @media (max-width: 600px) {
+    padding: 16px !important;
+  }
 }
 
 .custos-header {
@@ -160,8 +299,9 @@ function excluirCustoFixo(id: string) {
 
   @media (max-width: 600px) {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 16px;
+    padding: 20px;
   }
 
   &__info {
@@ -175,17 +315,59 @@ function excluirCustoFixo(id: string) {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.custos-grid {
+.custos-grid-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
+  width: 100%;
+
+  @media (max-width: 650px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
-.custos-empty {
+.custos-empty,
+.text-busca-vazia {
   margin-top: 80px;
 }
 
 .skeleton-card {
   border-radius: 16px;
+}
+
+.buscar-input {
+  width: 100%;
+  max-width: 450px;
+  @media (max-width: 599px) {
+    max-width: 100%;
+  }
+}
+
+.flex.justify-end-sm {
+  @media (min-width: 600px) {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.status-toggle {
+  @media (max-width: 599px) {
+    width: 100%;
+    :deep(.q-btn) {
+      flex: 1;
+    }
+  }
+}
+
+/* Transições com TransitionGroup */
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
 }
 </style>
