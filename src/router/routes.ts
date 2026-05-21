@@ -51,6 +51,11 @@ const routes: RouteRecordRaw[] = [
         name: 'MetasFinanceirasPage',
         component: () => import('src/pages/MetasFinanceiras/MetasFinanceirasPage.vue'),
       },
+      {
+        path: '/custos-fixos',
+        name: 'CustosFixosPage',
+        component: () => import('src/pages/CustosFixos/CustosFixosPage.vue'),
+      },
     ],
   },
 ];

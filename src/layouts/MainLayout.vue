@@ -95,6 +95,15 @@
               <q-item-label>Metas Financeiras</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item to="/custos-fixos" class="menu-title" clickable v-ripple active-class="text-dark">
+            <q-item-section avatar>
+              <q-avatar icon="receipt_long" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Custos Fixos</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
 
