@@ -1,28 +1,13 @@
 <template>
   <q-page class="custos-page q-pa-lg">
     <!-- ===== HEADER ===== -->
-    <div class="custos-header q-mb-lg">
-      <div class="custos-header__info">
-        <q-icon name="receipt_long" size="40px" color="white" />
-        <div>
-          <h4 class="text-h4 text-bold text-white q-mb-none" style="line-height: 1">
-            Custos Fixos
-          </h4>
-          <span class="text-subtitle1 text-white-70"
-            >Gerencie seus compromissos financeiros recorrentes</span
-          >
-        </div>
-      </div>
-      <q-btn
-        color="white"
-        text-color="primary"
-        icon="add"
-        label="Novo Custo Fixo"
-        rounded
-        unelevated
-        @click="abrirModalCriar"
-      />
-    </div>
+    <PageHeaderBanner
+      icon="receipt_long"
+      title="Custos Fixos"
+      subtitle="Gerencie seus compromissos financeiros recorrentes"
+      button-label="Novo Custo Fixo"
+      @action="abrirModalCriar"
+    />
 
     <!-- ===== FILTROS ===== -->
     <div class="row q-col-gutter-md q-mb-lg items-center" v-if="custosFixos.length > 0">
@@ -136,6 +121,7 @@ import { useRouter } from 'vue-router';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import getCustoFixoService from 'src/services/CustoFixoService';
 import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
+import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
 import ModalCriarCustoFixo from 'src/components/CustosFixos/ModalCriarCustoFixo.vue';
 import ModalEditarCustoFixo from 'src/components/CustosFixos/ModalEditarCustoFixo.vue';
@@ -288,31 +274,7 @@ function excluirCustoFixo(id: string) {
   }
 }
 
-.custos-header {
-  background: linear-gradient(135deg, #1a237e 0%, #4a148c 100%);
-  border-radius: 16px;
-  padding: 24px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 
-  @media (max-width: 600px) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    padding: 20px;
-  }
-
-  &__info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-}
-
-.text-white-70 {
-  color: rgba(255, 255, 255, 0.7);
-}
 
 .custos-grid-list {
   display: grid;

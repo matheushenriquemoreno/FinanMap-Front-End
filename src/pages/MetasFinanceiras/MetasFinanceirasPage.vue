@@ -1,17 +1,13 @@
 <template>
     <q-page class="metas-page q-pa-lg">
         <!-- ===== HEADER ===== -->
-        <div class="metas-header q-mb-lg">
-            <div class="metas-header__info">
-                <q-icon name="emoji_events" size="40px" color="white" />
-                <div>
-                    <h4 class="text-h4 text-bold text-white q-mb-none" style="line-height: 1;">Metas Financeiras</h4>
-                    <span class="text-subtitle1 text-white-70">Transforme seus sonhos em conquistas</span>
-                </div>
-            </div>
-            <q-btn color="white" text-color="primary" icon="add" label="Nova Meta" rounded unelevated
-                @click="abrirModalCriar" />
-        </div>
+        <PageHeaderBanner
+            icon="emoji_events"
+            title="Metas Financeiras"
+            subtitle="Transforme seus sonhos em conquistas"
+            button-label="Nova Meta"
+            @action="abrirModalCriar"
+        />
 
         <!-- ===== PAINEL DE RESUMO (3 Cards) ===== -->
         <PainelResumoMetas :resumo="resumo" :loading="loading" />
@@ -68,6 +64,7 @@ import type {
     UpdateContribuicaoDTO,
 } from 'src/Model/MetaFinanceira';
 import PainelResumoMetas from 'src/components/MetasFinanceiras/PainelResumoMetas.vue';
+import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import MetaCard from 'src/components/MetasFinanceiras/MetaCard.vue';
 import ModalCriarMeta from 'src/components/MetasFinanceiras/ModalCriarMeta.vue';
 import ModalContribuir from 'src/components/MetasFinanceiras/ModalContribuir.vue';
@@ -255,30 +252,7 @@ function excluirMeta(id: string) {
     margin: 0 auto;
 }
 
-.metas-header {
-    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-    border-radius: 16px;
-    padding: 24px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 
-    @media (max-width: 600px) {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-
-    &__info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-}
-
-.text-white-70 {
-    color: rgba(255, 255, 255, 0.7);
-}
 
 .metas-grid {
     display: grid;
