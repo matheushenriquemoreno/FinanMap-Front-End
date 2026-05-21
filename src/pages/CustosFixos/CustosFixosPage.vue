@@ -249,7 +249,6 @@ function excluirCustoFixo(id: string) {
   $q.dialog({
     title: 'Excluir Custo Fixo',
     message: 'Deseja realmente excluir este custo fixo?',
-    cancel: true,
     persistent: false,
     ok: {
       flat: true,
