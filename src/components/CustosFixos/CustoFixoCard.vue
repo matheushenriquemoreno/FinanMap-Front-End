@@ -58,7 +58,7 @@ const props = defineProps<{ custo: CustoFixoResult }>();
 const emit = defineEmits<{
   (e: 'excluir', id: string): void;
   (e: 'editar', custo: CustoFixoResult): void;
-  (e: 'statusAlterado'): void;
+  (e: 'statusAlterado', custoAtualizado: CustoFixoResult): void;
 }>();
 
 const $q = useQuasar();
@@ -66,12 +66,12 @@ const service = getCustoFixoService();
 
 async function toggleAtivo(novoValor: boolean) {
   try {
-    await service.alterarStatus(props.custo.id, novoValor, props.custo);
+    const custoAtualizado = await service.alterarStatus(props.custo.id, novoValor, props.custo);
     $q.notify({
       type: 'positive',
       message: `Custo fixo ${novoValor ? 'ativado' : 'inativado'} com sucesso! 🎯`,
     });
-    emit('statusAlterado');
+    emit('statusAlterado', custoAtualizado);
   } catch (error) {
     notificarErro('Erro ao alterar o status do custo fixo.');
   }

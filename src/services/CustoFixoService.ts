@@ -70,14 +70,19 @@ class CustoFixoService {
 
   async obterConfiguracoes(): Promise<CustoFixoConfiguracao> {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.get<CustoFixoConfiguracao>('/api/usuarios/configuracoes/custos-fixos');
+      const response = await this.axios.get<CustoFixoConfiguracao>(
+        process.env.URL_API + 'usuarios/configuracoes/custos-fixos'
+      );
       return response.data;
     });
   }
 
   async atualizarOptOut(receberNotificacoes: boolean): Promise<void> {
     return this.requestWithLoading(async () => {
-      await this.axios.put('/api/usuarios/configuracoes/custos-fixos', { receberNotificacoes });
+      await this.axios.put(
+        process.env.URL_API + 'usuarios/configuracoes/custos-fixos',
+        { receberNotificacoes }
+      );
     });
   }
 }

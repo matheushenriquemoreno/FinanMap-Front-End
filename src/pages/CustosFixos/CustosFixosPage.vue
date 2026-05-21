@@ -30,19 +30,60 @@
         <q-btn-toggle
           v-model="filtroStatus"
           toggle-color="primary"
-          color="grey-2"
-          text-color="grey-7"
-          toggle-text-color="white"
-          unelevated
+          :color="$q.dark.isActive ? 'dark' : 'white'"
+          :text-color="$q.dark.isActive ? 'grey-4' : 'grey-8'"
           rounded
-          dense
-          class="status-toggle"
+          unelevated
+          size="13px"
+          class="status-toggle-premium border-sutil"
           :options="[
-            { label: 'Todos', value: 'todos' },
-            { label: 'Ativos', value: 'ativos' },
-            { label: 'Inativos', value: 'inativos' },
+            { value: 'todos', slot: 'todos' },
+            { value: 'ativos', slot: 'ativos' },
+            { value: 'inativos', slot: 'inativos' },
           ]"
-        />
+        >
+          <template v-slot:todos>
+            <div class="row items-center no-wrap q-px-sm">
+              <q-icon name="apps" class="q-mr-xs" size="18px" />
+              <span>Todos</span>
+              <q-badge
+                :color="filtroStatus === 'todos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
+                :text-color="filtroStatus === 'todos' ? 'primary' : ($q.dark.isActive ? 'grey-3' : 'grey-8')"
+                class="q-ml-xs text-bold badge-contador"
+              >
+                {{ totalCustos }}
+              </q-badge>
+            </div>
+          </template>
+
+          <template v-slot:ativos>
+            <div class="row items-center no-wrap q-px-sm">
+              <q-icon name="check_circle" class="q-mr-xs" size="18px" :color="filtroStatus === 'ativos' ? 'white' : 'green'" />
+              <span>Ativos</span>
+              <q-badge
+                :color="filtroStatus === 'ativos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
+                :text-color="filtroStatus === 'ativos' ? 'green-9' : ($q.dark.isActive ? 'grey-3' : 'grey-8')"
+                class="q-ml-xs text-bold badge-contador"
+              >
+                {{ totalAtivos }}
+              </q-badge>
+            </div>
+          </template>
+
+          <template v-slot:inativos>
+            <div class="row items-center no-wrap q-px-sm">
+              <q-icon name="unpublished" class="q-mr-xs" size="18px" :color="filtroStatus === 'inativos' ? 'white' : 'red'" />
+              <span>Inativos</span>
+              <q-badge
+                :color="filtroStatus === 'inativos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
+                :text-color="filtroStatus === 'inativos' ? 'red-9' : ($q.dark.isActive ? 'grey-3' : 'grey-8')"
+                class="q-ml-xs text-bold badge-contador"
+              >
+                {{ totalInativos }}
+              </q-badge>
+            </div>
+          </template>
+        </q-btn-toggle>
       </div>
     </div>
 
@@ -80,7 +121,7 @@
             :custo="custo"
             @excluir="excluirCustoFixo"
             @editar="abrirModalEditar"
-            @status-alterado="carregarDados"
+            @status-alterado="atualizarStatusLocal"
           />
         </transition-group>
 
@@ -164,6 +205,10 @@ watch(
   },
 );
 
+const totalCustos = computed(() => custosFixos.value.length);
+const totalAtivos = computed(() => custosFixos.value.filter((c) => c.ativo).length);
+const totalInativos = computed(() => custosFixos.value.filter((c) => !c.ativo).length);
+
 // Filtro em memória
 const custosFixosFiltrados = computed(() => {
   return custosFixos.value.filter((custo) => {
@@ -189,6 +234,13 @@ async function carregarDados() {
     console.error(err);
   } finally {
     loading.value = false;
+  }
+}
+
+function atualizarStatusLocal(custoAtualizado: CustoFixoResult) {
+  const index = custosFixos.value.findIndex((c) => c.id === custoAtualizado.id);
+  if (index !== -1) {
+    custosFixos.value[index] = custoAtualizado;
   }
 }
 
@@ -312,13 +364,26 @@ function excluirCustoFixo(id: string) {
   }
 }
 
-.status-toggle {
+.status-toggle-premium {
   @media (max-width: 599px) {
     width: 100%;
     :deep(.q-btn) {
       flex: 1;
     }
   }
+}
+
+.border-sutil {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  .body--dark & {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+}
+
+.badge-contador {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
 }
 
 /* Transições com TransitionGroup */
