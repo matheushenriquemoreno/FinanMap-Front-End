@@ -100,6 +100,7 @@
             <InformacoesConta v-if="tab === 'conta'" />
             <CategoriaConfig v-else-if="tab === 'categoria'" />
             <CompartilhamentoConfig v-else-if="tab === 'compartilhamento'" />
+            <CustoFixoConfig v-else-if="tab === 'custosFixos'" />
           </div>
         </q-scroll-area>
       </div>
@@ -113,6 +114,7 @@ import { useQuasar } from 'quasar';
 import CategoriaConfig from './CategoriaConfig.vue';
 import InformacoesConta from './InformacoesConta.vue';
 import CompartilhamentoConfig from '../Compartilhamento/CompartilhamentoConfig.vue';
+import CustoFixoConfig from './CustoFixoConfig.vue';
 
 // props
 const props = defineProps({
@@ -144,6 +146,7 @@ const isMobile = computed(() => $q.screen.lt.md);
 const menuItems = [
   { label: 'Categorias', value: 'categoria', icon: 'category' },
   { label: 'Compartilhamento', value: 'compartilhamento', icon: 'share' },
+  { label: 'Custos Fixos', value: 'custosFixos', icon: 'notifications' },
   { label: 'Conta', value: 'conta', icon: 'person' },
 ];
 

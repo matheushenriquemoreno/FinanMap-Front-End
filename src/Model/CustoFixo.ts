@@ -18,4 +18,10 @@ export interface UpdateCustoFixoDTO {
   nome: string;
   diaVencimento: number;
   categoriaId?: string;
+  ativo?: boolean;
 }
+
+export interface CustoFixoConfiguracao {
+  receberNotificacoes: boolean;
+}
+

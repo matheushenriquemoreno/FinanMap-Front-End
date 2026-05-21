@@ -39,6 +39,8 @@
           :key="custo.id"
           :custo="custo"
           @excluir="excluirCustoFixo"
+          @editar="abrirModalEditar"
+          @status-alterado="carregarDados"
         />
       </template>
     </div>
@@ -52,6 +54,7 @@
 
     <!-- ===== MODAIS ===== -->
     <ModalCriarCustoFixo v-model="modalCriarAberto" @criar="criarCustoFixo" />
+    <ModalEditarCustoFixo v-model="modalEditarAberto" :custo="custoSelecionado" @salvar="atualizarCustoFixo" />
   </q-page>
 </template>
 
@@ -59,9 +62,10 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import getCustoFixoService from 'src/services/CustoFixoService';
-import type { CustoFixoResult, CustoFixoCreate } from 'src/Model/CustoFixo';
+import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
 import ModalCriarCustoFixo from 'src/components/CustosFixos/ModalCriarCustoFixo.vue';
+import ModalEditarCustoFixo from 'src/components/CustosFixos/ModalEditarCustoFixo.vue';
 import { notificarErro } from 'src/helpers/Notificacao';
 
 const $q = useQuasar();
@@ -70,6 +74,8 @@ const service = getCustoFixoService();
 const custosFixos = ref<CustoFixoResult[]>([]);
 const loading = ref(false);
 const modalCriarAberto = ref(false);
+const modalEditarAberto = ref(false);
+const custoSelecionado = ref<CustoFixoResult | null>(null);
 
 onMounted(() => {
   carregarDados();
@@ -99,6 +105,22 @@ async function criarCustoFixo(dto: CustoFixoCreate) {
     carregarDados();
   } catch (error: any) {
     notificarErro('Erro ao criar o custo fixo. Verifique os campos.');
+  }
+}
+
+function abrirModalEditar(custo: CustoFixoResult) {
+  custoSelecionado.value = custo;
+  modalEditarAberto.value = true;
+}
+
+async function atualizarCustoFixo(dto: UpdateCustoFixoDTO) {
+  try {
+    await service.atualizar(dto);
+    modalEditarAberto.value = false;
+    $q.notify({ type: 'positive', message: 'Custo fixo atualizado com sucesso! 🎯' });
+    carregarDados();
+  } catch (error: any) {
+    notificarErro('Erro ao atualizar o custo fixo. Verifique os campos.');
   }
 }
 

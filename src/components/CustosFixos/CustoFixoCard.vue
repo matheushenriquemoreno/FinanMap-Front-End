@@ -28,9 +28,14 @@
             <q-icon name="calendar_today" size="16px" class="q-mr-xs" />
             Vence dia <strong>{{ custo.diaVencimento }}</strong>
           </div>
-          <q-badge :color="custo.ativo ? 'green' : 'grey'" class="q-py-xs q-px-sm text-bold">
-            {{ custo.ativo ? 'Ativo' : 'Inativo' }}
-          </q-badge>
+          <q-toggle
+            :model-value="custo.ativo"
+            @update:model-value="toggleAtivo"
+            color="green"
+            dense
+            :label="custo.ativo ? 'Ativo' : 'Inativo'"
+            class="text-bold"
+          />
         </div>
       </div>
     </q-card-section>
@@ -45,12 +50,32 @@
 
 <script setup lang="ts">
 import type { CustoFixoResult } from 'src/Model/CustoFixo';
+import getCustoFixoService from 'src/services/CustoFixoService';
+import { useQuasar } from 'quasar';
+import { notificarErro } from 'src/helpers/Notificacao';
 
-defineProps<{ custo: CustoFixoResult }>();
+const props = defineProps<{ custo: CustoFixoResult }>();
 const emit = defineEmits<{
   (e: 'excluir', id: string): void;
   (e: 'editar', custo: CustoFixoResult): void;
+  (e: 'statusAlterado'): void;
 }>();
+
+const $q = useQuasar();
+const service = getCustoFixoService();
+
+async function toggleAtivo(novoValor: boolean) {
+  try {
+    await service.alterarStatus(props.custo.id, novoValor, props.custo);
+    $q.notify({
+      type: 'positive',
+      message: `Custo fixo ${novoValor ? 'ativado' : 'inativado'} com sucesso! 🎯`,
+    });
+    emit('statusAlterado');
+  } catch (error) {
+    notificarErro('Erro ao alterar o status do custo fixo.');
+  }
+}
 </script>
 
 <style lang="scss" scoped>
