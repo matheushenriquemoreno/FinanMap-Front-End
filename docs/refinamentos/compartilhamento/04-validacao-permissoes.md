@@ -1,5 +1,8 @@
 # Fluxo 04: Validação de Permissões
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📝 Descrição
 
 Este documento detalha como o sistema valida permissões em operações de leitura e escrita quando um usuário está acessando dados compartilhados.

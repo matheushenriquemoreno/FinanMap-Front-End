@@ -1,5 +1,8 @@
 # 📋 Refinamento — Compartilhamento de Informações Entre Contas (Front-End)
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 > **Objetivo**: Implementar a interface de compartilhamento no front-end, permitindo que o usuário convide outros por e-mail, gerencie permissões, responda convites e alterne entre visualizar seus dados ou os dados compartilhados de outro usuário.
 
 ---

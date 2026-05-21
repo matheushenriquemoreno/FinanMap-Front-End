@@ -1,5 +1,8 @@
 # Documentação - Compartilhamento de Informações Entre Contas
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Esta pasta fica como referência histórica dos fluxos implementados.
+
 ## 📋 Índice
 
 Esta pasta contém a documentação completa dos fluxos de negócio da funcionalidade de compartilhamento de dados entre contas.

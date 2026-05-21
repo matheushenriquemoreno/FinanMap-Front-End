@@ -1,5 +1,8 @@
 # Fluxo 01: Enviar Convite de Compartilhamento
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📝 Descrição
 
 Este fluxo descreve como um usuário (proprietário) envia um convite para compartilhar seus dados financeiros com outro usuário (convidado).
