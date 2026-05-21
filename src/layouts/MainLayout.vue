@@ -22,7 +22,13 @@
             <q-icon :name="themeStore.isDark ? 'light_mode' : 'dark_mode'" size="25px" />
             <q-tooltip>{{ themeStore.isDark ? 'Modo Claro' : 'Modo Escuro' }}</q-tooltip>
           </q-btn>
-          <q-btn round dense flat color="grey-4" @click="() => (abrirModalConfig = !abrirModalConfig)">
+          <q-btn
+            round
+            dense
+            flat
+            color="grey-4"
+            @click="() => (abrirModalConfig = !abrirModalConfig)"
+          >
             <q-icon name="settings" size="25px" />
             <q-tooltip>Configurações</q-tooltip>
           </q-btn>
@@ -61,13 +67,20 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above :breakpoint="1100"
-      :class="themeStore.isDark ? 'bg-dark' : 'bg-grey-1'" :width="$q.screen.gt.xs ? 300 : 260">
-      <q-scroll-area :style="{
-        height: 'calc(100% - 150px)',
-        marginTop: '150px',
-        borderRight: themeStore.isDark ? 'none' : '1px solid #ddd'
-      }">
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      :breakpoint="1100"
+      :class="themeStore.isDark ? 'bg-dark' : 'bg-grey-1'"
+      :width="$q.screen.gt.xs ? 300 : 260"
+    >
+      <q-scroll-area
+        :style="{
+          height: 'calc(100% - 150px)',
+          marginTop: '150px',
+          borderRight: themeStore.isDark ? 'none' : '1px solid #ddd',
+        }"
+      >
         <q-list padding>
           <q-item to="/" class="menu-title" clickable v-ripple active-class="text-dark">
             <q-item-section avatar>
@@ -95,10 +108,30 @@
               <q-item-label>Metas Financeiras</q-item-label>
             </q-item-section>
           </q-item>
+
+          <q-item
+            v-if="!compartilhamentoStore.emModoCompartilhado"
+            to="/custos-fixos"
+            class="menu-title"
+            clickable
+            v-ripple
+            active-class="text-dark"
+          >
+            <q-item-section avatar>
+              <q-avatar icon="receipt_long" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Custos Fixos</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
 
-      <div class="absolute-top q-pa-md" :class="themeStore.isDark ? 'bg-dark-drawer' : 'bg-dark'" style="height: 150px">
+      <div
+        class="absolute-top q-pa-md"
+        :class="themeStore.isDark ? 'bg-dark-drawer' : 'bg-dark'"
+        style="height: 150px"
+      >
         <div class="text-white text-center">
           <q-avatar size="56px" class="q-mb-sm">
             <img src="/avatar.svg" />

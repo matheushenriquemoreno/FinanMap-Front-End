@@ -1,5 +1,8 @@
 # Fluxo 05: Gerenciar Compartilhamentos
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📝 Descrição
 
 Este fluxo descreve como proprietários e convidados gerenciam compartilhamentos existentes, incluindo atualização de permissões e revogação de acesso.

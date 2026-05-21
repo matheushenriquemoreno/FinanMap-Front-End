@@ -1,5 +1,8 @@
 # Fluxo 02: Responder Convite de Compartilhamento
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📝 Descrição
 
 Este fluxo descreve como um usuário (convidado) visualiza, aceita ou recusa um convite de compartilhamento recebido.

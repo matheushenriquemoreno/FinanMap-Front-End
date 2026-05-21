@@ -1,5 +1,8 @@
 # Componentes Vue - Compartilhamento
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📦 Visão Geral
 
 Esta documentação detalha os componentes Vue criados e modificados para a funcionalidade de compartilhamento.

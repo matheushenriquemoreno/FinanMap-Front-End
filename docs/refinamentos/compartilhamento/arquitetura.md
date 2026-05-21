@@ -1,5 +1,8 @@
 # Arquitetura - Compartilhamento de Informações
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📐 Visão Geral
 
 A funcionalidade de compartilhamento foi implementada seguindo a arquitetura em camadas existente no projeto, com separação clara entre Backend e Frontend.

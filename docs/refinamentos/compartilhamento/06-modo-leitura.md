@@ -1,5 +1,8 @@
 # Fluxo 06: Modo Somente Leitura
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📝 Descrição
 
 Este documento detalha como a interface do usuário se adapta quando um usuário está visualizando dados compartilhados com permissão de **Visualizar** (somente leitura).

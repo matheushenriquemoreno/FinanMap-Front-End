@@ -1,5 +1,8 @@
 # API Endpoints - Compartilhamento
 
+> **Status**: ✅ Concluído em 2026-05-21.
+> Mantido apenas como referência histórica da implementação.
+
 ## 📡 Base URL
 
 ```
