@@ -174,7 +174,7 @@ import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
 import TransacaoBaseModal from 'src/components/Transacao/TransacaoBaseModal.vue';
 import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
 
-import type { InvestimentoCreate, RendimentosCreate, RendimentosResult } from 'src/Model/Transacao';
+import type { RendimentosCreate, RendimentosResult } from 'src/Model/Transacao';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 
 import getRendimentoService from 'src/services/transacao/RendimentoService';
@@ -265,8 +265,8 @@ async function adicionarRendimento(rendimentoCreate: RendimentosCreate) {
   getReportAcumulado();
 }
 
-async function editarRendimento() {
-  await rendimentoService.update(rendimentoEdit.value);
+async function editarRendimento(rendimentoUpdate: RendimentosCreate) {
+  await rendimentoService.update(rendimentoUpdate);
   fecharModal();
   getReportAcumulado();
 }
@@ -309,7 +309,7 @@ function abriModalAdicionar(isEdit = false) {
 function fecharModal() {
   abriModal.value = false;
   ehEdicao.value = false;
-  rendimentoEdit.value = {} as InvestimentoCreate;
+  rendimentoEdit.value = {} as RendimentosCreate;
 }
 
 // Ações de seleção de registros
