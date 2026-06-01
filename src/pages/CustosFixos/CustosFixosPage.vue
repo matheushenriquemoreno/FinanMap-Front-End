@@ -10,7 +10,7 @@
     />
 
     <!-- ===== FILTROS ===== -->
-    <div class="row q-col-gutter-md q-mb-lg items-center" v-if="custosFixos.length > 0">
+    <div class="filters-row row q-col-gutter-md q-mb-lg items-center" v-if="custosFixos.length > 0">
       <div class="col-12 col-sm-6">
         <q-input
           v-model="filtroNome"
@@ -26,7 +26,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-12 col-sm-6 flex justify-end-sm">
+      <div class="status-filter-column col-12 col-sm-6 flex justify-end-sm">
         <q-btn-toggle
           v-model="filtroStatus"
           toggle-color="primary"
@@ -43,7 +43,7 @@
           ]"
         >
           <template v-slot:todos>
-            <div class="row items-center no-wrap q-px-sm">
+            <div class="status-toggle-option row items-center q-px-sm">
               <q-icon name="apps" class="q-mr-xs" size="18px" />
               <span>Todos</span>
               <q-badge
@@ -57,7 +57,7 @@
           </template>
 
           <template v-slot:ativos>
-            <div class="row items-center no-wrap q-px-sm">
+            <div class="status-toggle-option row items-center q-px-sm">
               <q-icon name="check_circle" class="q-mr-xs" size="18px" :color="filtroStatus === 'ativos' ? 'white' : 'green'" />
               <span>Ativos</span>
               <q-badge
@@ -71,7 +71,7 @@
           </template>
 
           <template v-slot:inativos>
-            <div class="row items-center no-wrap q-px-sm">
+            <div class="status-toggle-option row items-center q-px-sm">
               <q-icon name="unpublished" class="q-mr-xs" size="18px" :color="filtroStatus === 'inativos' ? 'white' : 'red'" />
               <span>Inativos</span>
               <q-badge
@@ -352,8 +352,15 @@ function excluirCustoFixo(id: string) {
 .buscar-input {
   width: 100%;
   max-width: 450px;
+
   @media (max-width: 599px) {
     max-width: 100%;
+  }
+}
+
+.status-filter-column {
+  @media (max-width: 599px) {
+    display: block;
   }
 }
 
@@ -365,11 +372,64 @@ function excluirCustoFixo(id: string) {
 }
 
 .status-toggle-premium {
+  max-width: 100%;
+
+  :deep(.q-btn-group) {
+    max-width: 100%;
+  }
+
+  :deep(.q-btn) {
+    min-height: 40px;
+  }
+
   @media (max-width: 599px) {
     width: 100%;
-    :deep(.q-btn) {
-      flex: 1;
+
+    :deep(.q-btn-group) {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
     }
+
+    :deep(.q-btn) {
+      min-width: 0;
+      width: 100%;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    :deep(.q-btn-group) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.status-toggle-option {
+  min-width: 0;
+  justify-content: center;
+  white-space: nowrap;
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 420px) {
+    padding-left: 2px;
+    padding-right: 2px;
+
+    .q-icon {
+      margin-right: 2px;
+      font-size: 16px !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    justify-content: flex-start;
+    padding: 0 12px;
   }
 }
 

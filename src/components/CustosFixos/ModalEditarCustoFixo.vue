@@ -1,13 +1,13 @@
 <template>
   <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
-    <q-card style="min-width: 420px; border-radius: 16px;">
-      <q-card-section class="row items-center q-pb-none">
+    <q-card class="custo-fixo-modal">
+      <q-card-section class="modal-header row items-center q-pb-none">
         <div class="text-h6 text-bold">Editar Custo Fixo</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
-      <q-card-section>
+      <q-card-section class="modal-body">
         <q-form @submit.prevent="submeter" class="q-gutter-md">
           <!-- Nome -->
           <div>
@@ -55,9 +55,16 @@
           </div>
 
           <!-- Botões -->
-          <div class="row justify-end q-gutter-sm q-mt-md">
-            <q-btn flat label="Cancelar" color="grey" v-close-popup />
-            <q-btn type="submit" label="Salvar Alterações 🎯" color="primary" rounded unelevated />
+          <div class="modal-actions row justify-end q-gutter-sm q-mt-md">
+            <q-btn flat label="Cancelar" color="grey" v-close-popup class="modal-action-btn" />
+            <q-btn
+              type="submit"
+              label="Salvar Alterações 🎯"
+              color="primary"
+              rounded
+              unelevated
+              class="modal-action-btn"
+            />
           </div>
         </q-form>
       </q-card-section>
@@ -142,5 +149,37 @@ function submeter() {
 <style lang="scss" scoped>
 .block {
   display: block;
+}
+
+.custo-fixo-modal {
+  width: min(420px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  border-radius: 16px;
+}
+
+.modal-header,
+.modal-body {
+  @media (max-width: 480px) {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+.modal-actions {
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+
+    :deep(.q-btn) {
+      margin-left: 0;
+    }
+  }
+}
+
+.modal-action-btn {
+  @media (max-width: 480px) {
+    width: 100%;
+  }
 }
 </style>
