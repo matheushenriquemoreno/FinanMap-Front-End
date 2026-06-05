@@ -2,15 +2,16 @@
   <section
     class="q-mb-md filter-section"
     :class="$q.dark.isActive ? 'filter-section--dark' : 'filter-section--light'"
+    aria-labelledby="dashboard-period-title"
   >
     <div class="filter-inner">
       <div class="filter-header">
         <div>
-          <div class="filter-eyebrow">
+          <div id="dashboard-period-title" class="filter-eyebrow">
             <q-icon name="calendar_month" size="18px" />
             <span>Período do dashboard</span>
           </div>
-          <div class="filter-summary">{{ periodoAplicadoFormatado }}</div>
+          <div class="filter-summary" aria-live="polite">{{ periodoAplicadoFormatado }}</div>
         </div>
 
         <q-btn
@@ -19,6 +20,8 @@
           :icon="isEditorOpen ? 'close' : 'edit_calendar'"
           :label="isEditorOpen ? 'Fechar' : 'Personalizar período'"
           class="customize-btn"
+          :aria-expanded="isEditorOpen"
+          aria-controls="dashboard-period-editor"
           @click="alternarEditor"
         />
       </div>
@@ -38,8 +41,13 @@
         />
       </div>
 
-      <q-slide-transition>
-        <div v-show="isEditorOpen" class="manual-editor">
+      <q-slide-transition :duration="prefersReducedMotion ? 0 : 300">
+        <div
+          id="dashboard-period-editor"
+          v-show="isEditorOpen"
+          class="manual-editor"
+          v-bind="hasValidationError ? { 'aria-describedby': 'dashboard-period-error' } : {}"
+        >
           <div class="period-fields">
             <div class="period-field-group">
               <span class="period-label">De</span>
@@ -47,12 +55,14 @@
                 <InputSelectMes
                   v-model:model-value="localPeriodoInicial.mes"
                   label="Mês"
+                  aria-label="Mês inicial"
                   :styled="inputStyled"
                   class="period-select"
                 />
                 <InputSelectAno
                   v-model:model-value="localPeriodoInicial.ano"
                   label="Ano"
+                  aria-label="Ano inicial"
                   :styled="inputStyled"
                   class="period-select period-select--ano"
                 />
@@ -67,12 +77,14 @@
                 <InputSelectMes
                   v-model:model-value="localPeriodoFinal.mes"
                   label="Mês"
+                  aria-label="Mês final"
                   :styled="inputStyled"
                   class="period-select"
                 />
                 <InputSelectAno
                   v-model:model-value="localPeriodoFinal.ano"
                   label="Ano"
+                  aria-label="Ano final"
                   :styled="inputStyled"
                   class="period-select period-select--ano"
                 />
@@ -93,7 +105,13 @@
             />
           </div>
 
-          <div v-if="hasValidationError" class="validation-message" role="alert">
+          <div
+            v-if="hasValidationError"
+            id="dashboard-period-error"
+            class="validation-message"
+            role="status"
+            aria-live="polite"
+          >
             <q-icon name="error_outline" size="18px" />
             {{ validationErrorMessage }}
           </div>
@@ -104,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useDashboardStore } from 'src/stores/dashboardStore';
 import InputSelectAno from 'src/components/Inputs/InputSelectAno.vue';
 import InputSelectMes from 'src/components/Inputs/InputSelectMes.vue';
@@ -118,6 +136,8 @@ const dashboardStore = useDashboardStore();
 
 const inputStyled = { dense: true, filled: false, rounded: false, borderless: false };
 const isEditorOpen = ref(false);
+const prefersReducedMotion = ref(false);
+let reducedMotionMediaQuery: MediaQueryList | undefined;
 
 const localPeriodoInicial = ref<Periodo>({
   mes: dashboardStore.mesInicial,
@@ -194,6 +214,20 @@ watch(
   ],
   () => restaurarRascunho()
 );
+
+onMounted(() => {
+  reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  prefersReducedMotion.value = reducedMotionMediaQuery.matches;
+  reducedMotionMediaQuery.addEventListener('change', atualizarPreferenciaDeMovimento);
+});
+
+onBeforeUnmount(() => {
+  reducedMotionMediaQuery?.removeEventListener('change', atualizarPreferenciaDeMovimento);
+});
+
+function atualizarPreferenciaDeMovimento(event: MediaQueryListEvent) {
+  prefersReducedMotion.value = event.matches;
+}
 
 function periodosIguais(periodoA: Periodo, periodoB: Periodo) {
   return periodoA.mes === periodoB.mes && periodoA.ano === periodoB.ano;
@@ -331,9 +365,14 @@ function aplicarFiltroManual() {
 }
 
 .customize-btn {
+  min-height: 44px;
   color: var(--q-primary);
   border-radius: 9px;
   font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .preset-group {
@@ -345,7 +384,7 @@ function aplicarFiltroManual() {
 }
 
 .preset-btn {
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 14px;
   color: #5e6878;
   background: rgba(96, 107, 125, 0.08);
@@ -353,6 +392,11 @@ function aplicarFiltroManual() {
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .filter-section--dark .preset-btn {
@@ -415,6 +459,7 @@ function aplicarFiltroManual() {
 }
 
 .period-select {
+  min-width: 0;
   width: 140px;
 }
 
@@ -432,8 +477,40 @@ function aplicarFiltroManual() {
   justify-self: end;
 }
 
+.editor-actions :deep(.q-btn) {
+  min-height: 44px;
+}
+
 .cancel-btn {
   color: #657083;
+}
+
+.filter-section--dark .cancel-btn {
+  color: #c1c7d0;
+}
+
+.customize-btn:focus-visible,
+.preset-btn:focus-visible,
+.editor-actions :deep(.q-btn:focus-visible),
+.period-select :deep(.q-field__native:focus-visible) {
+  outline: 3px solid rgba(63, 81, 181, 0.42);
+  outline-offset: 3px;
+}
+
+.filter-section--dark .customize-btn:focus-visible,
+.filter-section--dark .preset-btn:focus-visible,
+.filter-section--dark .editor-actions :deep(.q-btn:focus-visible),
+.filter-section--dark .period-select :deep(.q-field__native:focus-visible) {
+  outline-color: rgba(174, 185, 255, 0.72);
+}
+
+.customize-btn:hover,
+.preset-btn:hover {
+  background-color: rgba(63, 81, 181, 0.12);
+}
+
+.preset-btn:active {
+  background-color: rgba(63, 81, 181, 0.18);
 }
 
 .validation-message {
@@ -447,17 +524,41 @@ function aplicarFiltroManual() {
 }
 
 @media (max-width: 700px) {
+  .filter-inner {
+    padding: 16px;
+  }
+
   .filter-header {
     align-items: stretch;
     flex-direction: column;
   }
 
   .customize-btn {
-    align-self: flex-start;
+    align-self: stretch;
   }
 
   .manual-editor {
     grid-template-columns: 1fr;
+  }
+
+  .period-fields,
+  .period-field-group,
+  .period-selects {
+    width: 100%;
+  }
+
+  .period-field-group {
+    min-width: 0;
+  }
+
+  .period-select {
+    flex: 1 1 0;
+    width: auto;
+  }
+
+  .period-select--ano {
+    flex: 0 1 110px;
+    width: auto;
   }
 
   .period-separator {
@@ -465,7 +566,35 @@ function aplicarFiltroManual() {
   }
 
   .editor-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     justify-self: stretch;
+  }
+}
+
+@media (max-width: 380px) {
+  .filter-inner {
+    padding: 14px 12px;
+  }
+
+  .preset-group,
+  .editor-actions,
+  .period-selects {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .preset-btn,
+  .period-select,
+  .period-select--ano {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customize-btn,
+  .preset-btn {
+    transition-duration: 0.01ms;
   }
 }
 </style>

@@ -13,11 +13,18 @@
 **Validation:** `npm run lint` e `npm run build` concluídos com sucesso. A aplicação local inicia normalmente, mas a validação visual autenticada do dashboard ficou indisponível sem credenciais.
 
 ## Phase 2 -- Responsividade, acessibilidade e refinamento visual
-- [ ] DPF-P2-01: Criar layout responsivo sem overflow horizontal.
-- [ ] DPF-P2-02: Refinar estados visuais, contraste, foco e alvos de toque.
-- [ ] DPF-P2-03: Garantir nomes acessíveis, rótulos persistentes e anúncio do erro.
-- [ ] DPF-P2-04: Restringir transições e respeitar redução de movimento.
-- [ ] DPF-P2-05: Validar meses longos, zoom e diferentes larguras.
+- [x] DPF-P2-01: Criar layout responsivo sem overflow horizontal.
+- [x] DPF-P2-02: Refinar estados visuais, contraste, foco e alvos de toque.
+- [x] DPF-P2-03: Garantir nomes acessíveis, rótulos persistentes e anúncio do erro.
+- [x] DPF-P2-04: Restringir transições e respeitar redução de movimento.
+- [x] DPF-P2-05: Validar meses longos, zoom e diferentes larguras.
+
+**Status: completed**
+
+**Validation:** `npm test`, `npm run lint` e `npm run build` concluídos com sucesso. A revisão
+estática confirmou quebra em coluna única abaixo de 380px, controles flexíveis nas demais
+larguras, alvos de 44px, nomes acessíveis e redução de movimento. A inspeção visual autenticada
+do dashboard continua indisponível sem credenciais.
 
 ## Phase 3 -- Persistência do período e produção
 - [ ] DPF-P3-01: Sincronizar período aplicado com query params.

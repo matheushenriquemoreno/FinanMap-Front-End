@@ -116,4 +116,12 @@ import DashboardRadialComposition from 'src/components/Dashbord/DashboardRadialC
     transform: translateY(0);
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-section {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
 </style>
