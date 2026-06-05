@@ -6,12 +6,27 @@
   >
     <div class="filter-inner">
       <div class="filter-header">
-        <div>
+        <div class="filter-period">
           <div id="dashboard-period-title" class="filter-eyebrow">
             <q-icon name="calendar_month" size="18px" />
             <span>Período do dashboard</span>
           </div>
           <div class="filter-summary" aria-live="polite">{{ periodoAplicadoFormatado }}</div>
+        </div>
+
+        <div class="preset-group" aria-label="Atalhos de período">
+          <q-btn
+            v-for="preset in presets"
+            :key="preset.id"
+            unelevated
+            no-caps
+            :icon="activePreset === preset.id ? 'check' : preset.icon"
+            :label="preset.label"
+            class="preset-btn"
+            :class="{ 'preset-btn--active': activePreset === preset.id }"
+            :aria-pressed="activePreset === preset.id"
+            @click="aplicarPreset(preset.id)"
+          />
         </div>
 
         <q-btn
@@ -23,21 +38,6 @@
           :aria-expanded="isEditorOpen"
           aria-controls="dashboard-period-editor"
           @click="alternarEditor"
-        />
-      </div>
-
-      <div class="preset-group" aria-label="Atalhos de período">
-        <q-btn
-          v-for="preset in presets"
-          :key="preset.id"
-          unelevated
-          no-caps
-          :icon="activePreset === preset.id ? 'check' : preset.icon"
-          :label="preset.label"
-          class="preset-btn"
-          :class="{ 'preset-btn--active': activePreset === preset.id }"
-          :aria-pressed="activePreset === preset.id"
-          @click="aplicarPreset(preset.id)"
         />
       </div>
 
@@ -57,7 +57,7 @@
                   label="Mês"
                   aria-label="Mês inicial"
                   :styled="inputStyled"
-                  class="period-select"
+                  class="period-select period-select--mes"
                 />
                 <InputSelectAno
                   v-model:model-value="localPeriodoInicial.ano"
@@ -79,7 +79,7 @@
                   label="Mês"
                   aria-label="Mês final"
                   :styled="inputStyled"
-                  class="period-select"
+                  class="period-select period-select--mes"
                 />
                 <InputSelectAno
                   v-model:model-value="localPeriodoFinal.ano"
@@ -171,7 +171,7 @@ const hasValidationError = computed(() => {
 });
 
 const validationErrorMessage = computed(() =>
-  hasValidationError.value ? 'O período inicial não pode ser posterior ao período final.' : ''
+  hasValidationError.value ? 'O período inicial não pode ser posterior ao período final.' : '',
 );
 
 const activePreset = computed<PresetId | null>(() => {
@@ -212,7 +212,7 @@ watch(
     dashboardStore.mesFinal,
     dashboardStore.anoFinal,
   ],
-  () => restaurarRascunho()
+  () => restaurarRascunho(),
 );
 
 onMounted(() => {
@@ -243,7 +243,7 @@ function formatarMes(periodo: Periodo) {
 
 function formatarMesAno(periodo: Periodo) {
   return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(
-    dataDoPeriodo(periodo)
+    dataDoPeriodo(periodo),
   );
 }
 
@@ -330,10 +330,14 @@ function aplicarFiltroManual() {
 }
 
 .filter-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) auto minmax(190px, 1fr);
+  align-items: center;
   gap: 16px;
+}
+
+.filter-period {
+  min-width: 0;
 }
 
 .filter-eyebrow {
@@ -354,7 +358,7 @@ function aplicarFiltroManual() {
 .filter-summary {
   margin-top: 3px;
   color: #263248;
-  font-size: clamp(20px, 2.2vw, 28px);
+  font-size: clamp(17px, 1.8vw, 22px);
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.2;
@@ -365,6 +369,7 @@ function aplicarFiltroManual() {
 }
 
 .customize-btn {
+  justify-self: end;
   min-height: 44px;
   color: var(--q-primary);
   border-radius: 9px;
@@ -378,9 +383,9 @@ function aplicarFiltroManual() {
 .preset-group {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 16px;
 }
 
 .preset-btn {
@@ -463,6 +468,10 @@ function aplicarFiltroManual() {
   width: 140px;
 }
 
+.period-select--mes :deep(.q-field__native) {
+  font-size: 13px;
+}
+
 .period-select--ano {
   width: 96px;
 }
@@ -523,17 +532,46 @@ function aplicarFiltroManual() {
   font-weight: 600;
 }
 
+@media (max-width: 1100px) {
+  .filter-header {
+    grid-template-areas:
+      'period presets'
+      'customize customize';
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .filter-period {
+    grid-area: period;
+  }
+
+  .preset-group {
+    grid-area: presets;
+  }
+
+  .customize-btn {
+    grid-area: customize;
+  }
+}
+
 @media (max-width: 700px) {
   .filter-inner {
     padding: 16px;
   }
 
   .filter-header {
-    align-items: stretch;
-    flex-direction: column;
+    grid-template-areas:
+      'period'
+      'presets'
+      'customize';
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .preset-group {
+    justify-content: flex-start;
   }
 
   .customize-btn {
+    justify-self: stretch;
     align-self: stretch;
   }
 
