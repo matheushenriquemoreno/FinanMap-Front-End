@@ -1,122 +1,136 @@
 <template>
   <div class="categoria-principal column full-height">
-    <!-- Header / Description -->
-    <div class="q-mb-md">
-      <p class="descricao q-mt-sm q-mb-none">
-        A categorização é essencial para organizar e classificar nossos gastos diários,
-        proporcionando uma visão clara e estruturada das despesas.
-      </p>
-    </div>
-
-    <!-- Banner Modo Compartilhado -->
-    <BannerModoCompartilhado />
-    <!-- Controls Toolbar -->
-    <div class="row items-center q-mb-md justify-between wrap q-gutter-y-sm">
-      <!-- Tabs for Category Type -->
-      <q-tabs
-        v-model="tipoCategoriaSelecionada"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="left"
-        narrow-indicator
-        @update:model-value="() => obterCategorias()"
-      >
-        <q-tab
-          v-for="opt in options"
-          :key="opt.value"
-          :name="opt.value"
-          :label="opt.label"
-          no-caps
-        />
-      </q-tabs>
-
-      <!-- Actions -->
-      <div class="row q-gutter-sm items-center">
-        <q-input
-          v-model="filter"
-          dense
-          outlined
-          placeholder="Pesquisar"
-          class="rounded-borders"
-          :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'"
-          :dark="$q.dark.isActive"
-          style="min-width: 200px"
-        >
-          <template v-slot:prepend>
-            <q-icon name="search" size="xs" />
-          </template>
-        </q-input>
-
-        <q-btn
-          color="primary"
-          label="Criar Nova"
-          no-caps
-          icon="add"
-          unelevated
-          @click="openModalCriarCategoria"
-        />
+    <!-- Cabeçalho Padronizado -->
+    <div class="q-mb-md flex items-center q-gutter-x-sm">
+      <q-avatar color="primary" text-color="white" icon="category" size="48px" font-size="24px" />
+      <div>
+        <div class="text-h5 text-weight-bold">Categorias</div>
+        <div class="text-caption text-grey-7">
+          Gerencie as categorias de rendimentos, despesas e investimentos para classificar seu orçamento.
+        </div>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="col">
-      <q-table
-        flat
-        :rows="categorias || []"
-        :columns="columns"
-        row-key="id"
-        :loading="loading"
-        :pagination="{ rowsPerPage: 7 }"
-        :filter="filter"
-        no-data-label="Nenhuma categoria encontrada"
-        class="sticky-header-table"
-      >
-        <template v-slot:body-cell-tipo="props">
-          <q-td :props="props" auto-width>
-            <q-icon
-              :name="obterIconeCategoria(props.value).icone"
-              :color="obterIconeCategoria(props.value).cor"
-              size="24px"
-            />
-            <span class="q-ml-sm">{{ obterIconeCategoria(props.value).descricao }}</span>
-          </q-td>
-        </template>
+    <!-- Banner Modo Compartilhado -->
+    <BannerModoCompartilhado class="q-mb-md" />
 
-        <template v-slot:body-cell-actions="props">
-          <q-td :props="props" auto-width>
-            <div class="text-grey-8 q-gutter-xs">
-              <q-btn
-                size="12px"
-                flat
-                dense
-                round
-                icon="edit"
-                @click="() => modalEditarCategoria(props.row)"
+    <!-- Card de Conteúdo -->
+    <q-card flat bordered class="rounded-borders-xl shadow-1 col column overflow-hidden">
+      <q-card-section class="q-pa-md">
+        <!-- Controls Toolbar -->
+        <div class="row items-center justify-between wrap q-gutter-y-sm">
+          <!-- Tabs for Category Type -->
+          <q-tabs
+            v-model="tipoCategoriaSelecionada"
+            dense
+            class="text-grey"
+            active-color="primary"
+            indicator-color="primary"
+            align="left"
+            narrow-indicator
+            @update:model-value="() => obterCategorias()"
+          >
+            <q-tab
+              v-for="opt in options"
+              :key="opt.value"
+              :name="opt.value"
+              :label="opt.label"
+              no-caps
+            />
+          </q-tabs>
+
+          <!-- Actions -->
+          <div class="row q-gutter-sm items-center">
+            <q-input
+              v-model="filter"
+              dense
+              outlined
+              placeholder="Pesquisar"
+              class="rounded-borders"
+              :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'"
+              :dark="$q.dark.isActive"
+              style="min-width: 200px"
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" size="xs" />
+              </template>
+            </q-input>
+
+            <q-btn
+              color="primary"
+              label="Criar Nova"
+              no-caps
+              icon="add"
+              unelevated
+              @click="openModalCriarCategoria"
+            />
+          </div>
+        </div>
+      </q-card-section>
+
+      <q-separator />
+
+      <!-- Table Section -->
+      <div class="col overflow-auto">
+        <q-table
+          flat
+          :rows="categorias || []"
+          :columns="columns"
+          row-key="id"
+          :loading="loading"
+          :pagination="{ rowsPerPage: 7 }"
+          :filter="filter"
+          no-data-label="Nenhuma categoria encontrada"
+          class="sticky-header-table no-border"
+          :card-class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+        >
+          <template v-slot:body-cell-tipo="props">
+            <q-td :props="props" auto-width>
+              <q-icon
+                :name="obterIconeCategoria(props.value).icone"
+                :color="obterIconeCategoria(props.value).cor"
+                size="24px"
               />
-              <q-btn
-                size="12px"
-                flat
-                dense
-                round
-                icon="delete"
-                @click="() => excluirCategoria(props.row)"
-              />
-            </div>
-          </q-td>
-        </template>
-      </q-table>
-    </div>
+              <span class="q-ml-sm">{{ obterIconeCategoria(props.value).descricao }}</span>
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-actions="props">
+            <q-td :props="props" auto-width>
+              <div class="text-grey-8 q-gutter-xs">
+                <q-btn
+                  size="12px"
+                  flat
+                  dense
+                  round
+                  icon="edit"
+                  :color="$q.dark.isActive ? 'grey-4' : 'grey-8'"
+                  @click="() => modalEditarCategoria(props.row)"
+                />
+                <q-btn
+                  size="12px"
+                  flat
+                  dense
+                  round
+                  icon="delete"
+                  :color="$q.dark.isActive ? 'grey-4' : 'grey-8'"
+                  @click="() => excluirCategoria(props.row)"
+                />
+              </div>
+            </q-td>
+          </template>
+        </q-table>
+      </div>
+    </q-card>
   </div>
 
   <!-- modal Cadastro Categoria -->
   <q-dialog v-model="openModalCreateCategoria">
-    <q-card style="width: 330px">
+    <q-card style="width: 330px" class="rounded-borders-xl">
       <q-form @submit="criarCategoria">
         <q-card-section>
-          <section class="q-mb-sm">
-            <span class="text-subtitle1">Nova categoria</span>
+          <section class="q-mb-md">
+            <span class="text-subtitle1 text-weight-bold">Nova Categoria</span>
           </section>
           <q-input
             filled
@@ -124,12 +138,13 @@
             label="Nome"
             autogrow
             :rules="[(val:any) => (val && val.length > 0) || 'Nome é obrigatório!']"
+            class="q-mb-sm"
           />
           <div
             class="q-pa-sm rounded-borders"
             :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2'"
           >
-            Tipo da Categoria:
+            <div class="text-caption text-weight-medium q-mb-xs">Tipo da Categoria:</div>
             <q-option-group
               v-model="categoriaCreate.tipo"
               :options="options"
@@ -138,9 +153,9 @@
             />
           </div>
         </q-card-section>
-        <q-card-actions align="between" :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'">
-          <q-btn label="Fechar" no-caps flat dense v-close-popup />
-          <q-btn flat no-caps label="Adicionar" type="submit" :loading="loading" />
+        <q-card-actions align="between" class="q-px-md q-pb-md" :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'">
+          <q-btn label="Fechar" no-caps flat dense v-close-popup color="grey-7" />
+          <q-btn unelevated no-caps label="Adicionar" type="submit" color="primary" :loading="loading" style="border-radius: 8px;" />
         </q-card-actions>
       </q-form>
     </q-card>
@@ -295,30 +310,24 @@ function openModalCriarCategoria() {
 </script>
 
 <style scoped>
-/* Conteúdo principal */
 .categoria-principal {
   flex: 1;
   overflow-y: auto;
 }
 
-.categoria-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.rounded-borders-xl {
+  border-radius: 16px;
 }
 
-.categoria-titulo {
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text-primary);
+.shadow-1 {
+  transition: box-shadow 0.3s ease;
 }
 
-.descricao {
-  color: var(--text-secondary);
+.shadow-1:hover {
+  box-shadow: 0 6px 20px v-bind('$q.dark.isActive ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.08)"') !important;
 }
 
-.tabela-header {
-  color: var(--text-primary);
+.no-border {
+  border: none !important;
 }
 </style>

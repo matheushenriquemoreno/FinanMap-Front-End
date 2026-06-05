@@ -1,7 +1,7 @@
 <template>
-  <div class="compartilhamento-config q-pa-sm">
+  <div class="compartilhamento-config q-pa-none">
     <!-- Cabeçalho -->
-    <div class="q-mb-lg flex items-center q-gutter-x-sm">
+    <div class="q-mb-md flex items-center q-gutter-x-sm">
       <q-avatar color="primary" text-color="white" icon="share" font-size="24px" size="48px" />
       <div>
         <div class="text-h5 text-weight-bold">Compartilhamento de Dados</div>
@@ -381,6 +381,14 @@ function confirmarRevogacao(compartilhamentoId: string) {
 
 .rounded-borders-xl {
   border-radius: 16px;
+}
+
+.shadow-1 {
+  transition: box-shadow 0.3s ease;
+}
+
+.shadow-1:hover {
+  box-shadow: 0 6px 20px v-bind('$q.dark.isActive ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.08)"') !important;
 }
 
 .opacity-50 {

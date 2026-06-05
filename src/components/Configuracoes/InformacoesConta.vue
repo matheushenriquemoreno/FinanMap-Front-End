@@ -1,64 +1,75 @@
 <template>
   <div class="q-pa-none">
     <div v-if="loading" class="q-pa-md"><q-spinner color="primary" /> Carregando...</div>
-    <div class="column q-gutter-md" v-else>
-      <div class="row items-center q-gutter-md">
-        <q-avatar size="70px" font-size="40px" color="primary" text-color="white">
+    <div class="column q-gutter-y-md" v-else>
+      <!-- Cabeçalho Padronizado -->
+      <div class="q-mb-md flex items-center q-gutter-x-sm">
+        <q-avatar color="primary" text-color="white" size="48px" font-size="20px">
           {{ usuario.nome ? usuario.nome.charAt(0).toUpperCase() : 'U' }}
         </q-avatar>
         <div>
-          <div class="text-h6 text-weight-bold">{{ usuario.nome }}</div>
-          <div class="text-subtitle2" :class="$q.dark.isActive ? 'text-grey-4' : 'text-grey-7'">
+          <div class="text-h5 text-weight-bold">{{ usuario.nome }}</div>
+          <div class="text-caption text-grey-7">
             {{ usuario.email }}
           </div>
         </div>
       </div>
 
-      <q-separator class="q-my-md" />
+      <!-- Card Aparência -->
+      <q-card flat bordered class="rounded-borders-xl shadow-1">
+        <q-card-section class="q-pb-none">
+          <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm">
+            <q-icon name="palette" size="sm" color="primary" />
+            <span>Aparência</span>
+          </div>
+          <div class="text-caption text-grey-7 q-mt-xs">
+            Escolha como o FinanMap se apresenta para você.
+          </div>
+        </q-card-section>
 
-      <div>
-        <div class="text-subtitle1 text-weight-bold q-mb-sm">Aparência</div>
-        <div class="text-caption text-grey-7 q-mb-md">
-          Escolha como o FinanMap se apresenta para você.
-        </div>
-        
-        <q-btn-toggle
-          v-model="isDark"
-          spread
-          no-caps
-          rounded
-          unelevated
-          toggle-color="primary"
-          color="grey-3"
-          text-color="grey-9"
-          :options="[
-            { label: 'Claro', value: false, icon: 'light_mode' },
-            { label: 'Escuro', value: true, icon: 'dark_mode' }
-          ]"
-        />
-      </div>
+        <q-card-section>
+          <q-btn-toggle
+            v-model="isDark"
+            spread
+            no-caps
+            rounded
+            unelevated
+            toggle-color="primary"
+            :color="$q.dark.isActive ? 'grey-9' : 'grey-3'"
+            :text-color="$q.dark.isActive ? 'grey-4' : 'grey-8'"
+            :options="[
+              { label: 'Claro', value: false, icon: 'light_mode' },
+              { label: 'Escuro', value: true, icon: 'dark_mode' }
+            ]"
+          />
+        </q-card-section>
+      </q-card>
 
-      <q-separator class="q-my-md" />
+      <!-- Card Notificações -->
+      <q-card flat bordered class="rounded-borders-xl shadow-1">
+        <q-card-section class="q-pb-none">
+          <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm">
+            <q-icon name="notifications" size="sm" color="primary" />
+            <span>Notificações</span>
+          </div>
+          <div class="text-caption text-grey-7 q-mt-xs">
+            Gerencie as preferências de notificações enviadas pelo FinanMap.
+          </div>
+        </q-card-section>
 
-      <div>
-        <div class="text-subtitle1 text-weight-bold q-mb-sm">Notificações</div>
-        <div class="text-caption text-grey-7 q-mb-md">
-          Gerencie as preferências de notificações enviadas pelo FinanMap.
-        </div>
+        <q-card-section>
+          <!-- Se estiver em modo compartilhado (como convidado) -->
+          <q-banner v-if="emModoCompartilhado" class="bg-amber-1 text-amber-9 q-mb-md" rounded dense style="border-radius: 8px;" :class="{ 'bg-grey-9 text-amber-4': $q.dark.isActive }">
+            <q-icon name="warning" class="q-mr-xs" size="18px" />
+            Você está acessando os dados compartilhados de <strong>{{ proprietarioNome }}</strong>. 
+            As preferências de notificação por e-mail estão disponíveis apenas na sua conta pessoal.
+          </q-banner>
 
-        <!-- Se estiver em modo compartilhado (como convidado) -->
-        <q-banner v-if="emModoCompartilhado" class="bg-amber-1 text-amber-9 q-mb-md rounded-borders" rounded dense style="border-radius: 8px;">
-          <q-icon name="warning" class="q-mr-xs" size="18px" />
-          Você está acessando os dados compartilhados de <strong>{{ proprietarioNome }}</strong>. 
-          As preferências de notificação por e-mail estão disponíveis apenas na sua conta pessoal.
-        </q-banner>
+          <div v-if="loadingConfig" class="q-pa-md row justify-center">
+            <q-spinner-dots color="primary" size="40px" />
+          </div>
 
-        <div v-if="loadingConfig" class="q-pa-md row justify-center">
-          <q-spinner-dots color="primary" size="40px" />
-        </div>
-
-        <q-card v-else flat bordered class="config-card q-pa-md" style="border-radius: 12px;">
-          <div class="row items-center justify-between no-wrap">
+          <div v-else class="row items-center justify-between no-wrap">
             <div class="q-pr-md">
               <div class="text-subtitle1 text-bold">Lembretes por E-mail</div>
               <div class="text-caption text-grey-6 q-mt-xs">
@@ -72,8 +83,8 @@
               @update:model-value="salvarConfiguracao"
             />
           </div>
-        </q-card>
-      </div>
+        </q-card-section>
+      </q-card>
     </div>
   </div>
 </template>
@@ -152,10 +163,15 @@ async function salvarConfiguracao(novoValor: boolean) {
 </script>
 
 <style scoped>
-.config-card {
-  transition: box-shadow 0.3s;
+.rounded-borders-xl {
+  border-radius: 16px;
 }
-.config-card:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+.shadow-1 {
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.shadow-1:hover {
+  box-shadow: 0 6px 20px v-bind('$q.dark.isActive ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.08)"') !important;
 }
 </style>
