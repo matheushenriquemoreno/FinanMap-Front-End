@@ -15,7 +15,6 @@
 
   <q-page padding :class="$q.dark.isActive ? 'bg-dark-page' : 'bg-grey-2'">
     <div class="content-limit">
-
       <!-- Filter Section -->
       <div class="dashboard-section dashboard-section--delay-0">
         <SectionFiltrarPeriodo />
@@ -66,12 +65,13 @@
           <DashboardPeriodChart />
         </div>
       </div>
-
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import SectionFiltrarPeriodo from 'src/components/Dashbord/SectionFiltrarPeriodo.vue';
 import BannerModoCompartilhado from 'src/components/Compartilhamento/BannerModoCompartilhado.vue';
 import DashboardSummaryCards from 'src/components/Dashbord/DashboardSummaryCards.vue';
@@ -83,6 +83,76 @@ import DashboardBalanceCard from 'src/components/Dashbord/DashboardBalanceCard.v
 import DashboardTrendLineChart from 'src/components/Dashbord/DashboardTrendLineChart.vue';
 import DashboardCategoryTreemap from 'src/components/Dashbord/DashboardCategoryTreemap.vue';
 import DashboardRadialComposition from 'src/components/Dashbord/DashboardRadialComposition.vue';
+import { useDashboardStore } from 'src/stores/dashboardStore';
+import {
+  formatDashboardPeriodQuery,
+  parseDashboardPeriodQuery,
+  type DashboardPeriodRange,
+} from 'src/helpers/DashboardPeriodQuery';
+
+const route = useRoute();
+const router = useRouter();
+const dashboardStore = useDashboardStore();
+
+function storeMatchesPeriod(period: DashboardPeriodRange) {
+  return (
+    dashboardStore.mesInicial === period.inicio.mes &&
+    dashboardStore.anoInicial === period.inicio.ano &&
+    dashboardStore.mesFinal === period.fim.mes &&
+    dashboardStore.anoFinal === period.fim.ano
+  );
+}
+
+function syncRouteWithStore() {
+  const inicio = formatDashboardPeriodQuery({
+    mes: dashboardStore.mesInicial,
+    ano: dashboardStore.anoInicial,
+  });
+  const fim = formatDashboardPeriodQuery({
+    mes: dashboardStore.mesFinal,
+    ano: dashboardStore.anoFinal,
+  });
+
+  if (route.query.inicio === inicio && route.query.fim === fim) return;
+
+  void router.replace({
+    query: {
+      ...route.query,
+      inicio,
+      fim,
+    },
+  });
+}
+
+watch(
+  () => [route.query.inicio, route.query.fim],
+  ([inicio, fim]) => {
+    const period = parseDashboardPeriodQuery(inicio, fim);
+
+    if (!storeMatchesPeriod(period)) {
+      dashboardStore.setFiltros(
+        period.inicio.mes,
+        period.inicio.ano,
+        period.fim.mes,
+        period.fim.ano,
+      );
+      return;
+    }
+
+    syncRouteWithStore();
+  },
+  { immediate: true },
+);
+
+watch(
+  () => [
+    dashboardStore.mesInicial,
+    dashboardStore.anoInicial,
+    dashboardStore.mesFinal,
+    dashboardStore.anoFinal,
+  ],
+  syncRouteWithStore,
+);
 </script>
 
 <style scoped>
@@ -103,12 +173,24 @@ import DashboardRadialComposition from 'src/components/Dashbord/DashboardRadialC
   transform: translateY(16px);
 }
 
-.dashboard-section--delay-0 { animation-delay: 0ms; }
-.dashboard-section--delay-1 { animation-delay: 80ms; }
-.dashboard-section--delay-2 { animation-delay: 160ms; }
-.dashboard-section--delay-3 { animation-delay: 240ms; }
-.dashboard-section--delay-4 { animation-delay: 320ms; }
-.dashboard-section--delay-5 { animation-delay: 400ms; }
+.dashboard-section--delay-0 {
+  animation-delay: 0ms;
+}
+.dashboard-section--delay-1 {
+  animation-delay: 80ms;
+}
+.dashboard-section--delay-2 {
+  animation-delay: 160ms;
+}
+.dashboard-section--delay-3 {
+  animation-delay: 240ms;
+}
+.dashboard-section--delay-4 {
+  animation-delay: 320ms;
+}
+.dashboard-section--delay-5 {
+  animation-delay: 400ms;
+}
 
 @keyframes dashReveal {
   to {
