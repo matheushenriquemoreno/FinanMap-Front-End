@@ -19,7 +19,7 @@
 }
 
 body.body--dark {
-  //--bg-primary: #181a1b;        // Background principal
+  --bg-primary: var(--q-dark-page); // Background principal
   --bg-secondary: #181a1b;      // Drawer e elementos secundários
   --bg-card: #1e2021;           // Cards e tabelas (ligeiramente mais claro)
   --bg-icon: rgba(255, 255, 255, 0.08); // Background dos ícones
@@ -41,6 +41,12 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.q-page-container,
+.q-page {
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
 }
 
 .container-login {

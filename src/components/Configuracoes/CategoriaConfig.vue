@@ -495,16 +495,16 @@ function resetarFormularioCategoria() {
   place-items: center;
 }
 
-:global(body.body--dark) .categoria-type-option:hover {
+:global(body.body--dark .categoria-type-option:hover) {
   background: rgba(255, 255, 255, 0.08);
 }
 
-:global(body.body--dark) .categoria-type-option--selected,
-:global(body.body--dark) .categoria-type-option--disabled.categoria-type-option--selected:hover {
+:global(body.body--dark .categoria-type-option--selected),
+:global(body.body--dark .categoria-type-option--disabled.categoria-type-option--selected:hover) {
   background: rgba(76, 68, 231, 0.16);
 }
 
-:global(body.body--dark) .categoria-type-option--disabled:hover {
+:global(body.body--dark .categoria-type-option--disabled:hover) {
   background: transparent;
 }
 
