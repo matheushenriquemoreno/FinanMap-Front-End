@@ -125,40 +125,96 @@
     </q-card>
   </div>
 
-  <!-- modal Cadastro Categoria -->
-  <q-dialog v-model="openModalCreateCategoria">
-    <q-card style="width: 330px" class="rounded-borders-xl">
-      <q-form @submit="criarCategoria">
-        <q-card-section>
-          <section class="q-mb-md">
-            <span class="text-subtitle1 text-weight-bold">Nova Categoria</span>
-          </section>
-          <q-input
-            filled
-            v-model="categoriaCreate.nome"
-            label="Nome"
-            autogrow
-            :rules="[(val:any) => (val && val.length > 0) || 'Nome é obrigatório!']"
-            class="q-mb-sm"
-          />
-          <div
-            class="q-pa-sm rounded-borders"
-            :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-2'"
-          >
-            <div class="text-caption text-weight-medium q-mb-xs">Tipo da Categoria:</div>
-            <q-option-group
-              v-model="categoriaCreate.tipo"
-              :options="options"
+  <!-- Modal de cadastro e edição de categoria -->
+  <q-dialog v-model="openModalCategoria" @hide="resetarFormularioCategoria">
+    <q-card class="categoria-modal">
+      <q-card-section class="row items-center q-pb-none">
+        <div>
+          <div class="text-h6 text-bold">
+            {{ modalEdicao ? 'Editar categoria' : 'Criar nova categoria' }}
+          </div>
+          <div class="text-caption text-grey-7">
+            {{
+              modalEdicao
+                ? 'Altere o nome da categoria selecionada.'
+                : 'Adicione uma categoria para organizar seus lançamentos.'
+            }}
+          </div>
+        </div>
+        <q-space />
+        <q-btn v-close-popup flat round dense icon="close" aria-label="Fechar modal" />
+      </q-card-section>
+
+      <q-card-section>
+        <q-form class="q-gutter-md" @submit="salvarCategoria">
+          <div>
+            <label class="text-subtitle2 text-bold q-mb-xs block">Nome da categoria</label>
+            <q-input
+              v-model="categoriaForm.nome"
+              outlined
+              rounded
+              dense
+              autofocus
+              maxlength="60"
+              placeholder="Ex: Salário, Mercado, Reserva"
+              :rules="[(val: string) => !!val?.trim() || 'Informe o nome da categoria']"
+            >
+              <template #prepend>
+                <q-icon name="label_outline" size="20px" />
+              </template>
+            </q-input>
+          </div>
+
+          <div>
+            <div class="row items-center justify-between q-mb-sm">
+              <label class="text-subtitle2 text-bold">Tipo da categoria</label>
+              <span v-if="modalEdicao" class="text-caption text-grey-7">Não pode ser alterado</span>
+            </div>
+
+            <div class="categoria-type-grid">
+              <div
+                v-for="option in categoryOptions"
+                :key="option.value"
+                class="categoria-type-option"
+                :class="{
+                  'categoria-type-option--selected': categoriaForm.tipo === option.value,
+                  'categoria-type-option--disabled': modalEdicao,
+                }"
+                role="button"
+                tabindex="0"
+                :aria-pressed="categoriaForm.tipo === option.value"
+                :aria-disabled="modalEdicao"
+                @click="selecionarTipoCategoria(option.value)"
+                @keydown.enter="selecionarTipoCategoria(option.value)"
+                @keydown.space.prevent="selecionarTipoCategoria(option.value)"
+              >
+                <q-icon :name="option.icone" :color="option.cor" size="24px" />
+                <span class="text-caption text-weight-medium">{{ option.label }}</span>
+                <span
+                  v-if="categoriaForm.tipo === option.value"
+                  class="categoria-type-option__check"
+                >
+                  <q-icon name="check" color="white" size="13px" />
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="categoria-modal__actions row justify-end q-gutter-sm q-mt-lg">
+            <q-btn v-close-popup flat no-caps label="Cancelar" color="grey-7" />
+            <q-btn
+              unelevated
+              rounded
+              no-caps
+              type="submit"
               color="primary"
-              right-label
+              :icon="modalEdicao ? 'save' : 'add'"
+              :label="modalEdicao ? 'Salvar' : 'Criar categoria'"
+              :loading="modalLoading"
             />
           </div>
-        </q-card-section>
-        <q-card-actions align="between" class="q-px-md q-pb-md" :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'">
-          <q-btn label="Fechar" no-caps flat dense v-close-popup color="grey-7" />
-          <q-btn unelevated no-caps label="Adicionar" type="submit" color="primary" :loading="loading" style="border-radius: 8px;" />
-        </q-card-actions>
-      </q-form>
+        </q-form>
+      </q-card-section>
     </q-card>
   </q-dialog>
 </template>
@@ -169,35 +225,46 @@ import type { CategoriaResult, CreateCategoriaDTO } from 'src/Model/Categoria';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import obterCategoriaService from 'src/services/CategoriaService';
 import BannerModoCompartilhado from 'src/components/Compartilhamento/BannerModoCompartilhado.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 // Variaveis
 const categoriaService = obterCategoriaService();
 const categorias = ref<CategoriaResult[]>();
 const $q = useQuasar();
-const openModalCreateCategoria = ref(false);
+const openModalCategoria = ref(false);
+const categoriaEmEdicao = ref<CategoriaResult>();
 const loading = ref(false);
+const modalLoading = ref(false);
 const tipoCategoriaSelecionada = ref(TipoCategoriaETransacao.Rendimento);
-const categoriaCreate = ref<CreateCategoriaDTO>({
+const categoriaForm = ref<CreateCategoriaDTO>({
   nome: '',
   tipo: tipoCategoriaSelecionada.value,
 });
 const filter = ref('');
 
-const options = [
+const categoryOptions = [
   {
     label: 'Rendimentos',
     value: TipoCategoriaETransacao.Rendimento,
+    icone: 'trending_up',
+    cor: 'green',
   },
   {
     label: 'Despesas',
     value: TipoCategoriaETransacao.Despesa,
+    icone: 'trending_down',
+    cor: 'red',
   },
   {
     label: 'Investimentos',
     value: TipoCategoriaETransacao.Investimento,
+    icone: 'show_chart',
+    cor: 'primary',
   },
 ];
+
+const options = categoryOptions.map(({ label, value }) => ({ label, value }));
+const modalEdicao = computed(() => !!categoriaEmEdicao.value);
 
 const columns: any[] = [
   {
@@ -235,12 +302,28 @@ async function obterCategorias() {
   }
 }
 
-async function criarCategoria() {
-  await categoriaService.adicionar(categoriaCreate.value);
-  tipoCategoriaSelecionada.value = categoriaCreate.value.tipo;
-  categoriaCreate.value.nome = '';
-  openModalCreateCategoria.value = false;
-  await obterCategorias();
+async function salvarCategoria() {
+  modalLoading.value = true;
+  try {
+    if (categoriaEmEdicao.value) {
+      const categoriaAtualizada = await categoriaService.atualizar({
+        id: categoriaEmEdicao.value.id,
+        nome: categoriaForm.value.nome.trim(),
+      });
+      categoriaEmEdicao.value.nome = categoriaAtualizada.nome;
+    } else {
+      await categoriaService.adicionar({
+        nome: categoriaForm.value.nome.trim(),
+        tipo: categoriaForm.value.tipo,
+      });
+      tipoCategoriaSelecionada.value = categoriaForm.value.tipo;
+      await obterCategorias();
+    }
+
+    openModalCategoria.value = false;
+  } finally {
+    modalLoading.value = false;
+  }
 }
 
 function excluirCategoria(categoria: CategoriaResult) {
@@ -281,32 +364,36 @@ function obterIconeCategoria(tipoCategoria: TipoCategoriaETransacao) {
   }
 }
 
+function selecionarTipoCategoria(tipo: TipoCategoriaETransacao) {
+  if (!modalEdicao.value) {
+    categoriaForm.value.tipo = tipo;
+  }
+}
+
 function modalEditarCategoria(categoria: CategoriaResult) {
-  $q.dialog({
-    title: 'Editar categoria',
-    prompt: {
-      model: categoria.nome,
-      type: 'text',
-      isValid: (val) => val != null && val.length > 0,
-    },
-    cancel: true,
-    persistent: false,
-  }).onOk((nomeNovo: string) => {
-    if (nomeNovo === categoria.nome) return;
-    categoriaService
-      .atualizar({
-        id: categoria.id,
-        nome: nomeNovo,
-      })
-      .then((catecoriaResult: CategoriaResult) => {
-        categoria.nome = catecoriaResult.nome;
-      });
-  });
+  categoriaEmEdicao.value = categoria;
+  categoriaForm.value = {
+    nome: categoria.nome,
+    tipo: categoria.tipo,
+  };
+  openModalCategoria.value = true;
 }
 
 function openModalCriarCategoria() {
-  categoriaCreate.value.tipo = tipoCategoriaSelecionada.value;
-  openModalCreateCategoria.value = true;
+  categoriaEmEdicao.value = undefined;
+  categoriaForm.value = {
+    nome: '',
+    tipo: tipoCategoriaSelecionada.value,
+  };
+  openModalCategoria.value = true;
+}
+
+function resetarFormularioCategoria() {
+  categoriaEmEdicao.value = undefined;
+  categoriaForm.value = {
+    nome: '',
+    tipo: tipoCategoriaSelecionada.value,
+  };
 }
 </script>
 
@@ -338,5 +425,99 @@ function openModalCriarCategoria() {
 
 .categoria-tabs :deep(.q-tab--inactive) {
   opacity: 1;
+}
+
+.block {
+  display: block;
+}
+
+.categoria-modal {
+  width: min(460px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  border-radius: 16px;
+}
+
+.categoria-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.categoria-type-option {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 10px 6px;
+  flex-direction: column;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.categoria-type-option:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.categoria-type-option--selected {
+  background: rgba(29, 22, 156, 0.05);
+  border-color: var(--q-primary);
+}
+
+.categoria-type-option--disabled {
+  cursor: default;
+}
+
+.categoria-type-option--disabled:hover {
+  background: transparent;
+}
+
+.categoria-type-option--disabled.categoria-type-option--selected:hover {
+  background: rgba(29, 22, 156, 0.05);
+}
+
+.categoria-type-option__check {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  background: var(--q-primary);
+  border-radius: 50%;
+  place-items: center;
+}
+
+:global(body.body--dark) .categoria-type-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global(body.body--dark) .categoria-type-option--selected,
+:global(body.body--dark) .categoria-type-option--disabled.categoria-type-option--selected:hover {
+  background: rgba(76, 68, 231, 0.16);
+}
+
+:global(body.body--dark) .categoria-type-option--disabled:hover {
+  background: transparent;
+}
+
+@media (max-width: 480px) {
+  .categoria-modal__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .categoria-modal__actions :deep(.q-btn) {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 </style>

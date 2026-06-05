@@ -58,9 +58,14 @@
         <!-- Meus Compartilhamentos -->
         <q-card flat bordered class="rounded-borders-xl shadow-1 full-height">
           <q-card-section>
-            <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm q-mb-md">
+            <div class="flex items-start q-gutter-x-sm q-mb-md">
               <q-icon name="manage_accounts" size="sm" color="primary" />
-              <span>Pessoas com Acesso</span>
+              <div>
+                <div class="text-subtitle1 text-weight-bold">Contas com acesso aos meus dados</div>
+                <div class="text-caption text-grey-7">
+                  Gerencie as pessoas convidadas para visualizar ou editar seus dados.
+                </div>
+              </div>
             </div>
 
             <q-list separator v-if="compartilhamentoStore.meusCompartilhamentos.length > 0">
@@ -110,9 +115,14 @@
       <div class="col-12">
         <q-card flat bordered class="rounded-borders-xl shadow-1 full-height">
           <q-card-section>
-            <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm q-mb-md">
+            <div class="flex items-start q-gutter-x-sm q-mb-md">
               <q-icon name="folder_shared" size="sm" color="primary" />
-              <span>Acessos Liberados Para Mim</span>
+              <div>
+                <div class="text-subtitle1 text-weight-bold">Dados compartilhados comigo</div>
+                <div class="text-caption text-grey-7">
+                  Acesse os dados que outras pessoas compartilharam com você.
+                </div>
+              </div>
             </div>
 
             <q-list separator v-if="compartilhamentoStore.compartilhamentosAceitos.length > 0">
