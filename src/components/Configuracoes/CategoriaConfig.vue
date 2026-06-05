@@ -23,7 +23,7 @@
           <q-tabs
             v-model="tipoCategoriaSelecionada"
             dense
-            class="text-grey"
+            class="categoria-tabs"
             active-color="primary"
             indicator-color="primary"
             align="left"
@@ -35,6 +35,7 @@
               :key="opt.value"
               :name="opt.value"
               :label="opt.label"
+              class="text-weight-bold"
               no-caps
             />
           </q-tabs>
@@ -329,5 +330,13 @@ function openModalCriarCategoria() {
 
 .no-border {
   border: none !important;
+}
+
+.categoria-tabs {
+  color: v-bind('$q.dark.isActive ? "white" : "black"');
+}
+
+.categoria-tabs :deep(.q-tab--inactive) {
+  opacity: 1;
 }
 </style>
