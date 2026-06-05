@@ -14,11 +14,14 @@
         v-show="!isMobile || showMobileMenu"
       >
         <div class="q-pa-md">
-          <div
-            class="text-h6 text-weight-bold"
-            :class="[$q.dark.isActive ? 'text-white' : 'text-grey-9', isMobile ? 'q-mb-xs' : 'q-mb-md']"
-          >
-            Configurações
+          <div class="row items-center justify-between" :class="isMobile ? 'q-mb-xs' : 'q-mb-md'">
+            <div
+              class="text-h6 text-weight-bold"
+              :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
+            >
+              Configurações
+            </div>
+            <q-btn v-if="isMobile" icon="close" flat round dense v-close-popup color="grey-7" />
           </div>
           <div v-if="isMobile" class="text-caption text-grey-7 q-mb-md">
             Selecione uma opção abaixo para visualizar os detalhes

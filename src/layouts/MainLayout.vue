@@ -19,7 +19,6 @@
 
         <div class="q-gutter-sm row items-center no-wrap">
           <q-btn
-            v-if="$q.screen.gt.xs"
             round
             dense
             flat

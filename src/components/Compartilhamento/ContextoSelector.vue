@@ -55,6 +55,7 @@
 
     <!-- Botão de Compartilhamento -->
     <q-btn
+      v-if="$q.screen.gt.xs"
       round
       flat
       icon="share"
