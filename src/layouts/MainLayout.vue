@@ -13,12 +13,19 @@
         <q-space />
 
         <!-- Seletor de Contexto de Compartilhamento -->
-        <ContextoSelector v-if="$q.screen.gt.sm" class="q-mr-md" />
+        <ContextoSelector class="contexto-selector-header q-mr-md" />
 
-        <DateDisplay />
+        <DateDisplay v-if="$q.screen.gt.xs" />
 
         <div class="q-gutter-sm row items-center no-wrap">
-          <q-btn round dense flat color="grey-4" @click="themeStore.toggleTheme()">
+          <q-btn
+            v-if="$q.screen.gt.xs"
+            round
+            dense
+            flat
+            color="grey-4"
+            @click="themeStore.toggleTheme()"
+          >
             <q-icon :name="themeStore.isDark ? 'light_mode' : 'dark_mode'" size="25px" />
             <q-tooltip>{{ themeStore.isDark ? 'Modo Claro' : 'Modo Escuro' }}</q-tooltip>
           </q-btn>
@@ -50,6 +57,17 @@
                 </q-item>
 
                 <q-separator />
+
+                <q-item v-if="$q.screen.xs" clickable v-ripple @click="themeStore.toggleTheme()">
+                  <q-item-section avatar>
+                    <q-icon :name="themeStore.isDark ? 'light_mode' : 'dark_mode'" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>
+                      {{ themeStore.isDark ? 'Modo Claro' : 'Modo Escuro' }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
 
                 <!-- Botão de logout -->
                 <q-item clickable v-ripple @click="handleLogout">
@@ -199,6 +217,12 @@ defineOptions({
   font-weight: 600;
   font-size: 1.1rem;
   color: #646464;
+}
+
+@media (max-width: 599px) {
+  .contexto-selector-header {
+    margin-right: 4px;
+  }
 }
 </style>
 <style lang="sass" scoped>
