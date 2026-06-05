@@ -1,23 +1,34 @@
 <template>
-  <div class="row no-wrap items-center q-gutter-sm">
+  <div class="contexto-selector-wrapper row no-wrap items-center q-gutter-sm">
     <!-- Seletor de Contexto -->
-    <div 
-      class="row no-wrap items-center text-grey-9 rounded-borders cursor-pointer q-py-xs q-pl-md q-pr-xs transition-hover relative-position" 
-      style="border: 1px solid transparent; background-color: #ffffff"
+    <q-btn
+      flat
+      no-caps
+      :loading="loading"
+      :disable="loading"
+      class="contexto-selector row no-wrap items-center rounded-borders cursor-pointer q-py-xs q-pl-md q-pr-xs transition-hover relative-position"
+      :class="$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-white text-grey-9'"
     >
-      <div class="row items-center" @click="toggleMenu">
-          <q-icon :name="contextoIcon" size="20px" class="q-mr-sm" />
-          <span class="text-subtitle2 text-weight-medium ellipsis" style="max-width: 150px">{{ contextoLabel }}</span>
+      <div class="row no-wrap items-center">
+        <q-icon :name="contextoIcon" size="20px" class="q-mr-sm" />
+        <span class="contexto-label text-subtitle2 text-weight-medium ellipsis">{{
+          contextoLabel
+        }}</span>
       </div>
 
-      <div class="q-mx-sm" style="width: 1px; height: 24px; background-color: rgba(0,0,0,0.1)"></div>
+      <div class="contexto-divider q-mx-sm"></div>
 
-      <q-icon name="arrow_drop_down" size="24px" @click.stop="toggleMenu" />
+      <q-icon name="arrow_drop_down" size="24px" />
 
-      <q-menu v-model="menuOpen" fit anchor="bottom right" self="top right" :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'">
+      <q-menu
+        fit
+        anchor="bottom right"
+        self="top right"
+        :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
+      >
         <q-list style="min-width: 220px">
           <q-item-label header class="text-grey-7">Selecionar Contexto</q-item-label>
-          
+
           <q-item
             v-for="opcao in opcoesContexto"
             :key="opcao.value"
@@ -40,11 +51,7 @@
           </q-item>
         </q-list>
       </q-menu>
-      
-      <q-inner-loading :showing="loading" class="rounded-borders">
-          <q-spinner size="20px" color="primary" />
-      </q-inner-loading>
-    </div>
+    </q-btn>
 
     <!-- Botão de Compartilhamento -->
     <q-btn
@@ -66,10 +73,7 @@
     </q-btn>
 
     <!-- Modal de Compartilhamento -->
-    <compartilhamento-modal
-      v-model="showCompartilhamentoModal"
-      titulo-contexto="Meus Dados"
-    />
+    <compartilhamento-modal v-model="showCompartilhamentoModal" titulo-contexto="Meus Dados" />
   </div>
 </template>
 
@@ -84,12 +88,13 @@ const $q = useQuasar();
 
 const loading = ref(false);
 const contextSelecionadoInternal = ref<string | null>(null);
-const menuOpen = ref(false);
 const showCompartilhamentoModal = ref(false);
 
 const contextoSelecionado = computed({
   get: () => contextSelecionadoInternal.value,
-  set: (val) => { contextSelecionadoInternal.value = val; }
+  set: (val) => {
+    contextSelecionadoInternal.value = val;
+  },
 });
 
 const opcoesContexto = computed(() => {
@@ -97,16 +102,16 @@ const opcoesContexto = computed(() => {
     {
       label: 'Meus Dados',
       value: '',
-      icon: 'person'
-    }
+      icon: 'person',
+    },
   ];
 
   // Adicionar compartilhamentos aceitos
-  compartilhamentoStore.compartilhamentosAceitos.forEach(comp => {
+  compartilhamentoStore.compartilhamentosAceitos.forEach((comp) => {
     opcoes.push({
       label: `Dados de ${comp.proprietarioNome}`,
       value: comp.proprietarioId,
-      icon: 'share'
+      icon: 'share',
     });
   });
 
@@ -114,28 +119,22 @@ const opcoesContexto = computed(() => {
 });
 
 const contextoLabel = computed(() => {
-    const selected = opcoesContexto.value.find(o => o.value === contextoSelecionado.value);
-    // Se o selecionado for "Meus Dados" (valor vazio), podemos exibir "Minha Conta" ou manter "Meus Dados".
-    // Mas para imitar o layout "Compartilhar" do exemplo, talvez devêssemos usar "Compartilhar" como título fixo?
-    // O usuário pediu layout do botão. Vou manter o label dinâmico para usabilidade, mas com o ícone.
-    // Se for um contexto compartilhado, mostramos o nome.
-    if (selected) {
-        return selected.value === '' ? 'Meus Dados' : selected.label;
-    }
-    return 'Selecione';
+  const selected = opcoesContexto.value.find((o) => o.value === contextoSelecionado.value);
+  // Se o selecionado for "Meus Dados" (valor vazio), podemos exibir "Minha Conta" ou manter "Meus Dados".
+  // Mas para imitar o layout "Compartilhar" do exemplo, talvez devêssemos usar "Compartilhar" como título fixo?
+  // O usuário pediu layout do botão. Vou manter o label dinâmico para usabilidade, mas com o ícone.
+  // Se for um contexto compartilhado, mostramos o nome.
+  if (selected) {
+    return selected.value === '' ? 'Meus Dados' : selected.label;
+  }
+  return 'Selecione';
 });
 
 const contextoIcon = computed(() => {
-    const selected = opcoesContexto.value.find(o => o.value === contextoSelecionado.value);
-    if (selected && selected.value === '') return 'person'; 
-    return 'share';
+  const selected = opcoesContexto.value.find((o) => o.value === contextoSelecionado.value);
+  if (selected && selected.value === '') return 'person';
+  return 'share';
 });
-
-function toggleMenu() {
-    if (!loading.value) {
-        menuOpen.value = !menuOpen.value;
-    }
-}
 
 function abrirModalCompartilhamento() {
   showCompartilhamentoModal.value = true;
@@ -144,7 +143,7 @@ function abrirModalCompartilhamento() {
 function trocarContexto(proprietarioId: string | null) {
   // Se já estiver selecionado, não faz nada
   if (proprietarioId === contextoSelecionado.value) return;
-  
+
   loading.value = true;
   try {
     if (proprietarioId === null || proprietarioId === '') {
@@ -153,7 +152,7 @@ function trocarContexto(proprietarioId: string | null) {
     } else {
       // Ativar contexto compartilhado
       const compartilhamento = compartilhamentoStore.compartilhamentosAceitos.find(
-        c => c.proprietarioId === proprietarioId
+        (c) => c.proprietarioId === proprietarioId,
       );
       if (compartilhamento) {
         compartilhamentoStore.ativarContexto(compartilhamento);
@@ -167,7 +166,7 @@ function trocarContexto(proprietarioId: string | null) {
     console.error('Erro ao trocar contexto:', error);
     $q.notify({
       type: 'negative',
-      message: 'Erro ao trocar visualização. Tente novamente.'
+      message: 'Erro ao trocar visualização. Tente novamente.',
     });
     loading.value = false;
   }
@@ -184,10 +183,43 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.transition-hover {
-  transition: background-color 0.3s ease;
+.contexto-label {
+  max-width: 150px;
 }
+
+.contexto-divider {
+  width: 1px;
+  height: 24px;
+  background-color: currentColor;
+  opacity: 0.12;
+}
+
+.transition-hover {
+  transition:
+    filter 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
 .transition-hover:hover {
   filter: brightness(0.95);
+}
+
+@media (max-width: 599px) {
+  .contexto-selector-wrapper {
+    gap: 4px;
+  }
+
+  .contexto-selector {
+    padding-left: 8px;
+  }
+
+  .contexto-label {
+    max-width: 82px;
+  }
+
+  .contexto-divider {
+    margin-left: 4px;
+    margin-right: 2px;
+  }
 }
 </style>

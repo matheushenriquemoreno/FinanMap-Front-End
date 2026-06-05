@@ -71,8 +71,11 @@
       >
         <!-- Header Content -->
         <div
-          class="row items-center q-pa-md border-bottom"
-          :class="$q.dark.isActive ? 'border-color-dark' : 'border-color-light'"
+          class="row items-center border-bottom"
+          :class="[
+            $q.dark.isActive ? 'border-color-dark' : 'border-color-light',
+            isMobile ? 'q-pa-md' : 'q-py-sm q-px-md'
+          ]"
         >
           <q-btn
             v-if="isMobile"
@@ -85,6 +88,7 @@
             :color="$q.dark.isActive ? 'white' : 'grey-8'"
           />
           <div
+            v-if="isMobile"
             class="text-h6 text-weight-bold"
             :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
           >

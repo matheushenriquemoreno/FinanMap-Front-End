@@ -29,8 +29,9 @@
               v-if="props.tipoCategoriaTransacao === TipoCategoriaETransacao.Investimento && compartilhamentoStore.podeEditar"
               class="q-mt-sm">
               <q-select v-model="(dadosFormulario as any).metaFinanceiraId" :options="metasDisponiveis"
-                option-label="nome" option-value="id" outlined rounded dense label="Vincular a uma Meta (opcional)"
-                clearable emit-value map-options :loading="loadingMetas">
+                option-label="nome" option-value="id" filled rounded label="Vincular a uma Meta (opcional)"
+                clearable emit-value map-options :loading="loadingMetas" options-cover transition-show="scale"
+                transition-hide="scale" behavior="menu">
                 <template v-slot:option="{ opt, itemProps }">
                   <q-item v-bind="itemProps">
                     <q-item-section avatar>
