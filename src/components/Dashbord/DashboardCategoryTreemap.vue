@@ -206,6 +206,16 @@ const chartOptions = computed<ApexOptions>(() => ({
       breakpoint: 600,
       options: {
         plotOptions: { bar: { horizontal: false } },
+        xaxis: {
+          labels: {
+            formatter: (val: string) => val,
+            rotate: -45,
+            rotateAlways: true,
+            hideOverlappingLabels: false,
+            trim: true,
+            maxHeight: 90,
+          },
+        },
         yaxis: { labels: { show: false } },
         dataLabels: { offsetX: 0, offsetY: -20, textAnchor: 'middle' },
       },
