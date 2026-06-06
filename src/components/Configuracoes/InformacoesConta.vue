@@ -4,7 +4,7 @@
     <div class="column q-gutter-y-md" v-else>
       <!-- Cabeçalho Padronizado -->
       <div class="q-mb-md flex items-center q-gutter-x-sm">
-        <UserAvatar :avatar-id="usuario.avatarId" size="48px" alt="Avatar atual do usuário" />
+        <UserAvatar :avatar-id="avatarSelecionado" size="48px" alt="Avatar do usuário" />
         <div>
           <div class="text-h5 text-weight-bold">{{ usuario.nome }}</div>
           <div class="text-caption text-grey-7">
@@ -15,41 +15,62 @@
 
       <q-card flat bordered class="rounded-borders-xl shadow-1">
         <q-card-section class="q-pb-none">
-          <div class="text-subtitle1 text-weight-bold">Avatar</div>
+          <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm">
+            <q-icon name="face" size="sm" color="primary" />
+            <span>Avatar</span>
+          </div>
           <div class="text-caption text-grey-7 q-mt-xs">
             Escolha a imagem exibida no seu perfil.
           </div>
         </q-card-section>
 
         <q-card-section>
-          <div class="avatar-grid" role="radiogroup" aria-label="Escolha seu avatar">
-            <q-btn
-              v-for="avatar in avataresDisponiveis"
-              :key="avatar.id"
-              flat
-              no-caps
-              role="radio"
-              :aria-label="avatar.nome"
-              :aria-checked="avatarSelecionado === avatar.id"
-              :class="{ 'avatar-selecionado': avatarSelecionado === avatar.id }"
-              @click="avatarSelecionado = avatar.id"
-            >
-              <UserAvatar :avatar-id="avatar.id" size="64px" alt="" />
-              <span class="avatar-nome">{{ avatar.nome }}</span>
-            </q-btn>
-          </div>
+          <div class="row items-center q-col-gutter-md">
+            <!-- Pré-visualização do Avatar -->
+            <div class="col-auto">
+              <div class="avatar-preview-wrapper">
+                <UserAvatar :avatar-id="avatarSelecionado" size="64px" />
+              </div>
+            </div>
 
-          <div class="row items-center q-gutter-sm q-mt-lg">
-            <q-btn
-              color="primary"
-              no-caps
-              label="Salvar avatar"
-              :loading="salvandoAvatar"
-              :disable="avatarSelecionado === usuario.avatarId"
-              @click="salvarAvatar"
-            />
-            <span class="sr-only" aria-live="polite">{{ statusAvatar }}</span>
+            <!-- Ações -->
+            <div class="col">
+              <div class="row q-gutter-sm items-center">
+                <q-btn
+                  outline
+                  color="primary"
+                  no-caps
+                  label="Alterar avatar"
+                  icon="edit"
+                  @click="abrirSeletorAvatar"
+                />
+                
+                <q-btn
+                  v-if="avatarSelecionado !== usuario.avatarId"
+                  color="primary"
+                  no-caps
+                  label="Salvar"
+                  :loading="salvandoAvatar"
+                  @click="salvarAvatar"
+                />
+                
+                <q-btn
+                  v-if="avatarSelecionado !== usuario.avatarId"
+                  flat
+                  color="grey"
+                  no-caps
+                  label="Descartar"
+                  :disable="salvandoAvatar"
+                  @click="descartarAlteracao"
+                />
+              </div>
+              <div v-if="avatarSelecionado !== usuario.avatarId" class="text-caption text-amber-8 q-mt-xs flex items-center q-gutter-x-xs">
+                <q-icon name="warning" size="16px" />
+                <span>Você tem alterações não salvas. Clique em Salvar para aplicar.</span>
+              </div>
+            </div>
           </div>
+          <span class="sr-only" aria-live="polite">{{ statusAvatar }}</span>
         </q-card-section>
       </q-card>
 
@@ -133,6 +154,46 @@
         </q-card-section>
       </q-card>
     </div>
+
+    <!-- Dialog Seletor de Avatar -->
+    <q-dialog v-model="seletorAvatarAberto" @hide="aoEsconderDialog">
+      <q-card style="width: 440px; max-width: 90vw;" class="rounded-borders-xl shadow-2">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm">
+            <q-icon name="face" size="sm" color="primary" />
+            <span>Escolha seu Avatar</span>
+          </div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="q-pt-md">
+          <div class="avatar-grid" role="radiogroup" aria-label="Escolha seu avatar">
+            <q-btn
+              v-for="avatar in avataresDisponiveis"
+              :key="avatar.id"
+              flat
+              no-caps
+              role="radio"
+              :aria-label="avatar.nome"
+              :aria-checked="avatarSelecionado === avatar.id"
+              :class="{ 'avatar-selecionado': avatarSelecionado === avatar.id }"
+              @click="avatarSelecionado = avatar.id"
+            >
+              <UserAvatar :avatar-id="avatar.id" size="56px" alt="" />
+              <span class="avatar-nome text-grey-8" :class="{ 'text-primary text-weight-bold': avatarSelecionado === avatar.id }">
+                {{ avatar.nome }}
+              </span>
+            </q-btn>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md q-pt-none">
+          <q-btn flat label="Cancelar" color="grey" no-caps @click="cancelarSelecao" />
+          <q-btn label="Confirmar" color="primary" no-caps @click="confirmarSelecao" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -162,6 +223,36 @@ const usuario = computed(() => ({
 const avatarSelecionado = ref<AvatarId>(usuarioStore.avatarId);
 const salvandoAvatar = ref(false);
 const statusAvatar = ref('');
+
+const seletorAvatarAberto = ref(false);
+const avatarSelecionadoAnterior = ref<AvatarId>(usuarioStore.avatarId);
+let confirmado = false;
+
+function abrirSeletorAvatar() {
+  avatarSelecionadoAnterior.value = avatarSelecionado.value;
+  confirmado = false;
+  seletorAvatarAberto.value = true;
+}
+
+function confirmarSelecao() {
+  confirmado = true;
+  seletorAvatarAberto.value = false;
+}
+
+function cancelarSelecao() {
+  confirmado = false;
+  seletorAvatarAberto.value = false;
+}
+
+function aoEsconderDialog() {
+  if (!confirmado) {
+    avatarSelecionado.value = avatarSelecionadoAnterior.value;
+  }
+}
+
+function descartarAlteracao() {
+  avatarSelecionado.value = usuario.value.avatarId;
+}
 const loadingConfig = ref(false);
 const receberNotificacoes = ref(true);
 
@@ -256,9 +347,18 @@ async function salvarConfiguracao(novoValor: boolean) {
 }
 
 .avatar-grid :deep(.q-btn) {
-  min-height: 104px;
-  border: 1px solid rgba(127, 127, 127, 0.35);
-  border-radius: 14px;
+  min-height: 92px;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 12px;
+}
+
+.avatar-preview-wrapper {
+  border: 2px solid var(--q-primary);
+  border-radius: 50%;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .avatar-grid :deep(.q-btn__content) {

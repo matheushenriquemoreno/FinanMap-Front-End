@@ -5,7 +5,7 @@
 | Tech Lead    | @Antigravity                 |
 | Team         | Matheus                      |
 | Epic/Ticket  | Padronização de Layout Modais |
-| Status       | In Review                    |
+| Status       | Completed                    |
 | Created      | 2026-06-05                   |
 | Last Updated | 2026-06-05                   |
 

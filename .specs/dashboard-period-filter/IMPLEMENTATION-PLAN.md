@@ -5,7 +5,7 @@
 | Tech Lead    | @Usuario                      |
 | Team         | Front-end                     |
 | Epic/Ticket  | Dashboard — Filtro de período |
-| Status       | Draft                         |
+| Status       | Completed                         |
 | Created      | 2026-06-05                    |
 | Last Updated | 2026-06-05                    |
 

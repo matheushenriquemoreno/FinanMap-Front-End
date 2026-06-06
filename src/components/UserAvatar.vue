@@ -30,6 +30,8 @@ const avatarAlt = computed(() => props.alt ?? 'Avatar do usuário');
 }
 
 .user-avatar img {
-  object-fit: cover;
+  object-fit: contain;
+  padding: 0;
+  margin: 0;
 }
 </style>
