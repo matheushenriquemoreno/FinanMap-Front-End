@@ -4,8 +4,8 @@
     <div class="column q-gutter-y-md" v-else>
       <!-- Cabeçalho Padronizado -->
       <div class="q-mb-md flex items-center q-gutter-x-sm">
-        <q-avatar color="primary" text-color="white" size="48px" font-size="20px">
-          {{ usuario.nome ? usuario.nome.charAt(0).toUpperCase() : 'U' }}
+        <q-avatar size="48px">
+          <img :src="obterCaminhoAvatar(usuario.avatarId)" alt="Avatar do usuário" />
         </q-avatar>
         <div>
           <div class="text-h5 text-weight-bold">{{ usuario.nome }}</div>
@@ -14,6 +14,41 @@
           </div>
         </div>
       </div>
+
+      <q-card flat bordered class="rounded-borders-xl shadow-1">
+        <q-card-section class="q-pb-none">
+          <div class="text-subtitle1 text-weight-bold">Avatar</div>
+          <div class="text-caption text-grey-7 q-mt-xs">
+            Escolha a imagem exibida no seu perfil.
+          </div>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row items-center q-gutter-md">
+            <q-btn
+              v-for="avatar in avataresDisponiveis"
+              :key="avatar.id"
+              round
+              flat
+              :aria-label="avatar.nome"
+              :class="{ 'avatar-selecionado': avatarSelecionado === avatar.id }"
+              @click="avatarSelecionado = avatar.id"
+            >
+              <q-avatar size="64px">
+                <img :src="obterCaminhoAvatar(avatar.id)" :alt="avatar.nome" />
+              </q-avatar>
+            </q-btn>
+            <q-btn
+              color="primary"
+              no-caps
+              label="Salvar avatar"
+              :loading="salvandoAvatar"
+              :disable="avatarSelecionado === usuario.avatarId"
+              @click="salvarAvatar"
+            />
+          </div>
+        </q-card-section>
+      </q-card>
 
       <!-- Card Aparência -->
       <q-card flat bordered class="rounded-borders-xl shadow-1">
@@ -90,26 +125,33 @@
 </template>
 
 <script setup lang="ts">
-import { CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import { useThemeStore } from 'src/stores/theme-store';
 import { computed, onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import getCustoFixoService from 'src/services/CustoFixoService';
+import UsuarioService from 'src/services/UsuarioService';
+import { useEmailStore } from 'src/stores/UserEmail-Store';
+import {
+  avataresDisponiveis,
+  obterCaminhoAvatar,
+  type AvatarId,
+} from 'src/models/Usuario';
 
-interface UsuarioSistema {
-  nome: string;
-  email: string;
-}
-
-const usuario = ref<UsuarioSistema>({} as UsuarioSistema);
-const loading = ref(false);
 const themeStore = useThemeStore();
-
 const $q = useQuasar();
 const service = getCustoFixoService();
 const compartilhamentoStore = useCompartilhamentoStore();
+const usuarioStore = useEmailStore();
 
+const loading = computed(() => !usuarioStore.name || !usuarioStore.email);
+const usuario = computed(() => ({
+  nome: usuarioStore.name ?? '',
+  email: usuarioStore.email ?? '',
+  avatarId: usuarioStore.avatarId,
+}));
+const avatarSelecionado = ref<AvatarId>(usuarioStore.avatarId);
+const salvandoAvatar = ref(false);
 const loadingConfig = ref(false);
 const receberNotificacoes = ref(true);
 
@@ -122,18 +164,21 @@ const isDark = computed({
 });
 
 onMounted(async () => {
-  await buscarUsuario();
+  avatarSelecionado.value = usuarioStore.avatarId;
   if (!emModoCompartilhado.value) {
     await carregarConfiguracao();
   }
 });
 
-async function buscarUsuario() {
-  loading.value = true;
-  const axios = CreateIntanceAxios();
-  const result = await axios.get<UsuarioSistema>(process.env.URL_API + 'user/');
-  usuario.value = result.data;
-  loading.value = false;
+async function salvarAvatar() {
+  salvandoAvatar.value = true;
+  try {
+    const resultado = await UsuarioService.atualizarAvatar(avatarSelecionado.value);
+    usuarioStore.setAvatarId(resultado.avatarId);
+    $q.notify({ type: 'positive', message: 'Avatar atualizado com sucesso!' });
+  } finally {
+    salvandoAvatar.value = false;
+  }
 }
 
 async function carregarConfiguracao() {
@@ -173,5 +218,10 @@ async function salvarConfiguracao(novoValor: boolean) {
 
 .shadow-1:hover {
   box-shadow: 0 6px 20px v-bind('$q.dark.isActive ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.08)"') !important;
+}
+
+.avatar-selecionado {
+  outline: 3px solid var(--q-primary);
+  outline-offset: 3px;
 }
 </style>

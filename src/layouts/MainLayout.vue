@@ -39,7 +39,9 @@
             <q-tooltip>Configurações</q-tooltip>
           </q-btn>
           <q-btn round flat>
-            <q-icon name="person" size="26px" />
+            <q-avatar size="32px">
+              <img :src="avatarSrc" alt="Avatar do usuário" />
+            </q-avatar>
             <q-tooltip>Conta</q-tooltip>
             <q-menu>
               <q-list style="min-width: 200px">
@@ -47,7 +49,7 @@
                 <q-item class="q-pa-md">
                   <q-item-section avatar>
                     <q-avatar>
-                      <img src="/avatar.svg" />
+                      <img :src="avatarSrc" alt="Avatar do usuário" />
                     </q-avatar>
                   </q-item-section>
                   <q-item-section>
@@ -151,7 +153,7 @@
       >
         <div class="text-white text-center">
           <q-avatar size="56px" class="q-mb-sm">
-            <img src="/avatar.svg" />
+            <img :src="avatarSrc" alt="Avatar do usuário" />
           </q-avatar>
           <div>Seja bem vindo,</div>
           <div class="text-weight-bold">{{ username }}</div>
@@ -174,10 +176,14 @@ import DateDisplay from 'src/components/DateDisplay.vue';
 import ContextoSelector from 'src/components/Compartilhamento/ContextoSelector.vue';
 import { useThemeStore } from 'src/stores/theme-store';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
-import { ref, onMounted } from 'vue';
+import { computed, ref, onMounted } from 'vue';
+import { useEmailStore } from 'src/stores/UserEmail-Store';
+import UsuarioService from 'src/services/UsuarioService';
+import { obterCaminhoAvatar } from 'src/models/Usuario';
 
 const themeStore = useThemeStore();
 const compartilhamentoStore = useCompartilhamentoStore();
+const usuarioStore = useEmailStore();
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -186,13 +192,16 @@ const leftDrawerOpen = ref(false);
 
 const router = useRouter();
 const abrirModalConfig = ref(false);
-const username = localStorage.getItem('userName')?.split(' ', 2).join(' ');
+const username = computed(() => usuarioStore.name?.split(' ', 2).join(' ') ?? '');
+const avatarSrc = computed(() => obterCaminhoAvatar(usuarioStore.avatarId));
 
 function handleLogout() {
   // Remove todos os dados de autenticação do localStorage
   localStorage.removeItem('token');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('userName');
+  localStorage.removeItem('userEmail');
+  usuarioStore.clearUser();
 
   // Redireciona para a página de login
   router.push({ name: 'LoginPage' });
@@ -200,6 +209,12 @@ function handleLogout() {
 
 onMounted(async () => {
   themeStore.initTheme();
+  try {
+    const perfil = await UsuarioService.obterPerfil();
+    usuarioStore.setUser(perfil);
+  } catch (error) {
+    console.error('Erro ao carregar perfil do usuário:', error);
+  }
 
   // Carregar compartilhamentos e restaurar contexto do localStorage
   await compartilhamentoStore.carregarCompartilhamentos();
