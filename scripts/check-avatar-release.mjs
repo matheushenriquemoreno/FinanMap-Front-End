@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const failures = [];
 const avatarIds = Array.from(
-  { length: 8 },
+  { length: 10 },
   (_, index) => `avatar-${String(index + 1).padStart(2, '0')}`,
 );
 
@@ -40,5 +40,5 @@ if (failures.length > 0) {
   failures.forEach((failure) => console.error(`- ${failure}`));
   process.exitCode = 1;
 } else {
-  console.log('Release do avatar validada: oito assets e contratos preservados.');
+  console.log('Release do avatar validada: dez assets e contratos preservados.');
 }

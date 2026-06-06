@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const failures = [];
 const avatarIds = Array.from(
-  { length: 8 },
+  { length: 10 },
   (_, index) => `avatar-${String(index + 1).padStart(2, '0')}`,
 );
 
