@@ -11,6 +11,7 @@
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "npm run test:theme && npm run test:avatar",
     "test:avatar": "node scripts/check-avatar-experience.mjs",
+    "test:avatar:release": "node scripts/check-avatar-release.mjs",
     "test:theme": "node scripts/check-dark-mode.mjs",
     "dev": "quasar dev",
     "build": "quasar build",
