@@ -18,13 +18,7 @@
         <DateDisplay v-if="$q.screen.gt.xs" />
 
         <div class="q-gutter-sm row items-center no-wrap">
-          <q-btn
-            round
-            dense
-            flat
-            color="grey-4"
-            @click="themeStore.toggleTheme()"
-          >
+          <q-btn round dense flat color="grey-4" @click="themeStore.toggleTheme()">
             <q-icon :name="themeStore.isDark ? 'light_mode' : 'dark_mode'" size="25px" />
             <q-tooltip>{{ themeStore.isDark ? 'Modo Claro' : 'Modo Escuro' }}</q-tooltip>
           </q-btn>
@@ -39,18 +33,14 @@
             <q-tooltip>Configurações</q-tooltip>
           </q-btn>
           <q-btn round flat>
-            <q-avatar size="32px">
-              <img :src="avatarSrc" alt="Avatar do usuário" />
-            </q-avatar>
+            <UserAvatar :avatar-id="usuarioStore.avatarId" size="32px" alt="Avatar do usuário" />
             <q-tooltip>Conta</q-tooltip>
             <q-menu>
               <q-list style="min-width: 200px">
                 <!-- Seção de informações do usuário -->
                 <q-item class="q-pa-md">
                   <q-item-section avatar>
-                    <q-avatar>
-                      <img :src="avatarSrc" alt="Avatar do usuário" />
-                    </q-avatar>
+                    <UserAvatar :avatar-id="usuarioStore.avatarId" alt="Avatar do usuário" />
                   </q-item-section>
                   <q-item-section>
                     <q-item-label>{{ username }}</q-item-label>
@@ -152,9 +142,12 @@
         style="height: 150px"
       >
         <div class="text-white text-center">
-          <q-avatar size="56px" class="q-mb-sm">
-            <img :src="avatarSrc" alt="Avatar do usuário" />
-          </q-avatar>
+          <UserAvatar
+            :avatar-id="usuarioStore.avatarId"
+            size="56px"
+            alt="Avatar do usuário"
+            class="q-mb-sm"
+          />
           <div>Seja bem vindo,</div>
           <div class="text-weight-bold">{{ username }}</div>
         </div>
@@ -179,7 +172,7 @@ import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { computed, ref, onMounted } from 'vue';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import UsuarioService from 'src/services/UsuarioService';
-import { obterCaminhoAvatar } from 'src/models/Usuario';
+import UserAvatar from 'src/components/UserAvatar.vue';
 
 const themeStore = useThemeStore();
 const compartilhamentoStore = useCompartilhamentoStore();
@@ -193,7 +186,6 @@ const leftDrawerOpen = ref(false);
 const router = useRouter();
 const abrirModalConfig = ref(false);
 const username = computed(() => usuarioStore.name?.split(' ', 2).join(' ') ?? '');
-const avatarSrc = computed(() => obterCaminhoAvatar(usuarioStore.avatarId));
 
 function handleLogout() {
   // Remove todos os dados de autenticação do localStorage
