@@ -1,18 +1,13 @@
 
 import { defineStore } from 'pinia'
+import { AVATAR_PADRAO, normalizarAvatarId, type AvatarId, type UsuarioPerfil } from 'src/models/Usuario'
 import { ref } from 'vue'
 
-// Interface para tipagem do estado
-interface UserState {
-  email: string | null
-}
-
 export const useEmailStore = defineStore('user', () => {
-  // Estado
   const email = ref<string | null>(null)
   const name = ref<string | null>(null)
+  const avatarId = ref<AvatarId>(AVATAR_PADRAO)
 
-  // Ações
   function setEmail(newEmail: string) {
     email.value = newEmail
   }
@@ -21,17 +16,22 @@ export const useEmailStore = defineStore('user', () => {
     name.value = newName
   }
 
-  function setUser(newEmail: string, newName: string) {
-    email.value = newEmail
-    name.value = newName
+  function setAvatarId(newAvatarId?: string | null) {
+    avatarId.value = normalizarAvatarId(newAvatarId)
+  }
+
+  function setUser(user: UsuarioPerfil) {
+    email.value = user.email
+    name.value = user.nome
+    setAvatarId(user.avatarId)
   }
 
   function clearUser() {
     email.value = null
     name.value = null
+    avatarId.value = AVATAR_PADRAO
   }
 
-  // Getters (computados)
   const getEmail = () => email.value
   const getName = () => name.value
   const isAuthenticated = () => !!email.value
@@ -39,10 +39,12 @@ export const useEmailStore = defineStore('user', () => {
   return {
     email,
     name,
+    avatarId,
     setEmail,
     setName,
+    setAvatarId,
     setUser,
-    clearUser, // Renomeado de clearEmail para clearUser para refletir melhor
+    clearUser,
     getEmail,
     getName,
     isAuthenticated
