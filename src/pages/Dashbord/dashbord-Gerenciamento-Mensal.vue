@@ -13,7 +13,7 @@
     <BannerModoCompartilhado />
   </div>
 
-  <q-page padding :class="$q.dark.isActive ? 'bg-dark-page' : 'bg-grey-2'">
+  <q-page padding>
     <div class="content-limit">
       <!-- Filter Section -->
       <div class="dashboard-section dashboard-section--delay-0">
@@ -159,11 +159,6 @@ watch(
 .content-limit {
   max-width: 1600px;
   margin: 0 auto;
-}
-
-/* Custom dark background */
-.bg-dark-page {
-  background-color: #121212;
 }
 
 /* Staggered reveal animation */

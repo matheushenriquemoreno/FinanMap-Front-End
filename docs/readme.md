@@ -790,6 +790,9 @@ Esta documentação cobre os principais aspectos do projeto FinanMap Front-End. 
 
 ## 🌓 Modo Escuro/Claro
 
+> Guia de arquitetura, prevenção de regressões e checklist:
+> [dark-mode.md](./dark-mode.md)
+
 ### Funcionalidade
 
 O FinanMap possui suporte completo para modo escuro e claro, permitindo que os usuários escolham sua preferência de visualização.
