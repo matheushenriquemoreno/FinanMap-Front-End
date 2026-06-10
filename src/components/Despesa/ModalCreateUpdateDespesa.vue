@@ -77,7 +77,7 @@
 
             <q-card-actions class="text-primary" align="between">
               <q-btn flat label="Cancelar" v-close-popup />
-              <q-btn flat :loading="loading" :label="ehEdicao ? 'Editar' : 'Adicionar'"
+              <q-btn flat :loading="loading" :label="labelBotaoSubmit"
                 :icon-right="ehEdicao ? 'edit' : 'add'" type="submit" />
             </q-card-actions>
           </q-form>
@@ -109,6 +109,8 @@ interface Props {
   modelValue: boolean;
   tituloAdd: string;
   tituloEdit: string;
+  labelSubmitAdd?: string;
+  labelSubmitEdit?: string;
   transacao?: DespesaResult;
   dadosIniciais?: DadosIniciaisDespesa | undefined;
   loading: boolean;
@@ -201,6 +203,14 @@ watch(localModelValue, (valor) => {
         } as Categoria)
       : null;
   }
+});
+
+const labelBotaoSubmit = computed(() => {
+  if (props.ehEdicao) {
+    return props.labelSubmitEdit ?? 'Editar';
+  }
+
+  return props.labelSubmitAdd ?? 'Adicionar';
 });
 
 // Emits do componente

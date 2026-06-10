@@ -17,14 +17,16 @@
 **Status: completed**
 
 ## Phase 3 -- Opcoes Avancadas Do Cadastro Existente
-- [ ] Task CFXD-P3-01: Conectar criacao em lote.
-- [ ] Task CFXD-P3-02: Garantir busca de agrupadoras no periodo correto.
-- [ ] Task CFXD-P3-03: Validar parcelamento e recorrencia fixa.
-- [ ] Task CFXD-P3-04: Revisar textos do modal para opcoes avancadas.
+- [x] Task CFXD-P3-01: Conectar criacao em lote.
+- [x] Task CFXD-P3-02: Garantir busca de agrupadoras no periodo correto.
+- [x] Task CFXD-P3-03: Validar parcelamento e recorrencia fixa.
+- [x] Task CFXD-P3-04: Revisar textos do modal para opcoes avancadas.
+**Status: completed**
 
 ## Phase 4 -- Polimento, Regressao E Prontidao
-- [ ] Task CFXD-P4-01: Ajustar spacing e responsividade das acoes do card.
-- [ ] Task CFXD-P4-02: Verificar dark mode e light mode.
-- [ ] Task CFXD-P4-03: Executar lint.
-- [ ] Task CFXD-P4-04: Executar build.
-- [ ] Task CFXD-P4-05: Atualizar estado de implementacao.
+- [x] Task CFXD-P4-01: Ajustar spacing e responsividade das acoes do card.
+- [x] Task CFXD-P4-02: Verificar dark mode e light mode.
+- [x] Task CFXD-P4-03: Executar lint.
+- [x] Task CFXD-P4-04: Executar build.
+- [x] Task CFXD-P4-05: Atualizar estado de implementacao.
+**Status: completed**

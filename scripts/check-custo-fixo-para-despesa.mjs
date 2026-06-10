@@ -46,6 +46,16 @@ requirePattern(
 );
 requirePattern(
   page,
+  /@on-submit-add-lote="cadastrarDespesaEmLote"/,
+  'CustosFixosPage deve escutar a criacao de despesa em lote pelo modal reutilizado.',
+);
+requirePattern(
+  page,
+  /despesaService\.criarEmLote/,
+  'CustosFixosPage deve salvar despesa em lote pelo DespesaService existente.',
+);
+requirePattern(
+  page,
   /useGerenciamentoMensal\.mesAtual\.ano/,
   'CustosFixosPage deve preencher ano com o período mensal atual.',
 );
@@ -63,6 +73,11 @@ requirePattern(
   modal,
   /categoriaSelecionada\.value\s*=\s*\{/,
   'ModalCreateUpdateDespesa deve inicializar categoria quando ela vier do custo fixo.',
+);
+requirePattern(
+  modal,
+  /labelBotaoSubmit/,
+  'ModalCreateUpdateDespesa deve permitir texto de acao adequado ao fluxo reutilizado.',
 );
 
 if (failures.length > 0) {

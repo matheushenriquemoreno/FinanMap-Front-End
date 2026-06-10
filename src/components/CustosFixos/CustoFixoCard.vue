@@ -44,6 +44,7 @@
 
     <q-card-actions align="between" class="custo-card__actions">
       <q-btn
+        class="custo-card__action-btn"
         flat
         no-caps
         icon="add_card"
@@ -53,7 +54,15 @@
       >
         <q-tooltip>Cadastrar despesa a partir deste custo fixo</q-tooltip>
       </q-btn>
-      <q-btn flat no-caps icon="edit" label="Editar" color="primary" @click="emit('editar', custo)" />
+      <q-btn
+        class="custo-card__action-btn custo-card__action-btn--secondary"
+        flat
+        no-caps
+        icon="edit"
+        label="Editar"
+        color="primary"
+        @click="emit('editar', custo)"
+      />
     </q-card-actions>
   </q-card>
 </template>
@@ -136,6 +145,36 @@ async function toggleAtivo(novoValor: boolean) {
   &__actions {
     gap: 8px;
     flex-wrap: wrap;
+    padding: 8px 12px;
+  }
+
+  &__action-btn {
+    flex: 1 1 150px;
+    min-height: 40px;
+    min-width: 0;
+
+    :deep(.q-btn__content) {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__action-btn--secondary {
+    flex-basis: 96px;
+  }
+
+  @media (max-width: 420px) {
+    &__actions {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    &__action-btn {
+      flex-basis: auto;
+      width: 100%;
+    }
   }
 }
 

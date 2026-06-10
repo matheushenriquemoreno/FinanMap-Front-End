@@ -156,13 +156,15 @@
     <ModalDespesa
       v-model:model-value="modalDespesaAberto"
       :eh-edicao="false"
-      titulo-add="Cadastrar Despesa"
+      titulo-add="Cadastrar despesa do custo fixo"
       titulo-edit="Editar Despesa"
+      label-submit-add="Cadastrar"
       :dados-iniciais="dadosIniciaisDespesa"
       :loading="despesaService.loading.value"
       :ano="useGerenciamentoMensal.mesAtual.ano"
       :mes="useGerenciamentoMensal.mesAtual.mes"
       @on-submit-add="cadastrarDespesa"
+      @on-submit-add-lote="cadastrarDespesaEmLote"
       @close-modal="fecharModalDespesa"
     />
   </q-page>
@@ -177,7 +179,7 @@ import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-stor
 import getCustoFixoService from 'src/services/CustoFixoService';
 import getDespesaService from 'src/services/transacao/DespesaService';
 import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
-import type { DespesaCreate } from 'src/Model/Transacao';
+import type { DespesaCreate, LancarDespesaLoteDTO } from 'src/Model/Transacao';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
 import ModalCriarCustoFixo from 'src/components/CustosFixos/ModalCriarCustoFixo.vue';
@@ -325,6 +327,20 @@ async function cadastrarDespesa(despesa: DespesaCreate) {
     });
   } catch {
     notificarErro('Erro ao cadastrar despesa a partir do custo fixo. Verifique os campos.');
+  }
+}
+
+async function cadastrarDespesaEmLote(despesaLote: LancarDespesaLoteDTO) {
+  try {
+    await despesaService.criarEmLote(despesaLote);
+    fecharModalDespesa();
+    $q.notify({
+      type: 'positive',
+      message: 'Despesas cadastradas com sucesso!',
+      position: 'top-right',
+    });
+  } catch {
+    notificarErro('Erro ao cadastrar despesas em lote a partir do custo fixo. Verifique os campos.');
   }
 }
 
