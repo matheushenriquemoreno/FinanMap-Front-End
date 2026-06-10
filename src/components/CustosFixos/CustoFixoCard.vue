@@ -42,7 +42,17 @@
 
     <q-separator />
 
-    <q-card-actions align="center">
+    <q-card-actions align="between" class="custo-card__actions">
+      <q-btn
+        flat
+        no-caps
+        icon="add_card"
+        label="Cadastrar despesa"
+        color="teal"
+        @click="emit('cadastrarDespesa', custo)"
+      >
+        <q-tooltip>Cadastrar despesa a partir deste custo fixo</q-tooltip>
+      </q-btn>
       <q-btn flat no-caps icon="edit" label="Editar" color="primary" @click="emit('editar', custo)" />
     </q-card-actions>
   </q-card>
@@ -58,6 +68,7 @@ const props = defineProps<{ custo: CustoFixoResult }>();
 const emit = defineEmits<{
   (e: 'excluir', id: string): void;
   (e: 'editar', custo: CustoFixoResult): void;
+  (e: 'cadastrarDespesa', custo: CustoFixoResult): void;
   (e: 'statusAlterado', custoAtualizado: CustoFixoResult): void;
 }>();
 
@@ -120,6 +131,11 @@ async function toggleAtivo(novoValor: boolean) {
 
   &__details {
     padding: 8px 0;
+  }
+
+  &__actions {
+    gap: 8px;
+    flex-wrap: wrap;
   }
 }
 

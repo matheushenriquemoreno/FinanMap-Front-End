@@ -110,10 +110,17 @@ interface Props {
   tituloAdd: string;
   tituloEdit: string;
   transacao?: DespesaResult;
+  dadosIniciais?: DadosIniciaisDespesa | undefined;
   loading: boolean;
   ehEdicao: boolean;
   ano: number;
   mes: number;
+}
+
+interface DadosIniciaisDespesa {
+  descricao?: string | undefined;
+  categoriaId?: string | undefined;
+  categoriaNome?: string | undefined;
 }
 
 // Definição das props com validação
@@ -180,6 +187,19 @@ watch(localModelValue, (valor) => {
     } as Categoria;
 
     despesaAgrupadora.value = props.transacao?.agrupadora ?? null;
+  } else if (valor === true && !props.ehEdicao && props.dadosIniciais) {
+    dadosFormulario.value = {
+      ...({} as DespesaCreate),
+      descricao: props.dadosIniciais.descricao ?? '',
+      categoriaId: props.dadosIniciais.categoriaId ?? '',
+    };
+
+    categoriaSelecionada.value = props.dadosIniciais.categoriaId
+      ? ({
+          id: props.dadosIniciais.categoriaId,
+          nome: props.dadosIniciais.categoriaNome ?? '',
+        } as Categoria)
+      : null;
   }
 });
 

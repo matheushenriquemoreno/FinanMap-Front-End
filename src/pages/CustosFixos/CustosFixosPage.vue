@@ -121,6 +121,7 @@
             :custo="custo"
             @excluir="excluirCustoFixo"
             @editar="abrirModalEditar"
+            @cadastrar-despesa="abrirModalCadastrarDespesa"
             @status-alterado="atualizarStatusLocal"
           />
         </transition-group>
@@ -152,6 +153,18 @@
       :custo="custoSelecionado"
       @salvar="atualizarCustoFixo"
     />
+    <ModalDespesa
+      v-model:model-value="modalDespesaAberto"
+      :eh-edicao="false"
+      titulo-add="Cadastrar Despesa"
+      titulo-edit="Editar Despesa"
+      :dados-iniciais="dadosIniciaisDespesa"
+      :loading="despesaService.loading.value"
+      :ano="useGerenciamentoMensal.mesAtual.ano"
+      :mes="useGerenciamentoMensal.mesAtual.mes"
+      @on-submit-add="cadastrarDespesa"
+      @close-modal="fecharModalDespesa"
+    />
   </q-page>
 </template>
 
@@ -160,24 +173,38 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
+import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import getCustoFixoService from 'src/services/CustoFixoService';
+import getDespesaService from 'src/services/transacao/DespesaService';
 import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
+import type { DespesaCreate } from 'src/Model/Transacao';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
 import ModalCriarCustoFixo from 'src/components/CustosFixos/ModalCriarCustoFixo.vue';
 import ModalEditarCustoFixo from 'src/components/CustosFixos/ModalEditarCustoFixo.vue';
+import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
 import { notificarErro } from 'src/helpers/Notificacao';
 
 const $q = useQuasar();
 const router = useRouter();
 const compartilhamentoStore = useCompartilhamentoStore();
+const useGerenciamentoMensal = useGerenciamentoMensalStore();
 const service = getCustoFixoService();
+const despesaService = getDespesaService();
 
 const custosFixos = ref<CustoFixoResult[]>([]);
 const loading = ref(false);
 const modalCriarAberto = ref(false);
 const modalEditarAberto = ref(false);
+const modalDespesaAberto = ref(false);
 const custoSelecionado = ref<CustoFixoResult | null>(null);
+const dadosIniciaisDespesa = ref<DadosIniciaisDespesa | undefined>();
+
+interface DadosIniciaisDespesa {
+  descricao?: string | undefined;
+  categoriaId?: string | undefined;
+  categoriaNome?: string | undefined;
+}
 
 // Filtros locais
 const filtroNome = ref('');
@@ -266,6 +293,39 @@ async function criarCustoFixo(dto: CustoFixoCreate) {
 function abrirModalEditar(custo: CustoFixoResult) {
   custoSelecionado.value = custo;
   modalEditarAberto.value = true;
+}
+
+function abrirModalCadastrarDespesa(custo: CustoFixoResult) {
+  custoSelecionado.value = custo;
+  dadosIniciaisDespesa.value = {
+    descricao: custo.nome,
+    categoriaId: custo.categoriaId,
+    categoriaNome: custo.categoriaNome,
+  };
+  modalDespesaAberto.value = true;
+}
+
+function fecharModalDespesa() {
+  modalDespesaAberto.value = false;
+  dadosIniciaisDespesa.value = undefined;
+  custoSelecionado.value = null;
+}
+
+async function cadastrarDespesa(despesa: DespesaCreate) {
+  try {
+    despesa.ano = useGerenciamentoMensal.mesAtual.ano;
+    despesa.mes = useGerenciamentoMensal.mesAtual.mes;
+
+    await despesaService.create(despesa);
+    fecharModalDespesa();
+    $q.notify({
+      type: 'positive',
+      message: 'Despesa cadastrada com sucesso! 🎯',
+      position: 'top-right',
+    });
+  } catch {
+    notificarErro('Erro ao cadastrar despesa a partir do custo fixo. Verifique os campos.');
+  }
 }
 
 async function atualizarCustoFixo(dto: UpdateCustoFixoDTO) {
