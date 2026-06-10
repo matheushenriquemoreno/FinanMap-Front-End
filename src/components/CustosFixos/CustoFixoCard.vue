@@ -44,15 +44,18 @@
 
     <q-card-actions align="between" class="custo-card__actions">
       <q-btn
-        class="custo-card__action-btn"
+        class="custo-card__icon-action"
         flat
-        no-caps
+        round
+        dense
         icon="add_card"
-        label="Cadastrar despesa"
         color="teal"
+        aria-label="Cadastrar despesa"
         @click="emit('cadastrarDespesa', custo)"
       >
-        <q-tooltip>Cadastrar despesa a partir deste custo fixo</q-tooltip>
+        <q-tooltip class="custo-card__tooltip" :disable="$q.platform.has.touch">
+          Cadastrar despesa a partir deste custo fixo
+        </q-tooltip>
       </q-btn>
       <q-btn
         class="custo-card__action-btn custo-card__action-btn--secondary"
@@ -144,12 +147,18 @@ async function toggleAtivo(novoValor: boolean) {
 
   &__actions {
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     padding: 8px 12px;
   }
 
+  &__icon-action {
+    flex: 0 0 auto;
+    min-height: 40px;
+    width: 40px;
+  }
+
   &__action-btn {
-    flex: 1 1 150px;
+    flex: 0 1 auto;
     min-height: 40px;
     min-width: 0;
 
@@ -167,13 +176,11 @@ async function toggleAtivo(novoValor: boolean) {
 
   @media (max-width: 420px) {
     &__actions {
-      align-items: stretch;
-      flex-direction: column;
+      justify-content: flex-end;
     }
 
     &__action-btn {
-      flex-basis: auto;
-      width: 100%;
+      flex: 0 1 auto;
     }
   }
 }
