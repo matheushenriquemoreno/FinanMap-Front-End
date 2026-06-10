@@ -1,56 +1,35 @@
 <template>
   <q-page class="custos-page q-pa-lg">
     <!-- ===== HEADER ===== -->
-    <PageHeaderBanner
-      icon="receipt_long"
-      title="Custos Fixos"
-      subtitle="Gerencie seus compromissos financeiros recorrentes"
-      button-label="Novo Custo Fixo"
-      @action="abrirModalCriar"
-    />
+    <PageHeaderBanner icon="receipt_long" title="Custos Fixos"
+      subtitle="Gerencie seus compromissos financeiros recorrentes" button-label="Novo Custo Fixo"
+      @action="abrirModalCriar" />
 
     <!-- ===== FILTROS ===== -->
     <div class="filters-row row q-col-gutter-md q-mb-lg items-center" v-if="custosFixos.length > 0">
       <div class="col-12 col-sm-6">
-        <q-input
-          v-model="filtroNome"
-          dense
-          outlined
-          placeholder="Buscar custo fixo pelo nome..."
-          color="primary"
-          clearable
-          class="buscar-input"
-        >
+        <q-input v-model="filtroNome" dense outlined placeholder="Buscar custo fixo pelo nome..." color="primary"
+          clearable class="buscar-input">
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
         </q-input>
       </div>
       <div class="status-filter-column col-12 col-sm-6 flex justify-end-sm">
-        <q-btn-toggle
-          v-model="filtroStatus"
-          toggle-color="primary"
-          :color="$q.dark.isActive ? 'dark' : 'white'"
-          :text-color="$q.dark.isActive ? 'grey-4' : 'grey-8'"
-          rounded
-          unelevated
-          size="13px"
-          class="status-toggle-premium border-sutil"
-          :options="[
+        <q-btn-toggle v-model="filtroStatus" toggle-color="primary" :color="$q.dark.isActive ? 'dark' : 'white'"
+          :text-color="$q.dark.isActive ? 'grey-4' : 'grey-8'" rounded unelevated size="13px"
+          class="status-toggle-premium border-sutil" :options="[
             { value: 'todos', slot: 'todos' },
             { value: 'ativos', slot: 'ativos' },
             { value: 'inativos', slot: 'inativos' },
-          ]"
-        >
+          ]">
           <template v-slot:todos>
             <div class="status-toggle-option row items-center q-px-sm">
               <q-icon name="apps" class="q-mr-xs" size="18px" />
               <span>Todos</span>
-              <q-badge
-                :color="filtroStatus === 'todos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
+              <q-badge :color="filtroStatus === 'todos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
                 :text-color="filtroStatus === 'todos' ? 'primary' : ($q.dark.isActive ? 'grey-3' : 'grey-8')"
-                class="q-ml-xs text-bold badge-contador"
-              >
+                class="q-ml-xs text-bold badge-contador">
                 {{ totalCustos }}
               </q-badge>
             </div>
@@ -58,13 +37,12 @@
 
           <template v-slot:ativos>
             <div class="status-toggle-option row items-center q-px-sm">
-              <q-icon name="check_circle" class="q-mr-xs" size="18px" :color="filtroStatus === 'ativos' ? 'white' : 'green'" />
+              <q-icon name="check_circle" class="q-mr-xs" size="18px"
+                :color="filtroStatus === 'ativos' ? 'white' : 'green'" />
               <span>Ativos</span>
-              <q-badge
-                :color="filtroStatus === 'ativos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
+              <q-badge :color="filtroStatus === 'ativos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
                 :text-color="filtroStatus === 'ativos' ? 'green-9' : ($q.dark.isActive ? 'grey-3' : 'grey-8')"
-                class="q-ml-xs text-bold badge-contador"
-              >
+                class="q-ml-xs text-bold badge-contador">
                 {{ totalAtivos }}
               </q-badge>
             </div>
@@ -72,13 +50,12 @@
 
           <template v-slot:inativos>
             <div class="status-toggle-option row items-center q-px-sm">
-              <q-icon name="unpublished" class="q-mr-xs" size="18px" :color="filtroStatus === 'inativos' ? 'white' : 'red'" />
+              <q-icon name="unpublished" class="q-mr-xs" size="18px"
+                :color="filtroStatus === 'inativos' ? 'white' : 'red'" />
               <span>Inativos</span>
-              <q-badge
-                :color="filtroStatus === 'inativos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
+              <q-badge :color="filtroStatus === 'inativos' ? 'white' : ($q.dark.isActive ? 'grey-8' : 'grey-3')"
                 :text-color="filtroStatus === 'inativos' ? 'red-9' : ($q.dark.isActive ? 'grey-3' : 'grey-8')"
-                class="q-ml-xs text-bold badge-contador"
-              >
+                class="q-ml-xs text-bold badge-contador">
                 {{ totalInativos }}
               </q-badge>
             </div>
@@ -109,20 +86,10 @@
 
       <template v-else>
         <!-- Transições suaves na listagem dos cards -->
-        <transition-group
-          name="list"
-          tag="div"
-          class="custos-grid-list"
-          v-if="custosFixosFiltrados.length > 0"
-        >
-          <CustoFixoCard
-            v-for="custo in custosFixosFiltrados"
-            :key="custo.id"
-            :custo="custo"
-            @excluir="excluirCustoFixo"
-            @editar="abrirModalEditar"
-            @status-alterado="atualizarStatusLocal"
-          />
+        <transition-group name="list" tag="div" class="custos-grid-list" v-if="custosFixosFiltrados.length > 0">
+          <CustoFixoCard v-for="custo in custosFixosFiltrados" :key="custo.id" :custo="custo"
+            @excluir="excluirCustoFixo" @editar="abrirModalEditar" @cadastrar-despesa="abrirModalCadastrarDespesa"
+            @status-alterado="atualizarStatusLocal" />
         </transition-group>
 
         <!-- Sem resultados da busca -->
@@ -147,11 +114,13 @@
 
     <!-- ===== MODAIS ===== -->
     <ModalCriarCustoFixo v-model="modalCriarAberto" @criar="criarCustoFixo" />
-    <ModalEditarCustoFixo
-      v-model="modalEditarAberto"
-      :custo="custoSelecionado"
-      @salvar="atualizarCustoFixo"
-    />
+    <ModalEditarCustoFixo v-model="modalEditarAberto" :custo="custoSelecionado" @salvar="atualizarCustoFixo" />
+    <ModalDespesa v-model:model-value="modalDespesaAberto" :eh-edicao="false"
+      titulo-add="Cadastrar despesa apartir do custo fixo" titulo-edit="Editar Despesa" label-submit-add="Cadastrar"
+      :dados-iniciais="dadosIniciaisDespesa" :loading="despesaService.loading.value"
+      :ano="useGerenciamentoMensal.mesAtual.ano" :mes="useGerenciamentoMensal.mesAtual.mes"
+      @on-submit-add="cadastrarDespesa" @on-submit-add-lote="cadastrarDespesaEmLote"
+      @close-modal="fecharModalDespesa" />
   </q-page>
 </template>
 
@@ -160,24 +129,38 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
+import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import getCustoFixoService from 'src/services/CustoFixoService';
+import getDespesaService from 'src/services/transacao/DespesaService';
 import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
+import type { DespesaCreate, LancarDespesaLoteDTO } from 'src/Model/Transacao';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
 import ModalCriarCustoFixo from 'src/components/CustosFixos/ModalCriarCustoFixo.vue';
 import ModalEditarCustoFixo from 'src/components/CustosFixos/ModalEditarCustoFixo.vue';
+import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
 import { notificarErro } from 'src/helpers/Notificacao';
 
 const $q = useQuasar();
 const router = useRouter();
 const compartilhamentoStore = useCompartilhamentoStore();
+const useGerenciamentoMensal = useGerenciamentoMensalStore();
 const service = getCustoFixoService();
+const despesaService = getDespesaService();
 
 const custosFixos = ref<CustoFixoResult[]>([]);
 const loading = ref(false);
 const modalCriarAberto = ref(false);
 const modalEditarAberto = ref(false);
+const modalDespesaAberto = ref(false);
 const custoSelecionado = ref<CustoFixoResult | null>(null);
+const dadosIniciaisDespesa = ref<DadosIniciaisDespesa | undefined>();
+
+interface DadosIniciaisDespesa {
+  descricao?: string | undefined;
+  categoriaId?: string | undefined;
+  categoriaNome?: string | undefined;
+}
 
 // Filtros locais
 const filtroNome = ref('');
@@ -266,6 +249,53 @@ async function criarCustoFixo(dto: CustoFixoCreate) {
 function abrirModalEditar(custo: CustoFixoResult) {
   custoSelecionado.value = custo;
   modalEditarAberto.value = true;
+}
+
+function abrirModalCadastrarDespesa(custo: CustoFixoResult) {
+  custoSelecionado.value = custo;
+  dadosIniciaisDespesa.value = {
+    descricao: custo.nome,
+    categoriaId: custo.categoriaId,
+    categoriaNome: custo.categoriaNome,
+  };
+  modalDespesaAberto.value = true;
+}
+
+function fecharModalDespesa() {
+  modalDespesaAberto.value = false;
+  dadosIniciaisDespesa.value = undefined;
+  custoSelecionado.value = null;
+}
+
+async function cadastrarDespesa(despesa: DespesaCreate) {
+  try {
+    despesa.ano = useGerenciamentoMensal.mesAtual.ano;
+    despesa.mes = useGerenciamentoMensal.mesAtual.mes;
+
+    await despesaService.create(despesa);
+    fecharModalDespesa();
+    $q.notify({
+      type: 'positive',
+      message: 'Despesa cadastrada com sucesso! 🎯',
+      position: 'top-right',
+    });
+  } catch {
+    notificarErro('Erro ao cadastrar despesa a partir do custo fixo. Verifique os campos.');
+  }
+}
+
+async function cadastrarDespesaEmLote(despesaLote: LancarDespesaLoteDTO) {
+  try {
+    await despesaService.criarEmLote(despesaLote);
+    fecharModalDespesa();
+    $q.notify({
+      type: 'positive',
+      message: 'Despesas cadastradas com sucesso!',
+      position: 'top-right',
+    });
+  } catch {
+    notificarErro('Erro ao cadastrar despesas em lote a partir do custo fixo. Verifique os campos.');
+  }
 }
 
 async function atualizarCustoFixo(dto: UpdateCustoFixoDTO) {
@@ -435,6 +465,7 @@ function excluirCustoFixo(id: string) {
 
 .border-sutil {
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
+
   .body--dark & {
     border-color: rgba(255, 255, 255, 0.12) !important;
   }
@@ -451,6 +482,7 @@ function excluirCustoFixo(id: string) {
 .list-leave-active {
   transition: all 0.4s ease;
 }
+
 .list-enter-from,
 .list-leave-to {
   opacity: 0;

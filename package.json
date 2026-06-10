@@ -9,9 +9,10 @@
   "scripts": {
     "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
-    "test": "npm run test:theme && npm run test:avatar",
+    "test": "npm run test:theme && npm run test:avatar && npm run test:custo-fixo-despesa",
     "test:avatar": "node scripts/check-avatar-experience.mjs",
     "test:avatar:release": "node scripts/check-avatar-release.mjs",
+    "test:custo-fixo-despesa": "node scripts/check-custo-fixo-para-despesa.mjs",
     "test:theme": "node scripts/check-dark-mode.mjs",
     "dev": "quasar dev",
     "build": "quasar build",

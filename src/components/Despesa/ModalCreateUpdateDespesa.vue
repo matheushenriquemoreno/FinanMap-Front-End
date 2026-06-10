@@ -77,7 +77,7 @@
 
             <q-card-actions class="text-primary" align="between">
               <q-btn flat label="Cancelar" v-close-popup />
-              <q-btn flat :loading="loading" :label="ehEdicao ? 'Editar' : 'Adicionar'"
+              <q-btn flat :loading="loading" :label="labelBotaoSubmit"
                 :icon-right="ehEdicao ? 'edit' : 'add'" type="submit" />
             </q-card-actions>
           </q-form>
@@ -109,11 +109,20 @@ interface Props {
   modelValue: boolean;
   tituloAdd: string;
   tituloEdit: string;
+  labelSubmitAdd?: string;
+  labelSubmitEdit?: string;
   transacao?: DespesaResult;
+  dadosIniciais?: DadosIniciaisDespesa | undefined;
   loading: boolean;
   ehEdicao: boolean;
   ano: number;
   mes: number;
+}
+
+interface DadosIniciaisDespesa {
+  descricao?: string | undefined;
+  categoriaId?: string | undefined;
+  categoriaNome?: string | undefined;
 }
 
 // Definição das props com validação
@@ -180,7 +189,28 @@ watch(localModelValue, (valor) => {
     } as Categoria;
 
     despesaAgrupadora.value = props.transacao?.agrupadora ?? null;
+  } else if (valor === true && !props.ehEdicao && props.dadosIniciais) {
+    dadosFormulario.value = {
+      ...({} as DespesaCreate),
+      descricao: props.dadosIniciais.descricao ?? '',
+      categoriaId: props.dadosIniciais.categoriaId ?? '',
+    };
+
+    categoriaSelecionada.value = props.dadosIniciais.categoriaId
+      ? ({
+          id: props.dadosIniciais.categoriaId,
+          nome: props.dadosIniciais.categoriaNome ?? '',
+        } as Categoria)
+      : null;
   }
+});
+
+const labelBotaoSubmit = computed(() => {
+  if (props.ehEdicao) {
+    return props.labelSubmitEdit ?? 'Editar';
+  }
+
+  return props.labelSubmitAdd ?? 'Adicionar';
 });
 
 // Emits do componente

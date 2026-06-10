@@ -42,8 +42,30 @@
 
     <q-separator />
 
-    <q-card-actions align="center">
-      <q-btn flat no-caps icon="edit" label="Editar" color="primary" @click="emit('editar', custo)" />
+    <q-card-actions align="between" class="custo-card__actions">
+      <q-btn
+        class="custo-card__icon-action"
+        flat
+        round
+        dense
+        icon="add_card"
+        color="teal"
+        aria-label="Cadastrar despesa"
+        @click="emit('cadastrarDespesa', custo)"
+      >
+        <q-tooltip class="custo-card__tooltip" :disable="$q.platform.has.touch">
+          Cadastrar despesa a partir deste custo fixo
+        </q-tooltip>
+      </q-btn>
+      <q-btn
+        class="custo-card__action-btn custo-card__action-btn--secondary"
+        flat
+        no-caps
+        icon="edit"
+        label="Editar"
+        color="primary"
+        @click="emit('editar', custo)"
+      />
     </q-card-actions>
   </q-card>
 </template>
@@ -58,6 +80,7 @@ const props = defineProps<{ custo: CustoFixoResult }>();
 const emit = defineEmits<{
   (e: 'excluir', id: string): void;
   (e: 'editar', custo: CustoFixoResult): void;
+  (e: 'cadastrarDespesa', custo: CustoFixoResult): void;
   (e: 'statusAlterado', custoAtualizado: CustoFixoResult): void;
 }>();
 
@@ -120,6 +143,45 @@ async function toggleAtivo(novoValor: boolean) {
 
   &__details {
     padding: 8px 0;
+  }
+
+  &__actions {
+    gap: 8px;
+    flex-wrap: nowrap;
+    padding: 8px 12px;
+  }
+
+  &__icon-action {
+    flex: 0 0 auto;
+    min-height: 40px;
+    width: 40px;
+  }
+
+  &__action-btn {
+    flex: 0 1 auto;
+    min-height: 40px;
+    min-width: 0;
+
+    :deep(.q-btn__content) {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__action-btn--secondary {
+    flex-basis: 96px;
+  }
+
+  @media (max-width: 420px) {
+    &__actions {
+      justify-content: flex-end;
+    }
+
+    &__action-btn {
+      flex: 0 1 auto;
+    }
   }
 }
 
