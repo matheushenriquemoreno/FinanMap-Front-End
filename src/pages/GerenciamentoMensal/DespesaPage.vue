@@ -266,7 +266,7 @@ function abrirDialogModificadorLote(acao: string, transacao: DespesaResult): Pro
       cancel: true,
       persistent: true
     }).onOk((data: ModificadorLote) => {
-      resolve(data);
+      resolve(Number(data) as ModificadorLote);
     }).onCancel(() => {
       resolve(null);
     });
@@ -286,6 +286,7 @@ async function editar(despesaUpdate: DespesaCreate) {
       novoValor: Number(despesaUpdate.valor),
       novaDescricao: despesaUpdate.descricao,
       novaCategoriaId: despesaUpdate.categoriaId,
+      idDespesaAgrupadora: despesaUpdate.idDespesaAgrupadora ?? '',
       modificador: modificador
     };
 

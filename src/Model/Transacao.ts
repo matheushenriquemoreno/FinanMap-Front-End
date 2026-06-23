@@ -69,6 +69,7 @@ export interface AtualizarLoteDespesaDTO {
   novoValor: number;
   novaDescricao: string;
   novaCategoriaId: string;
+  idDespesaAgrupadora?: string;
   modificador: ModificadorLote;
 }
 
