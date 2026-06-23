@@ -10,7 +10,7 @@
 
 O sistema possui **dois conceitos independentes** para organizar despesas:
 
-1. **Agrupamento (`IdDespesaAgrupadora`)**: Uma despesa pode ser "agrupadora" (pai) e ter despesas filhas vinculadas. Isso é usado para organizar, por exemplo, todas as compras do cartão de crédito sob uma única linha que mostra o total. O valor da agrupadora é a soma das filhas.
+1. **Agrupamento (`IdDespesaAgrupadora`)**: Uma despesa pode ser "agrupadora" (pai) e ter despesas filhas vinculadas. Isso é usado para organizar, por exemplo, todas as compras do cartão de crédito sob uma única linha que mostra o total. O valor da agrupadora é o valor próprio da despesa agrupadora somado ao valor das filhas.
 
 2. **Lote (`DespesaOrigemId`)**: Uma despesa pode pertencer a um lote de parcelas ou recorrências. Isso é usado para lançar 12x de uma compra parcelada ou uma assinatura mensal, gerando automaticamente os registros nos meses futuros.
 
@@ -61,7 +61,7 @@ A lógica de criação em lote deve ser adaptada para:
 1. Quando `IdDespesaAgrupadora` for informado, buscar a despesa agrupadora do mês/ano inicial.
 2. Para cada mês futuro do lote, **buscar ou criar a despesa agrupadora correspondente** naquele mês.
 3. Vincular cada despesa gerada à agrupadora do respectivo mês.
-4. Atualizar o valor da agrupadora de cada mês somando o valor da nova filha.
+4. Atualizar o valor da agrupadora preservando seu valor próprio e somando as filhas.
 
 **Arquivo:** `Application\Despesa\Services\DespesaService.cs`
 
@@ -120,12 +120,8 @@ public async Task<Result> LancarDespesaEmLoteAsync(LancarDespesaLoteDTO dto)
             var agrupadoaDoMes = await ObterOuClonarAgrupadora(
                 agrupadoaReferencia, anoCorrente, mesCorrente);
             
-            despesa.AdicionarDespesaAgrupadora(agrupadoaDoMes);
-            agrupadoaDoMes.MarcarDespesaComoAgrupadora();
-            
-            // Atualizar o valor da agrupadora somando a nova filha
-            agrupadoaDoMes.AtualizarValor(agrupadoaDoMes.Valor + valor);
-            await _repository.Update(agrupadoaDoMes);
+            await CapturarAgrupadoraAfetada(contextosAgrupadoras, agrupadoaDoMes.Id);
+            _agrupamentoService.Vincular(despesa, agrupadoaDoMes);
         }
 
         await _repository.Add(despesa);
@@ -178,7 +174,7 @@ private async Task<Despesa> ObterOuClonarAgrupadora(
     var clone = agrupadoaReferencia.Clone();
     clone.Ano = ano;
     clone.Mes = mes;
-    clone.AtualizarValor(0); // Inicia com valor zero, será incrementado pelas filhas
+    clone.AtualizarValor(0); // Inicia com valor base zero; o total será sincronizado pelo serviço de agrupamento
     clone.MarcarDespesaComoAgrupadora();
     
     // Limpar dados de lote da agrupadora clonada (agrupadora não faz parte de lote)
@@ -197,36 +193,16 @@ private async Task<Despesa> ObterOuClonarAgrupadora(
 
 Quando o usuário edita uma despesa em lote que está agrupada, o sistema deve:
 
-- **Ao alterar valor**: Recalcular o valor da agrupadora de cada mês afetado.
+- **Ao alterar valor**: Recalcular o valor da agrupadora de cada mês afetado preservando o valor próprio e somando as filhas atuais.
 - **Ao alterar categoria**: Questionar se a despesa deve ser desvinculada da agrupadora atual (já que a categoria mudou — pode não fazer mais sentido estar naquele grupo).
 
 **Adição no método existente:**
 
 ```csharp
-// Após o UpdateManyAsync das despesas do lote:
-// Recalcular o valor de cada agrupadora afetada
-var agrupadorasAfetadas = new HashSet<string>();
-
-foreach (var despesa in despesasParaAtualizar)
-{
-    if (despesa.EstaAgrupada() && !string.IsNullOrEmpty(despesa.IdDespesaAgrupadora))
-        agrupadorasAfetadas.Add(despesa.IdDespesaAgrupadora);
-}
-
-foreach (var idAgrupadora in agrupadorasAfetadas)
-{
-    var agrupadora = await _repository.GetById(idAgrupadora);
-    if (agrupadora != null)
-    {
-        var valorTotal = await _repository.GetValorTotalDespesasDaAgrupadora(idAgrupadora);
-        
-        if (agrupadora.Valor < valorTotal)
-        {
-            agrupadora.AtualizarValor(valorTotal);
-            await _repository.Update(agrupadora);
-        }
-    }
-}
+// Antes de alterar as despesas, capturar o valor base das agrupadoras afetadas.
+// Após o UpdateManyAsync, sincronizar cada agrupadora com:
+// valorTotal = valorBaseCapturado + somaAtualDasFilhas.
+await SincronizarAgrupadoras(contextosAgrupadoras.Values);
 ```
 
 ### 1.5 Exclusão em Lote com Agrupadora — `ExcluirDespesaEmLoteAsync`
@@ -410,21 +386,21 @@ Nenhuma alteração adicional necessária nesse componente para esta feature.
 
 | Cenário | Comportamento |
 |---------|--------------|
-| Agrupadora existe no mês alvo | Vincula à existente e incrementa seu valor |
+| Agrupadora existe no mês alvo | Vincula à existente e sincroniza valor próprio + filhas |
 | Agrupadora **não** existe no mês alvo | Clona da referência com valor R$ 0 e vincula |
-| Agrupadora clonada já recebeu filhas via `ReplicarTransacao` | Sem conflito — o valor é recalculado |
+| Agrupadora clonada já recebeu filhas via `ReplicarTransacao` | Sem conflito — o valor é sincronizado preservando a base |
 
 ### 4.2 Exclusão em Lote de Despesas Agrupadas
 
 Quando o usuário exclui parcelas futuras (ex: cancelou a academia), o sistema deve:
-- Diminuir o valor da agrupadora de cada mês afetado
+- Remover apenas o valor das filhas excluídas, preservando o valor próprio da agrupadora
 - Se a agrupadora ficar sem filhas, desmarcar como agrupadora
 - **Não excluir a agrupadora automaticamente** — ela pode ter outras filhas
 
 ### 4.3 Edição em Lote de Despesas Agrupadas
 
 Quando o usuário edita o valor de parcelas futuras em lote:
-- Atualizar o valor de cada agrupadora afetada
+- Atualizar o valor de cada agrupadora afetada preservando o valor próprio e somando as filhas atuais
 - Se a categoria for alterada, questionar se deseja manter o agrupamento
 
 ### 4.4 Interação com `ReplicarTransacao`
