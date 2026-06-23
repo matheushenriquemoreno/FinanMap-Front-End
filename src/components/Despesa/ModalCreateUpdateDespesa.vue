@@ -104,6 +104,10 @@ function isEmpty(obj: object | null | undefined) {
   return Object.keys(obj).length === 0;
 }
 
+function normalizarDescricaoParcela(descricao: string | undefined) {
+  return (descricao ?? '').replace(/(?:\s+\(\d+\/\d+\))+$/g, '').trim();
+}
+
 // Props do componente
 interface Props {
   modelValue: boolean;
@@ -182,6 +186,7 @@ const resumoLote = computed(() => {
 watch(localModelValue, (valor) => {
   if (valor === true && props.ehEdicao && isEmpty(props.transacao) == false) {
     dadosFormulario.value = { ...props.transacao } as DespesaCreate;
+    dadosFormulario.value.descricao = normalizarDescricaoParcela(props.transacao?.descricao);
 
     categoriaSelecionada.value = {
       id: props.transacao?.categoriaId,
