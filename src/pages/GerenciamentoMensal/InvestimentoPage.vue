@@ -11,6 +11,7 @@
       flat
       bordered
       table-class="text-dark text-center"
+      v-model:pagination="pagination"
       :rows-per-page-options="[$q.screen.gt.xs ? 7 : 5, 9, 12, 15, 18, 21]"
       :loading="useGerenciamentoMensal.loading"
       selection="multiple"
@@ -225,6 +226,9 @@ const investimentosColumns: any[] = [
   },
 ];
 const investimentos = ref<InvestimentoResult[]>([]);
+const pagination = ref({
+  rowsPerPage: $q.screen.gt.xs ? 7 : 5,
+});
 
 // stores
 const useGerenciamentoMensal = useGerenciamentoMensalStore();
