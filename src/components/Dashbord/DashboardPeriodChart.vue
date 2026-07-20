@@ -1,9 +1,8 @@
 <template>
   <q-card
-    flat
     bordered
-    class="chart-card"
-    :class="$q.dark.isActive ? 'bg-dark chart-card--dark' : 'bg-white chart-card--light'"
+    class="dashboard-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section>
       <div class="row items-center justify-between">
@@ -22,12 +21,7 @@
           </div>
         </div>
         <div class="row q-gutter-xs items-center">
-          <q-chip
-            v-for="(item, i) in legendItems"
-            :key="i"
-            size="13px"
-            :style="{ background: item.bg, color: item.color }"
-          >
+          <q-chip v-for="(item, i) in legendItems" :key="i" size="13px" :class="item.className">
             {{ item.label }}
           </q-chip>
         </div>
@@ -35,7 +29,7 @@
     </q-card-section>
 
     <q-card-section>
-      <div v-if="loading" class="flex flex-center" style="height: 440px">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--440">
         <q-spinner color="primary" size="3em" />
       </div>
       <VueApexCharts v-else type="bar" height="440" :options="chartOptions" :series="series" />
@@ -49,6 +43,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import { getDashboardSeriesPalette } from 'src/design-system/dashboardTheme';
 
 const $q = useQuasar();
 const store = useDashboardStore();
@@ -74,9 +69,9 @@ const series = computed(() => [
 ]);
 
 const legendItems = [
-  { label: 'Rendimentos', color: '#21ba45', bg: 'rgba(33, 186, 69, 0.15)' },
-  { label: 'Despesas', color: '#c10015', bg: 'rgba(193, 0, 21, 0.15)' },
-  { label: 'Investimentos', color: '#31ccec', bg: 'rgba(49, 204, 236, 0.15)' },
+  { label: 'Rendimentos', className: 'dashboard-series-chip--income' },
+  { label: 'Despesas', className: 'dashboard-series-chip--expense' },
+  { label: 'Investimentos', className: 'dashboard-series-chip--investment' },
 ];
 
 const chartOptions = computed<ApexOptions>(() => ({
@@ -147,7 +142,7 @@ const chartOptions = computed<ApexOptions>(() => ({
     borderColor: $q.dark.isActive ? '#2a2a2a' : '#f0f0f0',
     strokeDashArray: 4,
   },
-  colors: ['#21ba45', '#c10015', '#31ccec'],
+  colors: getDashboardSeriesPalette(),
   legend: { show: false },
   tooltip: {
     theme: $q.dark.isActive ? 'dark' : 'light',
@@ -185,19 +180,3 @@ function formatarValorCurto(valor: number) {
   return 'R$' + valor.toFixed(0);
 }
 </script>
-
-<style scoped>
-.chart-card {
-  border-radius: 16px !important;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease;
-}
-
-.chart-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
-}
-
-.chart-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
-}
-</style>

@@ -1,6 +1,6 @@
 <template>
   <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
-    <q-card style="width: 380px; border-radius: 16px">
+    <q-card class="meta-dialog-card">
       <q-card-section class="q-pb-none">
         <div class="row items-center justify-between">
           <div>
@@ -103,3 +103,10 @@ function submeter() {
   emit('salvar', dto);
 }
 </script>
+
+<style scoped>
+.meta-dialog-card {
+  width: 380px;
+  border-radius: 16px;
+}
+</style>

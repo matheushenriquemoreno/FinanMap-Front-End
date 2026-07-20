@@ -30,6 +30,8 @@
 
 ## Phase 4 -- Design System e CSS
 
-- [ ] Task 1: centralizar tokens e cards de dashboard
-- [ ] Task 2: reduzir estilos inline e overrides frágeis
-- [ ] Task 3: validar, revisar, reauditar e versionar a rodada
+- [x] Task 1: centralizar tokens e cards de dashboard
+- [x] Task 2: reduzir estilos inline e overrides frágeis
+- [x] Task 3: validar, revisar, reauditar e versionar a rodada
+
+**Status da fase**: concluída; revisão independente final em PASS após centralizar tokens e shells, remover os quatro achados médios e corrigir segurança sem DOM, reatividade de tema e a colisão de `flat` com a elevação compartilhada. Reauditoria final: 9,9, com 0 achados críticos/altos/médios.

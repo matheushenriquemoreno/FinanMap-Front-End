@@ -1,9 +1,8 @@
 <template>
   <q-card
-    flat
     bordered
-    class="chart-card"
-    :class="$q.dark.isActive ? 'bg-dark chart-card--dark' : 'bg-white chart-card--light'"
+    class="dashboard-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section>
       <div class="row items-center justify-between">
@@ -36,25 +35,24 @@
     </q-card-section>
 
     <q-card-section class="q-pt-none flex flex-center">
-      <div v-if="loading" class="flex flex-center" style="height: 350px; width: 100%">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--350">
         <q-spinner color="primary" size="3em" />
       </div>
       <div
         v-else-if="semDados"
-        class="flex flex-center column"
-        style="height: 350px; width: 100%; gap: 12px"
+        class="dashboard-card__state dashboard-card__state--empty dashboard-card__state--350"
       >
         <q-icon name="donut_large" size="48px" :color="$q.dark.isActive ? 'grey-7' : 'grey-4'" />
         <span :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
           Nenhum dado para o período
         </span>
       </div>
-      <div v-else style="width: 100%; display: flex; justify-content: center">
+      <div v-else class="dashboard-chart-center">
         <VueApexCharts
           type="donut"
           height="350"
           width="100%"
-          style="max-width: 460px"
+          class="dashboard-chart--distribution"
           :options="chartOptions"
           :series="series"
         />
@@ -175,19 +173,3 @@ function carregarCategorias() {
   void store.carregarCategorias(tipoCategoriaSelecionada.value);
 }
 </script>
-
-<style scoped>
-.chart-card {
-  border-radius: 16px !important;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease;
-}
-
-.chart-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
-}
-
-.chart-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
-}
-</style>

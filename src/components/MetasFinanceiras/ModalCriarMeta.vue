@@ -1,6 +1,6 @@
 <template>
   <q-dialog :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
-    <q-card style="min-width: 420px; border-radius: 16px">
+    <q-card class="meta-create-card">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6 text-bold">Criar Nova Meta</div>
         <q-space />
@@ -138,6 +138,11 @@ function submeter() {
 </script>
 
 <style lang="scss" scoped>
+.meta-create-card {
+  min-width: 420px;
+  border-radius: 16px;
+}
+
 .categoria-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

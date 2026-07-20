@@ -1,10 +1,9 @@
 <template>
   <q-card
     v-if="visivel"
-    flat
     bordered
-    class="heatmap-card"
-    :class="$q.dark.isActive ? 'bg-dark heatmap-card--dark' : 'bg-white heatmap-card--light'"
+    class="dashboard-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section>
       <div class="row items-center justify-between">
@@ -33,7 +32,7 @@
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <div v-if="loading" class="flex flex-center" style="height: 220px">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--220">
         <q-spinner color="primary" size="3em" />
       </div>
       <VueApexCharts v-else type="heatmap" height="220" :options="chartOptions" :series="series" />
@@ -47,6 +46,10 @@ import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import {
+  dashboardHeatmapPalette,
+  getDashboardSeriesColors,
+} from 'src/design-system/dashboardTheme';
 
 const $q = useQuasar();
 const store = useDashboardStore();
@@ -109,7 +112,7 @@ const chartOptions = computed<ApexOptions>(() => ({
     },
     formatter: (val: number) => formatarValorCurto(val),
   },
-  colors: ['#1d169c'],
+  colors: [getDashboardSeriesColors().primary],
   plotOptions: {
     heatmap: {
       shadeIntensity: 0.6,
@@ -118,10 +121,15 @@ const chartOptions = computed<ApexOptions>(() => ({
       colorScale: {
         ranges: [
           { from: 0, to: 0, color: $q.dark.isActive ? '#2a2a2a' : '#f5f5f5', name: 'Vazio' },
-          { from: 1, to: 999, color: '#9fa8da', name: 'Baixo' },
-          { from: 1000, to: 4999, color: '#5c6bc0', name: 'Médio' },
-          { from: 5000, to: 19999, color: '#3949ab', name: 'Alto' },
-          { from: 20000, to: 999999, color: '#1a237e', name: 'Muito Alto' },
+          { from: 1, to: 999, color: dashboardHeatmapPalette.low, name: 'Baixo' },
+          { from: 1000, to: 4999, color: dashboardHeatmapPalette.medium, name: 'Médio' },
+          { from: 5000, to: 19999, color: dashboardHeatmapPalette.high, name: 'Alto' },
+          {
+            from: 20000,
+            to: 999999,
+            color: dashboardHeatmapPalette.veryHigh,
+            name: 'Muito Alto',
+          },
         ],
       },
     },
@@ -175,19 +183,3 @@ function formatarValorCurto(valor: number) {
   return 'R$' + valor.toFixed(0);
 }
 </script>
-
-<style scoped>
-.heatmap-card {
-  border-radius: 16px !important;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease;
-}
-
-.heatmap-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
-}
-
-.heatmap-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
-}
-</style>

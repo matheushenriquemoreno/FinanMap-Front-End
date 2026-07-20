@@ -6,7 +6,7 @@
 
 **Data**: 19/07/2026
 
-**Rodada**: 4 — reauditoria após a Fase 3
+**Rodada**: 5 — reauditoria final após a Fase 4
 
 **Stack identificada**: Vue 3.5, Quasar 2.18, Vite 6.4, TypeScript 5.9 em modo estrito, Pinia 3, Vue Router 4 em modo hash, Axios 1.18, Vitest 3.2, Vue Test Utils 2.4, ApexCharts 4 e SCSS.
 
@@ -14,43 +14,66 @@
 
 ## Resumo executivo
 
-A terceira fase eliminou o risco alto de credenciais persistidas no navegador e os quatro débitos médios de arquitetura. Access e refresh tokens agora ficam somente em memória; como o backend atual recebe o refresh token no corpo e não oferece cookie `HttpOnly`, recarregar a página encerra a sessão por decisão explícita de segurança.
+As quatro fases planejadas foram concluídas. A rodada final removeu os quatro últimos achados médios: cores de gráficos agora derivam das variáveis semânticas do Quasar por uma fronteira única e segura sem DOM; o shell dos cards analíticos foi consolidado; estilos estáticos saíram dos templates auditados; e os overrides frágeis de dashboard, seletor de período e calendário foram substituídos por especificidade previsível.
 
-Configuração e transporte HTTP foram consolidados em um único `apiClient`, com URL por ambiente, validação antes do build, refresh preventivo/forçado deduplicado e retry único após `401`. O lockfile também foi atualizado: `npm audit` caiu de 1 crítico, 14 altos e 8 médios para apenas 2 baixos em dependências de desenvolvimento.
+A regressão `check-design-system-css.mjs` verifica o uso executável de `getCssVar`, o fallback server-side, os consumidores do tema, as propriedades concretas do shell compartilhado e a ausência dos padrões removidos. Paletas são recalculadas dentro de dependências reativas do dark mode, evitando cores congeladas após a troca de tema.
 
-O lint voltou a rejeitar `any`, símbolos sem uso e promises flutuantes. Vitest e Vue Test Utils executam oito testes de sessão, store, componente, composable, concorrência de refresh e interceptores. Os cinco maiores SFCs auditados delegam estado/efeitos a composables, mantêm CSS externo e ficaram abaixo de 300 linhas. Permanecem quatro achados médios, todos concentrados em Design System e CSS para a Fase 4.
+Não restam achados críticos, altos ou médios. Permanecem cinco débitos baixos: três arquiteturais já conhecidos e dois de CSS legado fora dos hotspots corrigidos. A suíte completa, o lint, o build e a revisão independente passam.
 
 | Dimensão                            |  Nota   | Crítico | Alto  | Médio | Baixo |
 | ----------------------------------- | :-----: | :-----: | :---: | :---: | :---: |
-| Design System / consistência visual |   9,0   |    0    |   0   |   2   |   0   |
+| Design System / consistência visual |  10,0   |    0    |   0   |   0   |   0   |
 | Performance / Core Web Vitals       |  10,0   |    0    |   0   |   0   |   0   |
 | Acessibilidade / UX                 |  10,0   |    0    |   0   |   0   |   0   |
 | Arquitetura Vue/Quasar              |   9,7   |    0    |   0   |   0   |   3   |
-| CSS/SCSS/Quasar                     |   9,0   |    0    |   0   |   2   |   0   |
-| **Nota geral ponderada**            | **9,7** |  **0**  | **0** | **4** | **3** |
+| CSS/SCSS/Quasar                     |   9,5   |    0    |   0   |   0   |   2   |
+| **Nota geral ponderada**            | **9,9** |  **0**  | **0** | **0** | **5** |
 
 **Pesos**: Performance 25%, Acessibilidade/UX 25%, Arquitetura 25%, Design System 15% e CSS/SCSS/Quasar 10%. Tailwind não foi cobrado porque não faz parte da stack.
 
 ### Evolução da qualidade
 
-| Indicador      | Rodada 1 | Rodada 2 | Rodada 3 | Rodada 4 | Evolução total |
-| -------------- | :------: | :------: | :------: | :------: | :------------: |
-| Nota ponderada |   5,7    |   8,0    |   8,9    |   9,7    |      +4,0      |
-| Críticos       |    2     |    0     |    0     |    0     |       -2       |
-| Altos          |    6     |    3     |    1     |    0     |       -6       |
-| Médios         |    10    |    9     |    8     |    4     |       -6       |
+| Indicador      | Rodada 1 | Rodada 2 | Rodada 3 | Rodada 4 | Rodada 5 | Evolução total |
+| -------------- | :------: | :------: | :------: | :------: | :------: | :------------: |
+| Nota ponderada |   5,7    |   8,0    |   8,9    |   9,7    |   9,9    |      +4,2      |
+| Críticos       |    2     |    0     |    0     |    0     |    0     |       -2       |
+| Altos          |    6     |    3     |    1     |    0     |    0     |       -6       |
+| Médios         |    10    |    9     |    8     |    4     |    0     |      -10       |
 
 ---
 
 ## Top 3 prioridades restantes
 
-1. Centralizar cores semânticas de gráficos e componentes em tokens compartilhados.
-2. Extrair o shell visual comum dos cards de dashboard.
-3. Reduzir estilos inline estáticos, overrides profundos e `!important` não essenciais.
+1. Normalizar nomes e casing de pastas/arquivos em uma migração isolada.
+2. Adicionar smoke E2E das jornadas financeiras críticas quando houver API de teste determinística.
+3. Reduzir gradualmente os estilos inline e overrides legados de baixa severidade fora dos hotspots da Fase 4.
 
 ---
 
 ## Achados resolvidos nesta rodada
+
+### DS-01 — Cores semânticas repetidas como valores literais — Resolvido
+
+- `src/design-system/dashboardTheme.ts` resolve `primary`, `positive`, `negative` e `info` com `getCssVar`, mantém fallback sem DOM e fornece paletas tipadas para séries, categorias e heatmap.
+- Oito consumidores explícitos importam a fronteira semântica; chips e estados visuais usam custom properties nomeadas em `app.scss`.
+- Paletas são obtidas dentro de `computed` que acompanham `$q.dark.isActive`, preservando a troca de tema em runtime.
+
+### DS-02 — Shell visual dos cards de dashboard duplicado — Resolvido
+
+- `.dashboard-card`, seus modificadores claro/escuro e utilitários de corpo/estado vivem em `src/css/app.scss`.
+- Nove componentes analíticos usam o mesmo shell; raio, overflow, transição e elevação não são mais repetidos nos SFCs.
+
+### CSS-01 — Overrides profundos dependentes de `!important` — Resolvido
+
+- Cards do dashboard não usam mais `!important` para raio ou sombra.
+- `MothYearSelector` usa seletores de estado com especificidade local e tokens semânticos.
+- `ModernDateInput` usa wrappers compostos para borda, cursor e raios do card, sem escalation de especificidade.
+
+### CSS-02 — Estilos inline nos hotspots auditados — Resolvido
+
+- Dimensões e estados dos gráficos usam utilitários compartilhados; apenas larguras e cores realmente calculadas permanecem em `:style`.
+- Metas, seletor de período e calendário moveram dimensões, flex, opacidade, tipografia e raios estáticos para classes locais.
+- A regressão percorre esses diretórios e impede a reintrodução de atributos `style` estáticos.
 
 ### ARCH-02 — Credenciais persistidas no navegador — Resolvido
 
@@ -138,27 +161,7 @@ O lint voltou a rejeitar `any`, símbolos sem uso e promises flutuantes. Vitest 
 
 ## 1. Design System / consistência visual
 
-### DS-01 — Cores semânticas são repetidas como valores literais
-
-**Severidade**: Médio
-
-**Local**: `src/css/quasar.variables.scss`; `DashboardSummaryCards.vue`; `DashboardTrendLineChart.vue:27-41`
-
-- **Esperado**: cores de marca e estado devem vir de uma fonte semântica única.
-- **Implementado**: componentes e gráficos repetem hexadecimais como `#21ba45`, `#c10015` e `#31ccec`, embora o tema Quasar já defina cores equivalentes.
-- **Impacto**: mudanças de tema exigem edições dispersas e podem gerar tons divergentes.
-- **Sugestão**: criar tokens compartilhados para gráficos e usar nomes semânticos do Quasar nos componentes.
-
-### DS-02 — O shell visual dos cards de dashboard é duplicado
-
-**Severidade**: Médio
-
-**Local**: `DashboardCategoryChart.vue:221-231`; `DashboardCategoryDistributionChart.vue:192-202`; `DashboardCategoryTreemap.vue:266-276`; `DashboardTrendLineChart.vue:264-274`
-
-- **Esperado**: cards equivalentes devem reutilizar um shell ou tokens comuns.
-- **Implementado**: raio, sombra e variações de tema são repetidos em pelo menos seis componentes.
-- **Impacto**: ajustes visuais precisam ser replicados e já apresentam diferenças de alpha.
-- **Sugestão**: extrair `DashboardCard.vue` ou uma classe global baseada em custom properties.
+Nenhum achado aberto. Os tokens semânticos e o shell dos cards possuem fonte compartilhada e regressão automatizada.
 
 ## 2. Performance / Core Web Vitals
 
@@ -166,11 +169,11 @@ Nenhum achado aberto nesta rodada. O dashboard ainda gera um aviso por ultrapass
 
 ## 3. Acessibilidade / UX
 
-Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG: a Fase 3 ainda deve adicionar testes comportamentais e auditoria em navegador/leitor de tela.
+Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG; auditoria manual em navegador e leitor de tela continua recomendada para releases maiores.
 
 ## 4. Arquitetura Vue/Quasar
 
-Nenhum achado crítico, alto ou médio permanece nesta dimensão. Os débitos abaixo são baixos e não bloqueiam a Fase 4.
+Nenhum achado crítico, alto ou médio permanece nesta dimensão. Os débitos abaixo são baixos e não bloqueiam o gate final de qualidade.
 
 ### ARCH-07 — Nomenclatura e organização são inconsistentes
 
@@ -207,27 +210,29 @@ Nenhum achado crítico, alto ou médio permanece nesta dimensão. Os débitos ab
 
 ## 5. CSS/SCSS/Quasar
 
-### CSS-01 — Overrides profundos dependem de `!important`
+Nenhum achado crítico, alto ou médio permanece nesta dimensão.
 
-**Severidade**: Médio
+### CSS-03 — Overrides legados permanecem fora dos hotspots corrigidos
 
-**Local**: cards do dashboard; `MothYearSelector.styles.css`; `ModernDateInput.vue:127-142`
+**Severidade**: Baixo
 
-- **Esperado**: customização via API do Quasar, wrappers e tokens com especificidade previsível.
-- **Implementado**: há vários `!important` para raio, sombra, cursor, borda e estados internos.
-- **Impacto**: cria uma escala de especificidade difícil de evoluir e sensível a upgrades do Quasar.
-- **Sugestão**: migrar primeiro os shells dos cards e documentar exceções realmente necessárias.
+**Local**: `src/css/app.scss`; configuração de conta/compartilhamento; custos fixos
 
-### CSS-02 — Estilos inline dificultam consistência e responsividade
+- **Esperado**: customizações do Quasar devem preferir tokens e seletores locais previsíveis.
+- **Implementado**: 23 declarações `!important` permanecem em regras globais de dark mode, tooltip e módulos legados não relacionados aos quatro achados médios.
+- **Impacto**: manutenção localizada e risco baixo de disputa de especificidade em futuros upgrades.
+- **Sugestão**: remover por módulo quando cada tela voltar a ser alterada, com teste visual claro/escuro.
 
-**Severidade**: Médio
+### CSS-04 — Estilos inline simples permanecem em módulos legados
 
-**Local**: componentes de dashboard, metas, `MothYearSelector.vue:25,70` e `ModernDateInput.vue:46`
+**Severidade**: Baixo
 
-- **Esperado**: estilos estáticos e responsivos em classes/tokens; `:style` apenas para valores realmente dinâmicos.
-- **Implementado**: dimensões, flex, espaçamento, raio e opacidade aparecem inline em diversos templates.
-- **Impacto**: reduz reutilização, dificulta media queries e aumenta divergência visual.
-- **Sugestão**: mover estilos estáticos para classes; preservar bindings apenas para cor/progresso calculados.
+**Local**: layout, autenticação, configurações, tabelas e modais de transação
+
+- **Esperado**: estilos estáticos devem preferir classes, sobretudo quando reutilizados ou responsivos.
+- **Implementado**: 34 atributos estáticos simples ainda definem largura, tipografia ou raio em componentes fora do escopo focal da Fase 4.
+- **Impacto**: dívida dispersa, sem efeito funcional ou inconsistência sistêmica observada nesta rodada.
+- **Sugestão**: migrar oportunisticamente para classes locais; bindings calculados devem continuar como `:style`.
 
 ---
 
@@ -238,10 +243,10 @@ Nenhum achado crítico, alto ou médio permanece nesta dimensão. Os débitos ab
 - `npm run build`: passou após validar `.env.prod`; URL com protocolo inválido também foi rejeitada no teste negativo.
 - `git diff --check`: passou.
 - `npm audit`: 0 crítico, 0 alto, 0 médio e 2 baixos.
-- Revisão independente final: PASS após três ciclos, sem achados críticos, altos ou médios no escopo da Fase 3.
-- Build: 1.193,92 KB de JS e 229,19 KB de CSS; entrypoint de 91,50 KB e dashboard lazy de 596,86 KB.
+- Revisão independente final da Fase 4: PASS após corrigir segurança sem DOM, reatividade de tema, robustez do checker e a colisão do prop `flat` com a elevação compartilhada.
+- Build: 1.193,96 KB de JS e 230,15 KB de CSS; entrypoint de 91,50 KB e dashboard lazy de 597,06 KB.
 - Logo: 26.578 bytes, 90,3% menor que o PNG anterior.
 
 ## Próxima rodada recomendada
 
-Executar a Fase 4 do plano em `.specs/frontend-quality-improvements/IMPLEMENTATION-PLAN.md`: centralizar tokens semânticos e shells de cards, reduzir estilos inline estáticos, overrides profundos e `!important`. A nota já superou 9,0, mas o gate final ainda exige resolver os quatro achados médios restantes; também permanecem três débitos baixos não bloqueantes.
+O gate final foi atingido: **9,9**, sem achados críticos, altos ou médios. As próximas rodadas podem tratar os cinco débitos baixos como manutenção evolutiva, priorizando smoke E2E, nomenclatura e remoção oportunística de CSS legado.

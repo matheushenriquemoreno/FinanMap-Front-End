@@ -5,7 +5,7 @@
       <q-card v-for="i in 3" :key="'skel-' + i" flat bordered class="resumo-card">
         <q-card-section horizontal class="items-center q-pa-md">
           <q-skeleton type="QAvatar" size="48px" />
-          <div class="q-ml-md" style="flex: 1">
+          <div class="resumo-card__skeleton-content q-ml-md">
             <q-skeleton type="text" width="50%" />
             <q-skeleton type="text" width="70%" class="q-mt-xs" />
           </div>
@@ -87,5 +87,9 @@ defineProps<{
     transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
+}
+
+.resumo-card__skeleton-content {
+  flex: 1;
 }
 </style>

@@ -88,8 +88,8 @@
       <!-- Lista de Contribuições -->
       <template v-if="meta && meta.contribuicoes && meta.contribuicoes.length > 0">
         <q-separator />
-        <q-card-section class="col" style="display: flex; flex-direction: column; min-height: 0">
-          <div class="text-subtitle2 text-bold q-mb-sm" style="flex-shrink: 0">
+        <q-card-section class="historico-section col">
+          <div class="historico-section__title text-subtitle2 text-bold q-mb-sm">
             Histórico de Contribuições ({{ meta.contribuicoes.length }})
           </div>
           <q-list separator class="historico-list col">
@@ -144,18 +144,7 @@
                   {{ formatarData(contribuicao.data) }}
                 </q-item-label>
                 <q-item-label v-if="contribuicao.origem === 'Investimento'" class="q-mt-sm">
-                  <q-badge
-                    color="primary"
-                    class="q-px-sm q-py-xs"
-                    style="
-                      border-radius: 6px;
-                      font-weight: normal;
-                      font-size: 11px;
-                      max-width: 100%;
-                      white-space: normal;
-                      text-align: left;
-                    "
-                  >
+                  <q-badge color="primary" class="investimento-badge q-px-sm q-py-xs">
                     <q-icon name="account_balance" size="13px" class="q-mr-xs" />
                     <span
                       >Investimento -
@@ -240,6 +229,25 @@ const corProgresso = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+.historico-section {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+
+  &__title {
+    flex-shrink: 0;
+  }
+}
+
+.investimento-badge {
+  max-width: 100%;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: normal;
+  text-align: left;
+  white-space: normal;
+}
+
 .historico-list {
   max-height: 300px;
   overflow-y: auto;

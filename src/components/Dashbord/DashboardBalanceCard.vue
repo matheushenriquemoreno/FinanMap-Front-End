@@ -1,9 +1,8 @@
 <template>
   <q-card
-    flat
     bordered
-    class="balance-card"
-    :class="$q.dark.isActive ? 'bg-dark balance-card--dark' : 'bg-white balance-card--light'"
+    class="dashboard-card balance-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section class="q-pb-none">
       <div class="row items-center justify-between">
@@ -46,11 +45,8 @@
       </div>
     </q-card-section>
 
-    <q-card-section
-      class="q-pt-md"
-      style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center"
-    >
-      <div v-if="loading" class="flex flex-center" style="height: 180px">
+    <q-card-section class="q-pt-md dashboard-card__body">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--180">
         <q-spinner color="primary" size="2em" />
       </div>
       <div v-else class="balance-bars-wrapper q-py-sm">
@@ -97,14 +93,7 @@
         </div>
 
         <!-- Resumo info -->
-        <div
-          class="text-center q-mt-lg q-pt-md"
-          :style="{
-            borderTop: $q.dark.isActive
-              ? '1px dashed rgba(255,255,255,0.1)'
-              : '1px dashed rgba(0,0,0,0.1)',
-          }"
-        >
+        <div class="balance-summary text-center q-mt-lg q-pt-md">
           <q-chip
             v-if="rendimento > 0"
             outline
@@ -178,26 +167,13 @@ function formatarValor(valor: number) {
 
 <style scoped>
 .balance-card {
-  border-radius: 16px !important;
-  overflow: hidden;
   height: 100%;
-  transition:
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
   display: flex;
   flex-direction: column;
 }
 
 .balance-card:hover {
   transform: translateY(-2px);
-}
-
-.balance-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-}
-
-.balance-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35) !important;
 }
 
 .balance-icon-wrapper {
@@ -210,11 +186,19 @@ function formatarValor(valor: number) {
 }
 
 .balance-icon-wrapper--positive {
-  background: rgba(33, 186, 69, 0.12);
+  background: var(--semantic-positive-soft-subtle);
 }
 
 .balance-icon-wrapper--negative {
-  background: rgba(193, 0, 21, 0.12);
+  background: var(--semantic-negative-soft-subtle);
+}
+
+.balance-summary {
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-card--dark .balance-summary {
+  border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .balance-bars-wrapper {

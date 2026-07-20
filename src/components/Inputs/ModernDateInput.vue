@@ -43,7 +43,7 @@
             dense
             v-close-popup
             aria-label="Fechar calendário"
-            style="background: rgba(0, 0, 0, 0.05)"
+            class="date-picker-close"
           />
         </q-card-section>
 
@@ -123,27 +123,32 @@ const formattedDisplayDate = computed(() => {
 }
 
 /* Remove dashed border from Quasar's readonly outlined input */
-.modern-date-wrapper :deep(.q-field--outlined.q-field--readonly .q-field__control:before) {
-  border-style: solid !important;
+.modern-date-wrapper.modern-date-wrapper
+  :deep(.q-field--outlined.q-field--readonly .q-field__control:before) {
+  border-style: solid;
 }
 
-.hide-readonly-cursor :deep(input) {
-  cursor: pointer !important;
+.hide-readonly-cursor.hide-readonly-cursor :deep(input) {
+  cursor: pointer;
 }
 
-.mobile-sheet {
-  border-top-left-radius: 24px !important;
-  border-top-right-radius: 24px !important;
+.date-picker-card.mobile-sheet {
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
   width: 100vw;
   padding-bottom: 20px;
 }
 
-.desktop-dialog {
-  border-radius: 24px !important;
+.date-picker-card.desktop-dialog {
+  border-radius: 24px;
   min-width: 360px;
 }
 
 .custom-q-date {
   border-radius: 16px;
+}
+
+.date-picker-close {
+  background: rgba(0, 0, 0, 0.05);
 }
 </style>

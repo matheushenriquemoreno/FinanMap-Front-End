@@ -16,23 +16,23 @@
           <q-btn
             flat
             no-caps
-            class="text-body1 q-px-md"
+            class="period-trigger text-body1 q-px-md"
             :aria-expanded="showSelector"
             aria-controls="period-selector-dialog"
             aria-haspopup="dialog"
             @click="showSelector = !showSelector"
             :loading="loading"
-            style="width: 185px"
           >
             <div
               :class="
-                'row items-center text-center text-weight-bold ' +
-                (mesAnoSelecionadoEhAtual ? 'text-primary' : 'text-dark')
+                'period-trigger__label row items-center text-center text-weight-bold ' +
+                (mesAnoSelecionadoEhAtual
+                  ? 'period-trigger__label--current'
+                  : 'period-trigger__label--default')
               "
             >
               {{ mesAtualNome }} {{ selectedYear }}
               <q-icon
-                :color="mesAnoSelecionadoEhAtual ? 'primary' : 'dark'"
                 :name="mesAnoSelecionadoEhAtual ? 'event' : 'expand_more'"
                 size="sm"
                 class="q-ml-xs"
@@ -67,9 +67,7 @@
                 class="text-primary"
                 size="16px"
               >
-                <q-tooltip class="bg-grey-7" style="font-size: 14px"
-                  >Voltar para data atual</q-tooltip
-                >
+                <q-tooltip class="period-tooltip bg-grey-7">Voltar para data atual</q-tooltip>
               </q-btn>
             </div>
           </q-card-section>

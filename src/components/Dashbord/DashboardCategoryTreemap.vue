@@ -1,9 +1,8 @@
 <template>
   <q-card
-    flat
     bordered
-    class="treemap-card"
-    :class="$q.dark.isActive ? 'bg-dark treemap-card--dark' : 'bg-white treemap-card--light'"
+    class="dashboard-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section>
       <div class="row items-center justify-between">
@@ -33,10 +32,13 @@
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <div v-if="loading" class="flex flex-center" style="height: 380px">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--380">
         <q-spinner color="primary" size="3em" />
       </div>
-      <div v-else-if="semDados" class="flex flex-center column" style="height: 380px; gap: 12px">
+      <div
+        v-else-if="semDados"
+        class="dashboard-card__state dashboard-card__state--empty dashboard-card__state--380"
+      >
         <q-icon
           name="format_list_bulleted"
           size="48px"
@@ -58,6 +60,7 @@ import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import { getDashboardCategoryPalette } from 'src/design-system/dashboardTheme';
 
 const $q = useQuasar();
 const store = useDashboardStore();
@@ -112,15 +115,12 @@ const series = computed(() => [
 
 const categories = computed(() => processedData.value.map((item) => item.x));
 
-const corPorTipo: Record<string, [string, string]> = {
-  [TipoCategoriaETransacao.Rendimento]: ['#21ba45', '#2e7d32'],
-  [TipoCategoriaETransacao.Despesa]: ['#e53935', '#c10015'],
-  [TipoCategoriaETransacao.Investimento]: ['#31ccec', '#0288d1'],
-};
-
-const cores = computed(() => corPorTipo[tipoSelecionado.value] ?? ['#1d169c', '#0d0a6e']);
-const corPrimaria = computed((): string => cores.value[0] ?? '#1d169c');
-const corSecundaria = computed((): string => cores.value[1] ?? '#0d0a6e');
+const cores = computed(() => {
+  void $q.dark.isActive;
+  return getDashboardCategoryPalette(tipoSelecionado.value);
+});
+const corPrimaria = computed(() => cores.value[0]);
+const corSecundaria = computed(() => cores.value[1]);
 
 const computedMax = computed(() => {
   if (!series.value[0]?.data.length) return 100;
@@ -241,19 +241,3 @@ function carregarCategorias() {
   void store.carregarCategorias(tipoSelecionado.value);
 }
 </script>
-
-<style scoped>
-.treemap-card {
-  border-radius: 16px !important;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease;
-}
-
-.treemap-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
-}
-
-.treemap-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
-}
-</style>

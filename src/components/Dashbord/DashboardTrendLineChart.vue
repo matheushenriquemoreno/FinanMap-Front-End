@@ -1,9 +1,8 @@
 <template>
   <q-card
-    flat
     bordered
-    class="trend-card"
-    :class="$q.dark.isActive ? 'bg-dark trend-card--dark' : 'bg-white trend-card--light'"
+    class="dashboard-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section>
       <div class="row items-center justify-between q-mb-xs">
@@ -22,13 +21,13 @@
           </div>
         </div>
         <div class="trend-legend row q-gutter-sm gt-xs">
-          <q-chip size="13px" :style="{ background: 'rgba(33, 186, 69, 0.15)', color: '#21ba45' }">
+          <q-chip size="13px" class="dashboard-series-chip--income">
             <q-icon name="circle" size="8px" class="q-mr-xs" />Rendimentos
           </q-chip>
-          <q-chip size="13px" :style="{ background: 'rgba(193, 0, 21, 0.15)', color: '#c10015' }">
+          <q-chip size="13px" class="dashboard-series-chip--expense">
             <q-icon name="circle" size="8px" class="q-mr-xs" />Despesas
           </q-chip>
-          <q-chip size="13px" :style="{ background: 'rgba(49, 204, 236, 0.15)', color: '#31ccec' }">
+          <q-chip size="13px" class="dashboard-series-chip--investment">
             <q-icon name="circle" size="8px" class="q-mr-xs" />Investimentos
           </q-chip>
         </div>
@@ -36,7 +35,7 @@
     </q-card-section>
 
     <q-card-section class="q-pt-none">
-      <div v-if="loading" class="flex flex-center" style="height: 380px">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--380">
         <q-spinner color="primary" size="3em" />
       </div>
       <VueApexCharts v-else type="area" height="380" :options="chartOptions" :series="series" />
@@ -50,6 +49,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import { getDashboardSeriesPalette } from 'src/design-system/dashboardTheme';
 
 const $q = useQuasar();
 const store = useDashboardStore();
@@ -86,7 +86,7 @@ const chartOptions = computed<ApexOptions>(() => ({
   theme: {
     mode: $q.dark.isActive ? 'dark' : 'light',
   },
-  colors: ['#21ba45', '#c10015', '#31ccec'],
+  colors: getDashboardSeriesPalette(),
   stroke: {
     curve: 'smooth',
     width: 2.5,
@@ -150,14 +150,13 @@ const chartOptions = computed<ApexOptions>(() => ({
       w: { globals: { categoryLabels: string[] } };
     }) {
       const labels = ['Rendimentos', 'Despesas', 'Investimentos'];
-      const colors = ['#21ba45', '#c10015', '#31ccec'];
       const xLabel = w.globals.categoryLabels[dataPointIndex] || '';
       let html = `<div class="trend-tooltip">
         <div class="trend-tooltip__header">${xLabel}</div>`;
       s.forEach((serie: number[], i: number) => {
         const val = serie[dataPointIndex] ?? 0;
         html += `<div class="trend-tooltip__row">
-          <span class="trend-tooltip__dot" style="background:${colors[i]};"></span>
+          <span class="trend-tooltip__dot trend-tooltip__dot--${i}"></span>
           <span class="trend-tooltip__label">${labels[i]}</span>
           <span class="trend-tooltip__val">${formatarValor(val)}</span>
         </div>`;
@@ -213,6 +212,15 @@ function formatarValorCurto(valor: number) {
   border-radius: 50%;
   flex-shrink: 0;
 }
+.trend-tooltip__dot--0 {
+  background: var(--q-positive);
+}
+.trend-tooltip__dot--1 {
+  background: var(--q-negative);
+}
+.trend-tooltip__dot--2 {
+  background: var(--q-info);
+}
 .trend-tooltip__label {
   font-size: 12px;
   color: #ccc;
@@ -230,21 +238,5 @@ function formatarValorCurto(valor: number) {
   font-size: 12px;
   font-weight: 700;
   color: #fff;
-}
-</style>
-
-<style scoped>
-.trend-card {
-  border-radius: 16px !important;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease;
-}
-
-.trend-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
-}
-
-.trend-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
 }
 </style>

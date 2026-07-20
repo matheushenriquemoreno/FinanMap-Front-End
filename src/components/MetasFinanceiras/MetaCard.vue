@@ -28,7 +28,7 @@
 
       <div class="meta-card__valores q-mt-md">
         <span class="text-body2 text-bold">R$ {{ formatarValor(meta.valorAtual) }}</span>
-        <span class="text-body2" style="opacity: 0.7">R$ {{ formatarValor(meta.valorAlvo) }}</span>
+        <span class="meta-card__muted text-body2">R$ {{ formatarValor(meta.valorAlvo) }}</span>
       </div>
 
       <q-linear-progress
@@ -41,10 +41,10 @@
       />
 
       <div class="meta-card__info q-mt-xs">
-        <span class="text-caption" style="opacity: 0.7"
+        <span class="meta-card__muted text-caption"
           >{{ meta.percentualProgresso?.toFixed(0) || 0 }}%</span
         >
-        <span class="text-caption" style="opacity: 0.7">
+        <span class="meta-card__muted text-caption">
           <q-icon name="calendar_today" size="12px" class="q-mr-xs" />
           {{
             meta.diasRestantes >= 0
@@ -154,6 +154,10 @@ const corProgresso = computed(() => {
   &__info {
     display: flex;
     justify-content: space-between;
+  }
+
+  &__muted {
+    opacity: 0.7;
   }
 }
 

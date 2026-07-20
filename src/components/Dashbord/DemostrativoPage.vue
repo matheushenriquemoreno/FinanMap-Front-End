@@ -1,5 +1,10 @@
 <template>
-  <div class="box" :class="$q.dark.isActive ? 'box--dark' : 'box--light'">
+  <div
+    class="dashboard-card box"
+    :class="
+      $q.dark.isActive ? 'box--dark dashboard-card--dark' : 'box--light dashboard-card--light'
+    "
+  >
     <div v-if="loading" class="flex flex-center full-height">
       <q-spinner color="primary" size="2em" />
     </div>
@@ -14,6 +19,7 @@ import type { ApexOptions } from 'apexcharts';
 import { computed, type PropType } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
+import { getDashboardSeriesColors } from 'src/design-system/dashboardTheme';
 
 const $q = useQuasar();
 
@@ -37,7 +43,7 @@ const props = defineProps({
   },
   corGrafico: {
     type: String,
-    default: '#1d169c', // Cor primaria do projeto
+    default: '',
   },
   mesesGrafico: {
     type: Object as PropType<string[]>,
@@ -98,7 +104,7 @@ const configuracoesGrafico = computed<ApexOptions>(() => ({
     min: 0,
   },
   xaxis: { type: 'category' },
-  colors: [props.corGrafico],
+  colors: [props.corGrafico || getDashboardSeriesColors().primary],
   title: {
     text: formatarValor(props.valor),
     offsetX: 30,
@@ -137,12 +143,7 @@ const valoresGrafico = computed(() => [
 <style scoped>
 .box {
   height: 190px;
-  border-radius: 16px;
-  overflow: hidden;
   cursor: default;
-  transition:
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
   position: relative;
 }
 
@@ -152,16 +153,10 @@ const valoresGrafico = computed(() => [
 
 .box--light {
   background: #fff;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .box--dark {
   background: #1e2021;
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.4),
-    0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .box__content {
@@ -186,13 +181,13 @@ const valoresGrafico = computed(() => [
 }
 
 .box__trend-badge--up {
-  background: rgba(33, 186, 69, 0.15);
-  color: #21ba45;
+  background: var(--semantic-positive-soft);
+  color: var(--q-positive);
 }
 
 .box__trend-badge--down {
-  background: rgba(193, 0, 21, 0.12);
-  color: #c10015;
+  background: var(--semantic-negative-soft-subtle);
+  color: var(--q-negative);
 }
 
 .full-height {

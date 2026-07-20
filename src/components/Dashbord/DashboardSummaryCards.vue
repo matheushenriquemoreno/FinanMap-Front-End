@@ -7,7 +7,7 @@
         :meses-grafico="meses"
         :dados-grafico="dadosGrafico.rendimento"
         nome-valor-grafico="Rendimento"
-        cor-grafico="#21ba45"
+        :cor-grafico="seriesColors.income"
         :loading="loading"
       />
     </div>
@@ -18,7 +18,7 @@
         :meses-grafico="meses"
         :dados-grafico="dadosGrafico.despesa"
         nome-valor-grafico="Despesa"
-        cor-grafico="#c10015"
+        :cor-grafico="seriesColors.expense"
         :loading="loading"
       />
     </div>
@@ -29,7 +29,7 @@
         :meses-grafico="meses"
         :dados-grafico="dadosGrafico.investimento"
         nome-valor-grafico="Investimento"
-        cor-grafico="#31ccec"
+        :cor-grafico="seriesColors.investment"
         :loading="loading"
       />
     </div>
@@ -38,10 +38,17 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useQuasar } from 'quasar';
 import { useDashboardStore } from 'src/stores/dashboardStore';
 import Demostrativo from 'src/components/Dashbord/DemostrativoPage.vue';
+import { getDashboardSeriesColors } from 'src/design-system/dashboardTheme';
 
 const store = useDashboardStore();
+const $q = useQuasar();
+const seriesColors = computed(() => {
+  void $q.dark.isActive;
+  return getDashboardSeriesColors();
+});
 const loading = computed(() => store.isLoading);
 
 const dados = computed(() => ({

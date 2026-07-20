@@ -4,6 +4,22 @@
   border-radius: 16px;
 }
 
+.period-trigger {
+  width: 185px;
+}
+
+.period-trigger__label--current {
+  color: var(--q-primary);
+}
+
+.period-trigger__label--default {
+  color: var(--text-primary);
+}
+
+.period-tooltip {
+  font-size: 14px;
+}
+
 .year-selector,
 .years-container,
 .year-item,
@@ -18,7 +34,7 @@
 }
 
 .year-nav-btn {
-  color: #9e9e9e;
+  color: var(--text-secondary);
 }
 
 .years-container {
@@ -38,13 +54,13 @@
 }
 
 .year-item:hover {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #2f6531;
+  background-color: var(--semantic-primary-soft);
+  color: var(--q-primary);
 }
 
-.year-selected {
-  background-color: #2f6531 !important;
-  color: white !important;
+.year-item.year-selected {
+  background-color: var(--q-primary);
+  color: white;
   font-size: 20px;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
@@ -70,15 +86,15 @@
 }
 
 .month-item:hover {
-  border-color: #2f6531;
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #2f6531;
+  border-color: var(--q-primary);
+  background-color: var(--semantic-primary-soft);
+  color: var(--q-primary);
 }
 
-.month-selected {
-  background-color: #2f6531 !important;
-  border-color: #2f6531 !important;
-  color: white !important;
+.month-item.month-selected {
+  background-color: var(--q-primary);
+  border-color: var(--q-primary);
+  color: white;
   box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
 }
 
@@ -118,14 +134,6 @@
   }
 }
 
-body.body--dark .text-dark {
-  color: #e0e0e0 !important;
-}
-
-body.body--dark .text-primary {
-  color: #5ab6ff !important;
-}
-
 body.body--dark .period-selector-card {
   background-color: #1e1e1e;
 }
@@ -135,8 +143,8 @@ body.body--dark .year-item {
 }
 
 body.body--dark .year-item:hover {
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #66bb6a;
+  background-color: var(--semantic-primary-soft-strong);
+  color: var(--q-primary);
 }
 
 body.body--dark .month-item {
@@ -145,16 +153,16 @@ body.body--dark .month-item {
 }
 
 body.body--dark .month-item:hover {
-  border-color: #66bb6a;
-  background-color: rgba(76, 175, 80, 0.2);
-  color: #66bb6a;
+  border-color: var(--q-primary);
+  background-color: var(--semantic-primary-soft-strong);
+  color: var(--q-primary);
 }
 
-body.body--dark .month-selected,
-body.body--dark .year-selected {
-  background-color: #4caf50 !important;
-  border-color: #4caf50 !important;
-  color: white !important;
+body.body--dark .month-item.month-selected,
+body.body--dark .year-item.year-selected {
+  background-color: var(--q-primary);
+  border-color: var(--q-primary);
+  color: white;
 }
 
 body.body--dark .year-nav-btn {

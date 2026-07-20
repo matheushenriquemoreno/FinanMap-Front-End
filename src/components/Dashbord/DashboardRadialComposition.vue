@@ -1,9 +1,8 @@
 <template>
   <q-card
-    flat
     bordered
-    class="radial-card"
-    :class="$q.dark.isActive ? 'bg-dark radial-card--dark' : 'bg-white radial-card--light'"
+    class="dashboard-card radial-card"
+    :class="$q.dark.isActive ? 'bg-dark dashboard-card--dark' : 'bg-white dashboard-card--light'"
   >
     <q-card-section>
       <div
@@ -17,11 +16,8 @@
       </div>
     </q-card-section>
 
-    <q-card-section
-      class="q-pt-none"
-      style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center"
-    >
-      <div v-if="loading" class="flex flex-center" style="height: 250px">
+    <q-card-section class="q-pt-none dashboard-card__body">
+      <div v-if="loading" class="dashboard-card__state dashboard-card__state--250">
         <q-spinner color="primary" size="3em" />
       </div>
       <VueApexCharts v-else type="bar" height="220" :options="chartOptions" :series="series" />
@@ -51,6 +47,7 @@ import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
+import { getDashboardSeriesPalette } from 'src/design-system/dashboardTheme';
 
 const $q = useQuasar();
 const store = useDashboardStore();
@@ -67,13 +64,16 @@ const series = computed(() => [
   },
 ]);
 
-const COLORS = ['#21ba45', '#c10015', '#31ccec'];
+const seriesPalette = computed(() => {
+  void $q.dark.isActive;
+  return getDashboardSeriesPalette();
+});
 const LABELS = ['Rendimentos', 'Despesas', 'Investimentos'];
 
 const legendItems = computed(() => [
-  { label: 'Rendimentos', valor: rendimento.value, color: COLORS[0] },
-  { label: 'Despesas', valor: despesa.value, color: COLORS[1] },
-  { label: 'Investimentos', valor: investimento.value, color: COLORS[2] },
+  { label: 'Rendimentos', valor: rendimento.value, color: seriesPalette.value[0] },
+  { label: 'Despesas', valor: despesa.value, color: seriesPalette.value[1] },
+  { label: 'Investimentos', valor: investimento.value, color: seriesPalette.value[2] },
 ]);
 
 const chartOptions = computed<ApexOptions>(() => ({
@@ -90,7 +90,7 @@ const chartOptions = computed<ApexOptions>(() => ({
   theme: {
     mode: $q.dark.isActive ? 'dark' : 'light',
   },
-  colors: COLORS,
+  colors: seriesPalette.value,
   plotOptions: {
     bar: {
       horizontal: true,
@@ -161,20 +161,9 @@ function formatarValorCurto(valor: number) {
 
 <style scoped>
 .radial-card {
-  border-radius: 16px !important;
-  overflow: hidden;
   height: 100%;
-  transition: box-shadow 0.25s ease;
   display: flex;
   flex-direction: column;
-}
-
-.radial-card--light {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
-}
-
-.radial-card--dark {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
 }
 
 .radial-legend-dot {
