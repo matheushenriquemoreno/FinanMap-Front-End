@@ -1,11 +1,24 @@
 <template>
-  <q-input v-bind="attrs" :dense="styled?.dense ?? false" :filled="styled?.filled ?? false"
-    :rounded="styled?.rounded ?? false" :borderless="styled?.borderless ?? false" :label="label"
-    v-model="modelLocalDisplay" :rules="[(val) => validarData(val) || 'Digite uma data válida!']" :hint="hintDisplay">
+  <q-input
+    v-bind="attrs"
+    :dense="styled?.dense ?? false"
+    :filled="styled?.filled ?? false"
+    :rounded="styled?.rounded ?? false"
+    :borderless="styled?.borderless ?? false"
+    :label="label"
+    v-model="modelLocalDisplay"
+    :rules="[(val) => validarData(val) || 'Digite uma data válida!']"
+    :hint="hintDisplay"
+  >
     <template v-slot:append>
       <q-icon name="event" color="black" class="cursor-pointer">
         <q-popup-proxy ref="proxyIten" cover transition-show="scale" transition-hide="scale">
-          <q-date v-model="modelLocalDisplay" mask="DD/MM/YYYY" today-btn @update:model-value="() => proxyIten.hide()">
+          <q-date
+            v-model="modelLocalDisplay"
+            mask="DD/MM/YYYY"
+            today-btn
+            @update:model-value="() => proxyIten.hide()"
+          >
             <div class="row items-center justify-end">
               <q-btn v-close-popup label="Fechar" icon="close" flat dense></q-btn>
             </div>
@@ -116,7 +129,7 @@ function validarDataBR(inputString: string): boolean {
   try {
     const data = converterDataBRParaDate(inputString);
     return !isNaN(data.getTime());
-  } catch (e) {
+  } catch {
     return false;
   }
 }

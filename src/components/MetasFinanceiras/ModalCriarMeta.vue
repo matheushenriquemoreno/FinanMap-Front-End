@@ -33,7 +33,7 @@
               v-model="form.valorAlvo"
               label=""
               placeholder="10.000,00"
-              :rules="[(val) => val > 0 || 'Valor deve ser positivo']"
+              :rules="[(val) => (val !== null && val > 0) || 'Valor deve ser positivo']"
             />
           </div>
 

@@ -1,4 +1,4 @@
-import type { TipoCategoriaETransacao } from "./Categoria";
+import type { TipoCategoriaETransacao } from './Categoria';
 
 export interface ReplicarTransacoesPeriodo {
   periodoInicial: Date;

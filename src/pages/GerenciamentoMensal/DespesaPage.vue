@@ -117,16 +117,20 @@
 import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
 import CriarRegistroProximoMesModal from 'src/components/Transacao/CriarRegistroProximoMesModal.vue';
 import DespesaTableRow from 'src/components/Despesa/DespesaTableRow.vue';
-import type { DespesaCreate, DespesaResult, LancarDespesaLoteDTO, AtualizarLoteDespesaDTO } from 'src/Model/Transacao';
+import type {
+  DespesaCreate,
+  DespesaResult,
+  LancarDespesaLoteDTO,
+  AtualizarLoteDespesaDTO,
+} from 'src/Model/Transacao';
 import { ModificadorLote } from 'src/Model/Transacao';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import { useQuasar, type NamedColor, type QTableColumn } from 'quasar';
 import getDespesaService from 'src/services/transacao/DespesaService';
-import GerenciamentoMensalPageIndex from './GerenciamentoMensalPageIndex.vue';
 
 // services
 const despesaservice = getDespesaService();
@@ -141,7 +145,7 @@ const despesaEdit = ref<DespesaResult>({} as DespesaResult);
 // Controle manual do estado de expansão
 const despesasExpandidas = ref<Set<string>>(new Set());
 
-const despesasColumns: any[] = [
+const despesasColumns: QTableColumn<DespesaResult>[] = [
   {
     name: 'categoriaNome',
     field: 'categoriaNome',
@@ -163,11 +167,11 @@ const despesasColumns: any[] = [
     format: (val: number) =>
       val ? val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
     sortable: true,
-    sort: (a: any, b: any) => parseInt(a, 10) - parseInt(b, 10),
+    sort: (a, b) => Number(a) - Number(b),
   },
   {
     name: 'acoes',
-    field: 'acoes',
+    field: () => 'acoes',
     label: 'Ações',
     align: 'center',
   },
@@ -192,7 +196,7 @@ watch(
   () => {
     // Limpa as categorias expandidas ao mudar de mês
     despesasExpandidas.value = new Set();
-    getReportAcumulado();
+    void getReportAcumulado();
   },
   { deep: true },
 );
@@ -244,74 +248,86 @@ async function adicionar(despesa: DespesaCreate) {
 
   await despesaservice.create(despesa);
   abriModal.value = false;
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
 async function adicionarEmLote(dto: LancarDespesaLoteDTO) {
   await despesaservice.criarEmLote(dto);
   abriModal.value = false;
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
-function abrirDialogModificadorLote(acao: string, transacao: DespesaResult): Promise<ModificadorLote | null> {
+function abrirDialogModificadorLote(
+  acao: string,
+  transacao: DespesaResult,
+): Promise<ModificadorLote | null> {
   return new Promise((resolve) => {
     $q.dialog({
       title: `Opções de ${acao} em Lote`,
-      message: 'Esta despesa faz parte de um parcelamento ou recorrência. Deseja aplicar a alteração a:',
+      message:
+        'Esta despesa faz parte de um parcelamento ou recorrência. Deseja aplicar a alteração a:',
       options: {
         type: 'radio',
         model: String(ModificadorLote.ApenasEsta),
         items: [
           { label: 'Apenas esta despesa', value: String(ModificadorLote.ApenasEsta) },
-          { label: 'Esta e as próximas (futuras)', value: String(ModificadorLote.EstaEProximas), disable: transacao.isParcelado && transacao.parcelaAtual === transacao.totalParcelas },
+          {
+            label: 'Esta e as próximas (futuras)',
+            value: String(ModificadorLote.EstaEProximas),
+            disable: transacao.isParcelado && transacao.parcelaAtual === transacao.totalParcelas,
+          },
           { label: 'Todas as despesas do lote', value: String(ModificadorLote.TodasDoLote) },
-        ]
+        ],
       },
       cancel: true,
-      persistent: true
-    }).onOk((data: ModificadorLote) => {
-      resolve(Number(data) as ModificadorLote);
-    }).onCancel(() => {
-      resolve(null);
-    });
+      persistent: true,
+    })
+      .onOk((data: ModificadorLote) => {
+        resolve(Number(data));
+      })
+      .onCancel(() => {
+        resolve(null);
+      });
   });
 }
 
 async function editar(despesaUpdate: DespesaCreate) {
-  const original = despesas.value.find(d => d.id === despesaUpdate.id) || 
-                   despesas.value.flatMap(d => d.despesasFilhas || []).find(d => d.id === despesaUpdate.id) ||
-                   despesaEdit.value;
+  const original =
+    despesas.value.find((d) => d.id === despesaUpdate.id) ||
+    despesas.value.flatMap((d) => d.despesasFilhas || []).find((d) => d.id === despesaUpdate.id) ||
+    despesaEdit.value;
 
   if (original?.despesaOrigemId) {
     const modificador = await abrirDialogModificadorLote('Edição', original);
     if (modificador === null) return;
-    
+
     const dtoLote: AtualizarLoteDespesaDTO = {
       novoValor: Number(despesaUpdate.valor),
       novaDescricao: despesaUpdate.descricao,
       novaCategoriaId: despesaUpdate.categoriaId,
       idDespesaAgrupadora: despesaUpdate.idDespesaAgrupadora ?? '',
-      modificador: modificador
+      modificador: modificador,
     };
 
     await despesaservice.atualizarLote(despesaUpdate.id!, dtoLote);
   } else {
     await despesaservice.update(despesaUpdate);
   }
-  
+
   fecharModal();
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
 function excluir(id: string) {
-  const despesaParaExcluir = despesas.value.find(d => d.id === id) || 
-                             despesas.value.flatMap(d => d.despesasFilhas || []).find(d => d.id === id);
+  const despesaParaExcluir =
+    despesas.value.find((d) => d.id === id) ||
+    despesas.value.flatMap((d) => d.despesasFilhas || []).find((d) => d.id === id);
 
   if (despesaParaExcluir?.despesaOrigemId) {
-    abrirDialogModificadorLote('Exclusão', despesaParaExcluir).then((modificador) => {
+    void abrirDialogModificadorLote('Exclusão', despesaParaExcluir).then((modificador) => {
       if (modificador !== null) {
-        despesaservice.excluirLote(id, modificador).then(() => {
-          getReportAcumulado();
+        void despesaservice.excluirLote(id, modificador).then(() => {
+          void getReportAcumulado();
         });
       }
     });
@@ -321,8 +337,8 @@ function excluir(id: string) {
       cancel: true,
       persistent: false,
     }).onOk(() => {
-      despesaservice.delete(id).then(() => {
-        getReportAcumulado();
+      void despesaservice.delete(id).then(() => {
+        void getReportAcumulado();
       });
     });
   }
@@ -399,17 +415,27 @@ async function buscarDespesasAgrupadas(id: string, expandir = true) {
   useGerenciamentoMensal.setLoading(false);
 }
 
-function filtrarDespesasDaAgrupadora(id: string) {
-  if (despesasExpandidas.value.has(id)) {
-    return despesas.value.filter((x) => x.idDespesaAgrupadora === id);
-  }
-  return [];
+interface DespesaRowProps {
+  key: string | number;
+  row: DespesaResult;
+  rowIndex: number;
+  pageIndex: number;
+  cols: QTableColumn<DespesaResult>[];
+  colsMap: Record<string, QTableColumn<DespesaResult>>;
+  selected: boolean;
+  expand: boolean;
+  color: NamedColor;
+  dark?: boolean | null;
+  dense: boolean;
+  __trClass: string;
+  __trStyle?: string;
+  [property: string]: unknown;
 }
 
-function getPropsRow(props: any, despesa: DespesaResult) {
+function getPropsRow(props: DespesaRowProps, despesa: DespesaResult): DespesaRowProps {
   const newProps = { ...props };
   newProps.row = despesa;
-  newProps.key = despesa.id;
+  newProps.key = despesa.id ?? props.key;
   return newProps;
 }
 
@@ -429,8 +455,8 @@ function excluirRegistrosSelecionados() {
     persistent: false,
   }).onOk(() => {
     const ids = obterIdsRegistrosSelecionados.value;
-    despesaservice.deleteMany(ids).then(() => {
-      getReportAcumulado();
+    void despesaservice.deleteMany(ids).then(() => {
+      void getReportAcumulado();
     });
     registrosSelecionados.value = [];
   });

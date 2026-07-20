@@ -1,0 +1,138 @@
+.custos-page {
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (max-width: 600px) {
+    padding: 16px !important;
+  }
+}
+
+.custos-grid-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
+
+  @media (max-width: 650px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.custos-empty,
+.text-busca-vazia {
+  margin-top: 80px;
+}
+
+.skeleton-card {
+  border-radius: 16px;
+}
+
+.buscar-input {
+  width: 100%;
+  max-width: 450px;
+
+  @media (max-width: 599px) {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 599px) {
+  .status-filter-column {
+    display: block;
+  }
+}
+
+@media (min-width: 600px) {
+  .flex.justify-end-sm {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.status-toggle-premium {
+  max-width: 100%;
+
+  :deep(.q-btn-group) {
+    max-width: 100%;
+  }
+
+  :deep(.q-btn) {
+    min-height: 40px;
+  }
+
+  @media (max-width: 599px) {
+    width: 100%;
+
+    :deep(.q-btn-group) {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      width: 100%;
+    }
+
+    :deep(.q-btn) {
+      min-width: 0;
+      width: 100%;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+  }
+
+  @media (max-width: 380px) {
+    :deep(.q-btn-group) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.status-toggle-option {
+  min-width: 0;
+  justify-content: center;
+  white-space: nowrap;
+
+  span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 420px) {
+    padding-left: 2px;
+    padding-right: 2px;
+
+    .q-icon {
+      margin-right: 2px;
+      font-size: 16px !important;
+    }
+  }
+
+  @media (max-width: 380px) {
+    justify-content: flex-start;
+    padding: 0 12px;
+  }
+}
+
+.border-sutil {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+
+  .body--dark & {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+}
+
+.badge-contador {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+}

@@ -149,7 +149,6 @@
 </template>
 
 <script setup lang="ts">
-import CampoSelectComSusgestao from 'src/components/Transacao/CampoSelect/CampoSelectComSusgestao.vue';
 import CampoSelect from 'src/components/CampoSelect/CampoSelectServer.vue';
 import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import { computed, ref, watch } from 'vue';
@@ -216,7 +215,7 @@ const valorNumerico = computed({
     return Number(v);
   },
   set: (val: number | null) => {
-    dadosFormulario.value.valor = val as any;
+    dadosFormulario.value.valor = val ?? 0;
   },
 });
 
@@ -292,21 +291,18 @@ const emit = defineEmits<{
 // metodos
 async function buscarCategorias(value?: string) {
   const axios = CreateIntanceAxios();
-  const result = await axios.get<Categoria[]>(
-    process.env.URL_API + 'categorias/GetUserCategorias',
-    {
-      params: {
-        tipoCategoria: TipoCategoriaETransacao.Despesa,
-        nome: value ?? '',
-      },
+  const result = await axios.get<Categoria[]>('categorias/GetUserCategorias', {
+    params: {
+      tipoCategoria: TipoCategoriaETransacao.Despesa,
+      nome: value ?? '',
     },
-  );
+  });
   return result.data;
 }
 
 async function buscarDespesas(value?: string) {
   const axios = CreateIntanceAxios();
-  const result = await axios.get<DespesaResult[]>(process.env.URL_API + 'despesas', {
+  const result = await axios.get<DespesaResult[]>('despesas', {
     params: {
       ano: props.ano,
       mes: props.mes,
@@ -321,7 +317,7 @@ async function buscarDespesas(value?: string) {
 const submitFormulario = () => {
   if (props.ehEdicao) {
     dadosFormulario.value.idDespesaAgrupadora = despesaAgrupadora.value?.id ?? '';
-    emit('onSubmitEdit', dadosFormulario.value as DespesaCreate);
+    emit('onSubmitEdit', dadosFormulario.value);
   } else {
     if (modoLote.value) {
       const dtoLote: LancarDespesaLoteDTO = {
@@ -342,7 +338,7 @@ const submitFormulario = () => {
       emit('onSubmitAddLote', dtoLote);
     } else {
       dadosFormulario.value.idDespesaAgrupadora = despesaAgrupadora.value?.id ?? '';
-      emit('onSubmitAdd', dadosFormulario.value as DespesaCreate);
+      emit('onSubmitAdd', dadosFormulario.value);
     }
   }
 };

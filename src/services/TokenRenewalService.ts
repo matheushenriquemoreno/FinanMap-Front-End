@@ -1,4 +1,5 @@
 import { refreshTokenManager } from './RefreshTokenManager';
+import { sessionService } from './SessionService';
 
 const CHECK_INTERVAL_MS = 60000; // Verifica a cada 1 minuto
 
@@ -44,16 +45,13 @@ class TokenRenewalService {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return;
-    }
+    if (!sessionService.hasSession()) return;
 
     this.isRunning = true;
-    this.checkAndRenewToken();
+    void this.checkAndRenewToken();
 
     this.intervalId = setInterval(() => {
-      this.checkAndRenewToken();
+      void this.checkAndRenewToken();
     }, CHECK_INTERVAL_MS);
 
     // Adiciona listener para garantir a renovação quando o usuário volta para o app (especialmente no iOS)
@@ -78,10 +76,7 @@ class TokenRenewalService {
    */
   private async checkAndRenewToken(): Promise<void> {
     try {
-      const token = localStorage.getItem('token');
-      const refreshToken = localStorage.getItem('refreshToken');
-
-      if (!token || !refreshToken) {
+      if (!sessionService.hasSession()) {
         this.stop();
         return;
       }
@@ -107,10 +102,7 @@ class TokenRenewalService {
    * Trata falha na renovação - limpa dados e redireciona
    */
   private handleRenewalFailure(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
-
+    sessionService.clear();
     window.location.href = process.env.LOGIN_URL ?? '/#/login';
   }
 }

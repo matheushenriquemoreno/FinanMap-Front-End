@@ -1,7 +1,7 @@
 <template>
   <div class="text-start">
     <span class="periodo-label"> {{ label }} </span>
-    <div class="flex justify-center  q-gutter-sm gap-1">
+    <div class="flex justify-center q-gutter-sm gap-1">
       <div style="width: 45%; min-width: 220px">
         <InputSelectMes label="Mês" v-model:model-value="modelLocal.mes" :styled="styled" />
       </div>
@@ -58,7 +58,7 @@ const modelLocal = computed({
   get() {
     return props.modelValue;
   },
-  set(value: any) {
+  set(value: MesAno) {
     emit('update:modelValue', value);
   },
 });

@@ -28,7 +28,7 @@
           <MoneyInputBR
             v-model="valorEditado"
             label="Valor da Contribuição (R$)"
-            :rules="[(val) => val > 0 || 'Valor deve ser positivo']"
+            :rules="[(val) => (val !== null && val > 0) || 'Valor deve ser positivo']"
             autofocus
           />
 

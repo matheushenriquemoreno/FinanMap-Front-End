@@ -7,15 +7,12 @@ export default async function ObterSusgestaoCategorias(
 ): Promise<string[]> {
   const api = CreateIntanceAxios();
   try {
-    const response = await api.get<string[]>(
-      process.env.URL_API + 'Categorias/Apoio/SugestoesCategoria',
-      {
-        params: {
-          tipoCategoria: tipoCategoria,
-          nomeItemCadastro: nomeItemCadastro,
-        },
+    const response = await api.get<string[]>('Categorias/Apoio/SugestoesCategoria', {
+      params: {
+        tipoCategoria: tipoCategoria,
+        nomeItemCadastro: nomeItemCadastro,
       },
-    );
+    });
     return response.data;
   } catch (error) {
     handleErrorAxios(error);

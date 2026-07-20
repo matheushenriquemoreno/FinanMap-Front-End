@@ -20,11 +20,13 @@
 
 ## Phase 3 -- Arquitetura, testes e configuração
 
-- [ ] Task 1: consolidar ambiente e cliente HTTP
-- [ ] Task 2: fortalecer tipagem e lint
-- [ ] Task 3: implantar testes de comportamento
-- [ ] Task 4: reduzir componentes com responsabilidades misturadas
-- [ ] Task 5: validar, revisar, reauditar e versionar a rodada
+- [x] Task 1: consolidar ambiente e cliente HTTP
+- [x] Task 2: fortalecer tipagem e lint
+- [x] Task 3: implantar testes de comportamento
+- [x] Task 4: reduzir componentes com responsabilidades misturadas
+- [x] Task 5: validar, revisar, reauditar e versionar a rodada
+
+**Status da fase**: concluída; revisão independente final em PASS após consolidar ambiente/transporte HTTP, testar refresh e interceptores, remover persistência de credenciais, fortalecer lint e decompor os cinco maiores SFCs. Reauditoria: 9,7, com 0 achados críticos/altos/médios no escopo da fase.
 
 ## Phase 4 -- Design System e CSS
 

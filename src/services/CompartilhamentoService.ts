@@ -1,14 +1,12 @@
-import { CreateIntanceAxios, handleErrorAxios } from 'src/services/api/AxiosHelper';
+import { CreateIntanceAxios } from 'src/services/api/AxiosHelper';
 import type {
   Compartilhamento,
   CriarCompartilhamentoDTO,
   AtualizarPermissaoDTO,
-  ResponderConviteDTO
+  ResponderConviteDTO,
 } from 'src/models/Compartilhamento';
-import axios from 'axios';
-
 class CompartilhamentoService {
-  private readonly baseURL = process.env.URL_API +'compartilhamento';
+  private readonly baseURL = 'compartilhamento';
   private axios = CreateIntanceAxios();
 
   /**

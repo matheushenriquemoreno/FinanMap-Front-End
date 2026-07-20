@@ -16,10 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import ValorPadraoBR from './ValorPadraoBR.vue';
 
-const props = defineProps({
+defineProps({
   // Valor a ser exibido formatado pelo componente ValorPadraoBR
   valor: {
     type: Number,

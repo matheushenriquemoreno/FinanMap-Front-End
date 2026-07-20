@@ -181,6 +181,8 @@ import { computed, ref, onMounted } from 'vue';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import UsuarioService from 'src/services/UsuarioService';
 import UserAvatar from 'src/components/UserAvatar.vue';
+import { sessionService } from 'src/services/SessionService';
+import { tokenRenewalService } from 'src/services/TokenRenewalService';
 
 const themeStore = useThemeStore();
 const compartilhamentoStore = useCompartilhamentoStore();
@@ -196,15 +198,12 @@ const abrirModalConfig = ref(false);
 const username = computed(() => usuarioStore.name?.split(' ', 2).join(' ') ?? '');
 
 function handleLogout() {
-  // Remove todos os dados de autenticação do localStorage
-  localStorage.removeItem('token');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('userName');
-  localStorage.removeItem('userEmail');
+  tokenRenewalService.stop();
+  sessionService.clear();
   usuarioStore.clearUser();
 
   // Redireciona para a página de login
-  router.push({ name: 'LoginPage' });
+  void router.push({ name: 'LoginPage' });
 }
 
 onMounted(async () => {

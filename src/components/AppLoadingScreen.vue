@@ -11,11 +11,7 @@
         <!-- Logo with pulse animation -->
         <div class="loading-logo-wrapper">
           <div class="loading-logo-glow"></div>
-          <img
-            src="/favicon.ico"
-            alt="FinanMap"
-            class="loading-logo"
-          />
+          <img src="/favicon.ico" alt="FinanMap" class="loading-logo" />
         </div>
 
         <!-- App name -->
@@ -50,7 +46,7 @@ defineProps<{
   visible: boolean;
 }>();
 
-function particleStyle(index: number) {
+function particleStyle(_index: number) {
   const size = 2 + Math.random() * 4;
   const left = Math.random() * 100;
   const delay = Math.random() * 6;
@@ -154,7 +150,8 @@ function particleStyle(index: number) {
 }
 
 @keyframes logoGlow {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.5;
   }
@@ -174,7 +171,8 @@ function particleStyle(index: number) {
 }
 
 @keyframes logoPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
   50% {
@@ -281,7 +279,9 @@ function particleStyle(index: number) {
 }
 
 @keyframes dotBounce {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     opacity: 0.3;
     transform: translateY(0);
   }

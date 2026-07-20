@@ -71,7 +71,11 @@
           </q-td>
 
           <!-- Editar Valor -->
-          <q-td key="valor" :props="props" :class="compartilhamentoStore.podeEditar ? 'cursor-pointer' : ''">
+          <q-td
+            key="valor"
+            :props="props"
+            :class="compartilhamentoStore.podeEditar ? 'cursor-pointer' : ''"
+          >
             <ValorPadraoBR :valor="props.row.valor" />
             <q-popup-edit
               v-if="compartilhamentoStore.podeEditar"
@@ -125,7 +129,10 @@
                 >
               </q-btn>
             </section>
-            <section class="q-gutter-sm" v-else-if="!$q.screen.gt.xs && compartilhamentoStore.podeEditar">
+            <section
+              class="q-gutter-sm"
+              v-else-if="!$q.screen.gt.xs && compartilhamentoStore.podeEditar"
+            >
               <q-btn-dropdown round dense color="primary">
                 <q-list bordered separator>
                   <q-item clickable v-ripple @click="abriModalEditarInvestimento(props.row)">
@@ -181,7 +188,7 @@ import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService'
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import { useQuasar, type QTableColumn } from 'quasar';
 import getInvestimentoService from 'src/services/transacao/InvestimentoService';
 import IconesGerenciamentoMensal from 'src/helpers/IconesGerenciamentoMensal';
 
@@ -194,7 +201,7 @@ const filter = ref('');
 const abriModal = ref(false);
 const ehEdicao = ref(false);
 const investimentoEdit = ref<InvestimentoCreate>({} as InvestimentoCreate);
-const investimentosColumns: any[] = [
+const investimentosColumns: QTableColumn<InvestimentoResult>[] = [
   {
     name: 'categoriaNome',
     field: 'categoriaNome',
@@ -216,11 +223,11 @@ const investimentosColumns: any[] = [
     format: (val: number) =>
       val ? val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
     sortable: true,
-    sort: (a: any, b: any) => parseInt(a, 10) - parseInt(b, 10),
+    sort: (a, b) => Number(a) - Number(b),
   },
   {
     name: 'acoes',
-    field: 'acoes',
+    field: () => 'acoes',
     label: 'Ações',
     align: 'center',
   },
@@ -242,7 +249,7 @@ onMounted(async () => {
 watch(
   useGerenciamentoMensal.mesAtual,
   () => {
-    getReportAcumulado();
+    void getReportAcumulado();
   },
   { deep: true },
 );
@@ -269,13 +276,13 @@ async function adicionar(investimento: InvestimentoCreate) {
 
   await investimentoservice.create(investimento);
   abriModal.value = false;
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
 async function editar(investimento: InvestimentoCreate) {
   await investimentoservice.update(investimento);
   fecharModal();
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
 function excluir(id: string) {
@@ -284,8 +291,8 @@ function excluir(id: string) {
     cancel: true,
     persistent: false,
   }).onOk(() => {
-    investimentoservice.delete(id).then(() => {
-      getReportAcumulado();
+    void investimentoservice.delete(id).then(() => {
+      void getReportAcumulado();
     });
   });
 }
@@ -336,8 +343,8 @@ function excluirRegistrosSelecionados() {
     persistent: false,
   }).onOk(() => {
     const ids = obterIdsRegistrosSelecionados.value;
-    investimentoservice.deleteMany(ids).then(() => {
-      getReportAcumulado();
+    void investimentoservice.deleteMany(ids).then(() => {
+      void getReportAcumulado();
     });
     registrosSelecionados.value = [];
   });

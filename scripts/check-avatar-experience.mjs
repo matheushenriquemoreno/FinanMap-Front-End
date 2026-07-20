@@ -40,7 +40,7 @@ requirePattern(avatarComponent, /normalizarAvatarId/, 'UserAvatar deve aplicar f
 requirePattern(avatarComponent, /alt/, 'UserAvatar deve aceitar texto alternativo.');
 requirePattern(account, /role="radiogroup"/, 'Seletor deve expor um radiogroup acessível.');
 requirePattern(account, /aria-checked/, 'Opções devem expor o estado selecionado.');
-requirePattern(account, /catch\s*\(/, 'Falha ao salvar avatar deve ser tratada.');
+requirePattern(account, /catch\s*(?:\([^)]*\))?\s*\{/, 'Falha ao salvar avatar deve ser tratada.');
 requirePattern(account, /UserAvatar/, 'Cabeçalho da conta deve usar UserAvatar.');
 requirePattern(layout, /UserAvatar/g, 'Layout deve usar UserAvatar.');
 

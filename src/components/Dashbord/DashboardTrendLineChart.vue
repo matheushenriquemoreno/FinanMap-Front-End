@@ -140,7 +140,15 @@ const chartOptions = computed<ApexOptions>(() => ({
     y: {
       formatter: (val: number) => formatarValor(val),
     },
-    custom({ series: s, seriesIndex, dataPointIndex, w }: any) {
+    custom({
+      series: s,
+      dataPointIndex,
+      w,
+    }: {
+      series: number[][];
+      dataPointIndex: number;
+      w: { globals: { categoryLabels: string[] } };
+    }) {
       const labels = ['Rendimentos', 'Despesas', 'Investimentos'];
       const colors = ['#21ba45', '#c10015', '#31ccec'];
       const xLabel = w.globals.categoryLabels[dataPointIndex] || '';

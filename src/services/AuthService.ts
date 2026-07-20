@@ -1,34 +1,23 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { ref } from 'vue';
-import { Notify } from 'quasar'
-
+import { Notify } from 'quasar';
+import { apiClient } from './api/AxiosHelper';
 
 export interface LoginResult {
-  token: string,
-  refreshToken: string,
-  nomeUsuario: string
+  token: string;
+  refreshToken: string;
+  nomeUsuario: string;
 }
 
 export class AuthService {
   public loading = ref(false);
-  private baseUrl: string;
-  constructor() {
-    this.baseUrl = process.env.URL_API || '';
-  }
 
   // Login - solicita código de verificação
   async login(email: string): Promise<void> {
     try {
       this.loading.value = true;
 
-      const options = {
-        method: 'POST',
-        url: this.baseUrl + 'login',
-        data: { email },
-        headers: { 'Content-Type': 'application/json' },
-      };
-
-      await axios.request(options);
+      await apiClient.post('login', { email }, { skipSession: true });
     } catch (error) {
       this.handleLoginError(error);
       throw error;
@@ -42,14 +31,7 @@ export class AuthService {
     try {
       this.loading.value = true;
 
-      const options = {
-        method: 'POST',
-        url: this.baseUrl + 'login/Create',
-        data: { email, nome },
-        headers: { 'Content-Type': 'application/json' },
-      };
-
-      await axios.request(options);
+      await apiClient.post('login/Create', { email, nome }, { skipSession: true });
     } catch (error) {
       this.showNotification('Erro ao fazer cadastro. Tente novamente.');
       throw error;
@@ -63,14 +45,11 @@ export class AuthService {
     try {
       this.loading.value = true;
 
-      const options = {
-        method: 'POST',
-        url: this.baseUrl + 'login/validate-code',
-        data: { email, codigo },
-        headers: { 'Content-Type': 'application/json' },
-      };
-
-      const result = await axios.request<LoginResult>(options);
+      const result = await apiClient.post<LoginResult>(
+        'login/validate-code',
+        { email, codigo },
+        { skipSession: true },
+      );
       return result.data;
     } catch (error) {
       this.handleVerifyError(error);
@@ -82,19 +61,11 @@ export class AuthService {
 
   // Renovação do token usando refresh token
   async refreshToken(refreshToken: string): Promise<LoginResult> {
-    const options = {
-      method: 'POST',
-      url: this.baseUrl + 'login/refresh',
-      data: { refreshToken },
-      headers: { 'Content-Type': 'application/json' },
-    };
-
-    // Importante: garantir que não envie header de Authorization se o axios global estiver configurado
-    // Aqui estamos usando axios.request direto, que por padrão não envia headers globais a menos que configurado
-    // Mas como CreateIntanceAxios configura interceptors em uma *instância*, o axios global deve estar limpo.
-    // Confirmaremos no teste.
-
-    const result = await axios.request<LoginResult>(options);
+    const result = await apiClient.post<LoginResult>(
+      'login/refresh',
+      { refreshToken },
+      { skipSession: true },
+    );
     return result.data;
   }
 

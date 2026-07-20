@@ -1,7 +1,6 @@
-
-import { defineStore } from 'pinia'
-import type { AcumuladoMensal, MesAno } from 'src/Model/Transacao'
-import { ref } from 'vue'
+import { defineStore } from 'pinia';
+import type { AcumuladoMensal, MesAno } from 'src/Model/Transacao';
+import { ref } from 'vue';
 
 export const useGerenciamentoMensalStore = defineStore('GerenciamentoMensalStore ', () => {
   // Sessao acumulado mensal
@@ -13,8 +12,7 @@ export const useGerenciamentoMensalStore = defineStore('GerenciamentoMensalStore
   });
 
   function setAcumuladoMensal(acumulado: AcumuladoMensal | null) {
-    if (acumulado == null)
-      return;
+    if (acumulado == null) return;
     AcumuladoMensal.value = acumulado;
   }
 
@@ -38,7 +36,7 @@ export const useGerenciamentoMensalStore = defineStore('GerenciamentoMensalStore
     return {
       ano: DataAtual.getFullYear(),
       mes: DataAtual.getMonth() + 1,
-    } as MesAno;
+    };
   }
 
   function setMesAno(ano: number, mes: number) {
@@ -69,6 +67,6 @@ export const useGerenciamentoMensalStore = defineStore('GerenciamentoMensalStore
     clearAcumuladoMensal,
     getAcumuladoMensal,
     loading,
-    setLoading
+    setLoading,
   };
-})
+});

@@ -95,7 +95,7 @@ setInterval(() => {
   dataAtual.value = getDataAtualFormatada();
 }, 1000);
 
-const handlePeriodChange = ({ mes, ano }: any) => {
+const handlePeriodChange = ({ mes, ano }: { mes: number; ano: number }) => {
   useGerenciamentoMensal.setMesAno(ano, mes);
 };
 

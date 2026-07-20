@@ -13,7 +13,7 @@ class CustoFixoService {
   private axios = CreateIntanceAxios();
 
   constructor() {
-    this.baseUrl = process.env.URL_API + 'custos-fixos';
+    this.baseUrl = 'custos-fixos';
   }
 
   private async requestWithLoading<T>(fn: () => Promise<T>): Promise<T> {
@@ -49,7 +49,11 @@ class CustoFixoService {
     });
   }
 
-  async alterarStatus(id: string, ativo: boolean, custoCompleto: CustoFixoResult): Promise<CustoFixoResult> {
+  async alterarStatus(
+    id: string,
+    ativo: boolean,
+    custoCompleto: CustoFixoResult,
+  ): Promise<CustoFixoResult> {
     const dto: UpdateCustoFixoDTO = {
       id,
       nome: custoCompleto.nome,
@@ -71,7 +75,7 @@ class CustoFixoService {
   async obterConfiguracoes(): Promise<CustoFixoConfiguracao> {
     return this.requestWithLoading(async () => {
       const response = await this.axios.get<CustoFixoConfiguracao>(
-        process.env.URL_API + 'usuarios/configuracoes/custos-fixos'
+        'usuarios/configuracoes/custos-fixos',
       );
       return response.data;
     });
@@ -79,10 +83,7 @@ class CustoFixoService {
 
   async atualizarOptOut(receberNotificacoes: boolean): Promise<void> {
     return this.requestWithLoading(async () => {
-      await this.axios.put(
-        process.env.URL_API + 'usuarios/configuracoes/custos-fixos',
-        { receberNotificacoes }
-      );
+      await this.axios.put('usuarios/configuracoes/custos-fixos', { receberNotificacoes });
     });
   }
 }
@@ -90,4 +91,3 @@ class CustoFixoService {
 export default function getCustoFixoService() {
   return new CustoFixoService();
 }
-

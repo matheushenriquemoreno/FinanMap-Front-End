@@ -1,8 +1,7 @@
-
 export enum TipoCategoriaETransacao {
-  Despesa = "Despesa",
-  Rendimento = "Rendimento",
-  Investimento = "Investimento"
+  Despesa = 'Despesa',
+  Rendimento = 'Rendimento',
+  Investimento = 'Investimento',
 }
 
 export interface Categoria {

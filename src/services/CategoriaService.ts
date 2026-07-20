@@ -1,5 +1,10 @@
 import { handleErrorAxios, CreateIntanceAxios } from 'src/services/api/AxiosHelper';
-import type { CategoriaResult, CreateCategoriaDTO, TipoCategoriaETransacao, UpdateCategoriaDTO } from 'src/Model/Categoria';
+import type {
+  CategoriaResult,
+  CreateCategoriaDTO,
+  TipoCategoriaETransacao,
+  UpdateCategoriaDTO,
+} from 'src/Model/Categoria';
 import { ref } from 'vue';
 
 export class CategoriaService {
@@ -8,7 +13,7 @@ export class CategoriaService {
   private axios = CreateIntanceAxios();
 
   constructor() {
-    this.baseUrl = process.env.URL_API + 'Categorias';
+    this.baseUrl = 'Categorias';
   }
 
   private async requestWithLoading<T>(requestFn: () => Promise<T>) {
@@ -32,12 +37,15 @@ export class CategoriaService {
 
   async obterCategoria(tipoCategoria: TipoCategoriaETransacao, nome?: string) {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.get<CategoriaResult[]>(`${this.baseUrl}/GetUserCategorias`, {
-        params: {
-          tipoCategoria: tipoCategoria,
-          nome: nome ?? '',
+      const response = await this.axios.get<CategoriaResult[]>(
+        `${this.baseUrl}/GetUserCategorias`,
+        {
+          params: {
+            tipoCategoria: tipoCategoria,
+            nome: nome ?? '',
+          },
         },
-      });
+      );
       return response.data;
     });
   }
@@ -67,8 +75,6 @@ export class CategoriaService {
   }
 }
 
-
 export default function obterCategoriaService() {
   return new CategoriaService();
 }
-

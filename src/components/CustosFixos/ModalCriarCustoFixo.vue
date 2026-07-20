@@ -92,7 +92,7 @@
 import { ref, watch } from 'vue';
 import CampoSelect from 'src/components/CampoSelect/CampoSelectServer.vue';
 import obterCategoriaService from 'src/services/CategoriaService';
-import { TipoCategoriaETransacao } from 'src/Model/Categoria';
+import { TipoCategoriaETransacao, type CategoriaResult } from 'src/Model/Categoria';
 import type { CustoFixoCreate } from 'src/Model/CustoFixo';
 
 const props = defineProps<{ modelValue: boolean }>();
@@ -109,7 +109,8 @@ const form = ref({
   categoriaId: null as string | null,
 });
 
-const categoriaSelecionada = ref<any>(null);
+type CategoriaOption = Pick<CategoriaResult, 'id' | 'nome'>;
+const categoriaSelecionada = ref<CategoriaOption | null>(null);
 
 const opcoesDias = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -137,7 +138,7 @@ async function buscarCategorias(filtro: string) {
   }
 }
 
-function alterarCategoria(val: any) {
+function alterarCategoria(val: CategoriaOption | null) {
   form.value.categoriaId = val ? val.id : null;
 }
 

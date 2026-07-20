@@ -139,8 +139,8 @@ const chartOptions = computed<ApexOptions>(() => ({
             showAlways: false,
             label: 'Total',
             color: $q.dark.isActive ? '#aaa' : '#666',
-            formatter: (w: any) => {
-              const total = w.globals.seriesTotals.reduce((a: any, b: any) => a + b, 0);
+            formatter: (w: { globals: { seriesTotals: number[] } }) => {
+              const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
               return formatarValor(total);
             },
           },
@@ -165,9 +165,9 @@ const chartOptions = computed<ApexOptions>(() => ({
   },
 }));
 
-function formatarValor(valor: any) {
-  const valorNumerico = parseFloat(valor);
-  if (isNaN(valorNumerico)) return valor;
+function formatarValor(valor: number | string) {
+  const valorNumerico = Number(valor);
+  if (Number.isNaN(valorNumerico)) return String(valor);
   return valorNumerico.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
 }
 

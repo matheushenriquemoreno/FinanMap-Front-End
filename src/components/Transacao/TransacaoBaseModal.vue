@@ -126,8 +126,7 @@
 <script setup lang="ts">
 import CampoSelectServer from 'src/components/CampoSelect/CampoSelectServer.vue';
 import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
-import { computed, ref, watch, onMounted } from 'vue';
-import { useQuasar } from 'quasar';
+import { computed, ref, watch } from 'vue';
 import type { Categoria } from 'src/Model/Categoria';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { CreateIntanceAxios } from 'src/services/api/AxiosHelper';
@@ -162,9 +161,6 @@ const props = withDefaults(defineProps<Props>(), {
   ehEdicao: false,
 });
 
-// services
-const $q = useQuasar();
-
 // Variaveis
 const localModelValue = computed({
   get: () => props.modelValue,
@@ -183,14 +179,14 @@ const valorNumerico = computed({
     return Number(v);
   },
   set: (val: number | null) => {
-    dadosFormulario.value.valor = val as any;
+    dadosFormulario.value.valor = val ?? 0;
   },
 });
 
 watch(localModelValue, (valor) => {
   if (valor === true) {
     if (props.ehEdicao && isEmpty(props.transacao) == false) {
-      dadosFormulario.value = { ...props.transacao } as TransacaoCreate;
+      dadosFormulario.value = { ...props.transacao };
 
       categoriaSelecionada.value = {
         id: props.transacao.categoriaId,
@@ -204,7 +200,7 @@ watch(localModelValue, (valor) => {
       props.tipoCategoriaTransacao === TipoCategoriaETransacao.Investimento &&
       metasDisponiveis.value.length === 0
     ) {
-      carregarMetas();
+      void carregarMetas();
     }
   }
 });
@@ -238,15 +234,12 @@ async function carregarMetas() {
 
 async function buscarCategorias(value?: string) {
   const axios = CreateIntanceAxios();
-  const result = await axios.get<Categoria[]>(
-    process.env.URL_API + 'categorias/GetUserCategorias',
-    {
-      params: {
-        tipoCategoria: props.tipoCategoriaTransacao,
-        nome: value ?? '',
-      },
+  const result = await axios.get<Categoria[]>('categorias/GetUserCategorias', {
+    params: {
+      tipoCategoria: props.tipoCategoriaTransacao,
+      nome: value ?? '',
     },
-  );
+  });
   return result.data;
 }
 

@@ -71,7 +71,11 @@
           </q-td>
 
           <!-- Editar Valor -->
-          <q-td key="valor" :props="props" :class="compartilhamentoStore.podeEditar ? 'cursor-pointer' : ''">
+          <q-td
+            key="valor"
+            :props="props"
+            :class="compartilhamentoStore.podeEditar ? 'cursor-pointer' : ''"
+          >
             <ValorPadraoBR :valor="props.row.valor" />
             <q-popup-edit
               v-if="compartilhamentoStore.podeEditar"
@@ -125,7 +129,10 @@
                 >
               </q-btn>
             </section>
-            <section class="q-gutter-sm" v-else-if="!$q.screen.gt.xs && compartilhamentoStore.podeEditar">
+            <section
+              class="q-gutter-sm"
+              v-else-if="!$q.screen.gt.xs && compartilhamentoStore.podeEditar"
+            >
               <q-btn-dropdown round dense color="primary">
                 <q-list bordered separator>
                   <q-item clickable v-ripple @click="abriModalEditarRendimento(props.row)">
@@ -183,7 +190,7 @@ import { obterAcumuladoMensalReport } from 'src/services/AcumuladoMensalService'
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
 import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useQuasar } from 'quasar';
+import { useQuasar, type QTableColumn } from 'quasar';
 
 // services
 const rendimentoService = getRendimentoService();
@@ -195,7 +202,7 @@ const filter = ref('');
 const abriModal = ref(false);
 const ehEdicao = ref(false);
 const rendimentoEdit = ref<RendimentosCreate>({} as RendimentosCreate);
-const rendimentosColumns: any[] = [
+const rendimentosColumns: QTableColumn<RendimentosResult>[] = [
   {
     name: 'categoriaNome',
     field: 'categoriaNome',
@@ -217,11 +224,11 @@ const rendimentosColumns: any[] = [
     format: (val: number) =>
       val ? val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '',
     sortable: true,
-    sort: (a: any, b: any) => parseInt(a, 10) - parseInt(b, 10),
+    sort: (a, b) => Number(a) - Number(b),
   },
   {
     name: 'acoes',
-    field: 'acoes',
+    field: () => 'acoes',
     label: 'Ações',
     align: 'center',
   },
@@ -243,7 +250,7 @@ onMounted(async () => {
 watch(
   useGerenciamentoMensal.mesAtual,
   () => {
-    getReportAcumulado();
+    void getReportAcumulado();
   },
   { deep: true },
 );
@@ -266,13 +273,13 @@ async function adicionarRendimento(rendimentoCreate: RendimentosCreate) {
 
   await rendimentoService.create(rendimentoCreate);
   abriModal.value = false;
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
 async function editarRendimento(rendimentoUpdate: RendimentosCreate) {
   await rendimentoService.update(rendimentoUpdate);
   fecharModal();
-  getReportAcumulado();
+  void getReportAcumulado();
 }
 
 function excluirRendimento(id: string) {
@@ -281,8 +288,8 @@ function excluirRendimento(id: string) {
     cancel: true,
     persistent: false,
   }).onOk(() => {
-    rendimentoService.delete(id).then(() => {
-      getReportAcumulado();
+    void rendimentoService.delete(id).then(() => {
+      void getReportAcumulado();
     });
   });
 }
@@ -334,8 +341,8 @@ function excluirRegistrosSelecionados() {
   }).onOk(() => {
     const ids = obterIdsRegistrosSelecionados.value;
     useGerenciamentoMensal.setLoading(true);
-    rendimentoService.deleteMany(ids).then(() => {
-      getReportAcumulado();
+    void rendimentoService.deleteMany(ids).then(() => {
+      void getReportAcumulado();
     });
     useGerenciamentoMensal.setLoading(false);
     registrosSelecionados.value = [];

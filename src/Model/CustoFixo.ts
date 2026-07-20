@@ -24,4 +24,3 @@ export interface UpdateCustoFixoDTO {
 export interface CustoFixoConfiguracao {
   receberNotificacoes: boolean;
 }
-

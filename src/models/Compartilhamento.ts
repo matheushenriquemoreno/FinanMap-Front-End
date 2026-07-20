@@ -1,13 +1,13 @@
 // Enums
 export enum NivelPermissao {
   Visualizar = 'Visualizar',
-  Editar = 'Editar'
+  Editar = 'Editar',
 }
 
 export enum StatusConvite {
   Pendente = 'Pendente',
   Aceito = 'Aceito',
-  Recusado = 'Recusado'
+  Recusado = 'Recusado',
 }
 
 // Interfaces

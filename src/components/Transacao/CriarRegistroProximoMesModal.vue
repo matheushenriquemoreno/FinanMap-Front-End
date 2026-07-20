@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useQuasar, date } from 'quasar';
+import { date } from 'quasar';
 import type { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import replicarTransacoesPorPeriodo from 'src/services/ReplicarTranscoes';
 import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
@@ -75,7 +75,6 @@ interface Props {
 const props = defineProps<Props>();
 
 // services
-const $q = useQuasar();
 const useGerenciamentoMensal = useGerenciamentoMensalStore();
 
 // Variaveis

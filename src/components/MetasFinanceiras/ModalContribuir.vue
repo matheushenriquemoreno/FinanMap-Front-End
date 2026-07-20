@@ -66,7 +66,7 @@
             v-if="!vincularInvestimento"
             v-model="valor"
             label="Valor da Contribuição (R$)"
-            :rules="[(val) => val > 0 || val]"
+            :rules="[(val) => (val !== null && val > 0) || 'Valor deve ser positivo']"
             autofocus
           />
 
@@ -176,7 +176,7 @@ watch(vincularInvestimento, (novoValor) => {
   if (novoValor) {
     // Se ativou o toggle e ainda não carregamos na sessão atual, busca na API
     if (investimentosDisponiveis.value.length === 0) {
-      carregarInvestimentosDoMes();
+      void carregarInvestimentosDoMes();
     }
   } else {
     investimentoSelecionado.value = null;

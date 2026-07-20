@@ -3,7 +3,7 @@ import { CreateIntanceAxios, handleErrorAxios } from 'src/services/api/AxiosHelp
 
 class UsuarioService {
   private readonly axios = CreateIntanceAxios();
-  private readonly baseUrl = process.env.URL_API + 'user';
+  private readonly baseUrl = 'user';
 
   async obterPerfil(): Promise<UsuarioPerfil> {
     try {

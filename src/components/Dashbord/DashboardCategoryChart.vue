@@ -181,9 +181,9 @@ const chartOptions = computed<ApexOptions>(() => ({
   ],
 }));
 
-function formatarValor(valor: any, style: 'currency' | 'decimal' = 'currency') {
-  const valorNumerico = parseFloat(valor);
-  if (isNaN(valorNumerico)) return valor;
+function formatarValor(valor: number | string, style: 'currency' | 'decimal' = 'currency') {
+  const valorNumerico = Number(valor);
+  if (Number.isNaN(valorNumerico)) return String(valor);
   return valorNumerico.toLocaleString('pt-br', {
     style,
     currency: 'BRL',

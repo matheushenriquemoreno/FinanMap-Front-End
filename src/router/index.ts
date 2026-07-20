@@ -8,6 +8,7 @@ import {
 import routes from './routes';
 import { isTokenExpired } from '../helpers/JwtHelper';
 import { refreshTokenManager } from '../services/RefreshTokenManager';
+import { sessionService } from '../services/SessionService';
 
 /*
  * If not building with SSR mode, you can
@@ -21,7 +22,9 @@ import { refreshTokenManager } from '../services/RefreshTokenManager';
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory;
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -36,8 +39,8 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   Router.beforeEach(async (to, from, next) => {
     const publicPages = ['/login', '/register', '/verify'];
     const authRequired = !publicPages.includes(to.path);
-    const token = localStorage.getItem('token');
-    const refreshToken = localStorage.getItem('refreshToken');
+    const token = sessionService.getAccessToken();
+    const refreshToken = sessionService.getRefreshToken();
 
     if (authRequired) {
       if (!token) {
@@ -74,4 +77,3 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
   return Router;
 });
-

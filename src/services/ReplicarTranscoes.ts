@@ -1,9 +1,14 @@
-import { CreateIntanceAxios, handleErrorAxios } from "src/services/api/AxiosHelper";
-import { notificar } from "src/helpers/Notificacao";
-import type { TipoCategoriaETransacao } from "src/Model/Categoria";
-import type { ReplicarTransacoesPeriodo } from "src/Model/CriarRegistro";
+import { CreateIntanceAxios, handleErrorAxios } from 'src/services/api/AxiosHelper';
+import { notificar } from 'src/helpers/Notificacao';
+import type { TipoCategoriaETransacao } from 'src/Model/Categoria';
+import type { ReplicarTransacoesPeriodo } from 'src/Model/CriarRegistro';
 
-export default async function replicarTransacoesPorPeriodo(idRegistros: string[], dataInicial: Date, dataFinal: Date, tipocategoria: TipoCategoriaETransacao) {
+export default async function replicarTransacoesPorPeriodo(
+  idRegistros: string[],
+  dataInicial: Date,
+  dataFinal: Date,
+  tipocategoria: TipoCategoriaETransacao,
+) {
   const axios = CreateIntanceAxios();
 
   const replica: ReplicarTransacoesPeriodo = {
@@ -14,11 +19,10 @@ export default async function replicarTransacoesPorPeriodo(idRegistros: string[]
   };
 
   try {
-    await axios.post(`${process.env.URL_API}ReplicarTransacao/Periodo`, replica);
+    await axios.post('ReplicarTransacao/Periodo', replica);
     notificar('Registros replicados com sucesso para o período informado!');
   } catch (error) {
     handleErrorAxios(error);
     throw error;
   }
 }
-

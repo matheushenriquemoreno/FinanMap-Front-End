@@ -16,7 +16,7 @@ class MetaFinanceiraService {
   private axios = CreateIntanceAxios();
 
   constructor() {
-    this.baseUrl = process.env.URL_API + 'MetasFinanceiras';
+    this.baseUrl = 'MetasFinanceiras';
   }
 
   private async requestWithLoading<T>(fn: () => Promise<T>): Promise<T> {
@@ -74,12 +74,12 @@ class MetaFinanceiraService {
 
   async adicionarContribuicao(
     metaId: string,
-    dto: ContribuicaoDTO
+    dto: ContribuicaoDTO,
   ): Promise<ResultContribuicaoResponse> {
     return this.requestWithLoading(async () => {
       const response = await this.axios.post<ResultContribuicaoResponse>(
         `${this.baseUrl}/${metaId}/contribuicoes`,
-        dto
+        dto,
       );
       return response.data;
     });
@@ -93,12 +93,12 @@ class MetaFinanceiraService {
 
   async editarContribuicao(
     metaId: string,
-    dto: UpdateContribuicaoDTO
+    dto: UpdateContribuicaoDTO,
   ): Promise<ResultContribuicaoResponse> {
     return this.requestWithLoading(async () => {
       const response = await this.axios.put<ResultContribuicaoResponse>(
         `${this.baseUrl}/${metaId}/contribuicoes`,
-        dto
+        dto,
       );
       return response.data;
     });

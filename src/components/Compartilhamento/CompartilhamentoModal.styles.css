@@ -1,0 +1,70 @@
+.compartilhamento-modal {
+  width: 720px;
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: 16px;
+}
+
+.convite-panel {
+  border: 1px solid;
+  border-radius: 16px;
+}
+
+.convite-panel--light {
+  background: #f8f8ff;
+  border-color: rgba(29, 22, 156, 0.14);
+}
+
+.convite-panel--dark {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.permissao-convite {
+  width: 180px;
+}
+
+.invite-button {
+  min-height: 40px;
+  border-radius: 8px;
+}
+
+.access-list {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.permission-select {
+  min-width: 132px;
+}
+
+.done-button {
+  min-width: 112px;
+  border-radius: 8px;
+}
+
+@media (max-width: 599px) {
+  .compartilhamento-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 16px 16px 0 0;
+    align-self: flex-end;
+  }
+
+  .permissao-convite {
+    width: auto;
+  }
+
+  .access-list :deep(.q-item) {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .access-list :deep(.q-item__section--side) {
+    width: 100%;
+    align-items: flex-end;
+    padding-left: 56px;
+    padding-top: 8px;
+  }
+}

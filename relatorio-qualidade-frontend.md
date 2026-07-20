@@ -6,51 +6,84 @@
 
 **Data**: 19/07/2026
 
-**Rodada**: 3 — reauditoria após a Fase 2
+**Rodada**: 4 — reauditoria após a Fase 3
 
-**Stack identificada**: Vue 3.4, Quasar 2.18, Vite 6.2, TypeScript 5.5 em modo estrito, Pinia 3, Vue Router 4 em modo hash, Axios 1.2, ApexCharts 4 e SCSS.
+**Stack identificada**: Vue 3.5, Quasar 2.18, Vite 6.4, TypeScript 5.9 em modo estrito, Pinia 3, Vue Router 4 em modo hash, Axios 1.18, Vitest 3.2, Vue Test Utils 2.4, ApexCharts 4 e SCSS.
 
 ---
 
 ## Resumo executivo
 
-A segunda fase eliminou os três achados de performance. ApexCharts não participa mais do boot global e ficou contido no chunk lazy do dashboard; o entrypoint de produção não contém tokens da biblioteca. O dashboard passou a orquestrar e compartilhar resumo, evolução e categorias por período/tipo, com deduplicação concorrente, cache multiperíodo e proteção contra respostas obsoletas.
+A terceira fase eliminou o risco alto de credenciais persistidas no navegador e os quatro débitos médios de arquitetura. Access e refresh tokens agora ficam somente em memória; como o backend atual recebe o refresh token no corpo e não oferece cookie `HttpOnly`, recarregar a página encerra a sessão por decisão explícita de segurança.
 
-A regressão de performance executa os módulos reais de cache, registro de categorias e composição de snapshots. Ela cobre requisições concorrentes, A→B→A, retorno a A enquanto B está pendente e reidratação de categorias lazy em snapshots antigos. A implementação passou por quatro ciclos de revisão independente até não restar achado crítico, alto ou médio no escopo da fase.
+Configuração e transporte HTTP foram consolidados em um único `apiClient`, com URL por ambiente, validação antes do build, refresh preventivo/forçado deduplicado e retry único após `401`. O lockfile também foi atualizado: `npm audit` caiu de 1 crítico, 14 altos e 8 médios para apenas 2 baixos em dependências de desenvolvimento.
 
-O principal risco restante está na arquitetura de sessão: access e refresh tokens continuam no `localStorage`, o que exige alinhamento com o backend. Também permanecem débitos médios de configuração HTTP, tipagem/lint, testes de componentes, decomposição de arquivos grandes, Design System e CSS.
+O lint voltou a rejeitar `any`, símbolos sem uso e promises flutuantes. Vitest e Vue Test Utils executam oito testes de sessão, store, componente, composable, concorrência de refresh e interceptores. Os cinco maiores SFCs auditados delegam estado/efeitos a composables, mantêm CSS externo e ficaram abaixo de 300 linhas. Permanecem quatro achados médios, todos concentrados em Design System e CSS para a Fase 4.
 
 | Dimensão                            |  Nota   | Crítico | Alto  | Médio | Baixo |
 | ----------------------------------- | :-----: | :-----: | :---: | :---: | :---: |
 | Design System / consistência visual |   9,0   |    0    |   0   |   2   |   0   |
 | Performance / Core Web Vitals       |  10,0   |    0    |   0   |   0   |   0   |
 | Acessibilidade / UX                 |  10,0   |    0    |   0   |   0   |   0   |
-| Arquitetura Vue/Quasar              |   6,4   |    0    |   1   |   4   |   1   |
+| Arquitetura Vue/Quasar              |   9,7   |    0    |   0   |   0   |   3   |
 | CSS/SCSS/Quasar                     |   9,0   |    0    |   0   |   2   |   0   |
-| **Nota geral ponderada**            | **8,9** |  **0**  | **1** | **8** | **1** |
+| **Nota geral ponderada**            | **9,7** |  **0**  | **0** | **4** | **3** |
 
 **Pesos**: Performance 25%, Acessibilidade/UX 25%, Arquitetura 25%, Design System 15% e CSS/SCSS/Quasar 10%. Tailwind não foi cobrado porque não faz parte da stack.
 
 ### Evolução da qualidade
 
-| Indicador      | Rodada 1 | Rodada 2 | Rodada 3 | Evolução total |
-| -------------- | :------: | :------: | :------: | :------------: |
-| Nota ponderada |   5,7    |   8,0    |   8,9    |      +3,2      |
-| Críticos       |    2     |    0     |    0     |       -2       |
-| Altos          |    6     |    3     |    1     |       -5       |
-| Médios         |    10    |    9     |    8     |       -2       |
+| Indicador      | Rodada 1 | Rodada 2 | Rodada 3 | Rodada 4 | Evolução total |
+| -------------- | :------: | :------: | :------: | :------: | :------------: |
+| Nota ponderada |   5,7    |   8,0    |   8,9    |   9,7    |      +4,0      |
+| Críticos       |    2     |    0     |    0     |    0     |       -2       |
+| Altos          |    6     |    3     |    1     |    0     |       -6       |
+| Médios         |    10    |    9     |    8     |    4     |       -6       |
 
 ---
 
 ## Top 3 prioridades restantes
 
-1. Migrar a sessão para cookie `HttpOnly` em conjunto com o backend, retirando o refresh token do `localStorage`.
-2. Consolidar URL por ambiente e um único cliente Axios, removendo a instância de exemplo.
-3. Adicionar Vitest/Vue Test Utils e reativar regras de tipagem, começando por serviços e stores.
+1. Centralizar cores semânticas de gráficos e componentes em tokens compartilhados.
+2. Extrair o shell visual comum dos cards de dashboard.
+3. Reduzir estilos inline estáticos, overrides profundos e `!important` não essenciais.
 
 ---
 
 ## Achados resolvidos nesta rodada
+
+### ARCH-02 — Credenciais persistidas no navegador — Resolvido
+
+- `SessionService.ts` mantém access token, refresh token e identidade apenas em memória; a varredura de arquitetura proíbe `token` e `refreshToken` em `localStorage`/`sessionStorage`.
+- Login inicia a sessão em memória; router, interceptores, renovação e logout consomem o mesmo serviço.
+- O contrato disponível no backend ainda recebe refresh token no corpo. Sem cookie `HttpOnly`, a decisão segura é exigir novo login após reload, evitando uma credencial financeira persistente e legível por JavaScript.
+
+### ARCH-03 — Ambiente e transporte HTTP concorrentes — Resolvido
+
+- `.env.prod` e `.env.example` documentam a URL por ambiente; `validate-build-env.mjs` rejeita configuração ausente ou fora de HTTP(S) antes do build.
+- `ApiConfig.ts` normaliza a base URL, e `AxiosHelper.ts` contém o único `axios.create` da aplicação.
+- Serviços autenticados, autenticação, refresh, `$api` e `$axios` usam o mesmo `apiClient`; endpoints públicos usam `skipSession` para não enviar token nem contexto de compartilhamento.
+
+### ARCH-04 — Regras críticas de lint desativadas — Resolvido
+
+- `no-explicit-any`, `no-unused-vars` e `no-floating-promises` voltaram como erros globais.
+- Os 117 erros inicialmente expostos foram tipados ou tratados; a suíte atual passa sem suppression global dessas regras.
+
+### ARCH-05 — Componentes com responsabilidades misturadas — Resolvido
+
+- `SectionFiltrarPeriodo`, `CustosFixosPage`, `CategoriaConfig`, `CompartilhamentoModal` e `MothYearSelector` delegam estado e efeitos a composables nomeados.
+- Os estilos foram movidos para arquivos dedicados e todos os cinco SFCs ficaram abaixo do limite de 300 linhas da rodada.
+
+### ARCH-06 — Ausência de testes comportamentais reais — Resolvido
+
+- Vitest, jsdom e Vue Test Utils agora fazem parte de `npm test`.
+- Oito testes cobrem sessão em memória, store Pinia, renderização de componente, navegação de período, refresh concorrente, rotação de tokens, classificação 4xx/rede/5xx, retry após `401` e isolamento dos endpoints públicos.
+- A correção foi guiada por RED/GREEN; os testes dos interceptores revelaram e impediram a repetição do token antigo após `401`.
+
+### DEP-01 — Lockfile com vulnerabilidades críticas e altas — Resolvido
+
+- Axios foi atualizado para 1.18.1 e a toolchain foi alinhada a TypeScript 5.9, `vue-tsc` 3.3 e `vite-plugin-checker` 0.14.
+- `npm audit` passou de 29 vulnerabilidades (1 crítica, 14 altas, 8 médias e 6 baixas) para 2 baixas de desenvolvimento, sem `--force` ou upgrade para TypeScript 7.
 
 ### A11Y-01 — Nomes acessíveis em formulários — Resolvido
 
@@ -137,60 +170,7 @@ Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG: a F
 
 ## 4. Arquitetura Vue/Quasar
 
-### ARCH-02 — Access e refresh tokens ficam no `localStorage`
-
-**Severidade**: Alto
-
-**Local**: `ConfirmarCodigoLoginPage.vue:76-79`; `RefreshTokenManager.ts:35-36,82-83`; `AxiosHelper.ts:45-51`
-
-- **Esperado**: refresh token em cookie `HttpOnly`, `Secure` e `SameSite`; access token de curta duração conforme o modelo de backend.
-- **Implementado**: os dois tokens são persistidos em armazenamento acessível a JavaScript.
-- **Impacto**: uma vulnerabilidade XSS pode exfiltrar uma sessão persistente, risco relevante para aplicação financeira.
-- **Sugestão**: migrar o contrato de sessão com o backend e tratar CSRF conforme a estratégia de cookies.
-
-### ARCH-03 — Configuração de API está acoplada ao código-fonte
-
-**Severidade**: Médio
-
-**Local**: `quasar.config.ts:57`; `src/boot/axios.ts:18`
-
-- **Esperado**: URL por ambiente e um único cliente HTTP real.
-- **Implementado**: a API de produção está versionada na configuração e o boot exporta outra instância com `api.example.com`.
-- **Impacto**: ambientes ficam acoplados e duas arquiteturas HTTP concorrentes confundem manutenção e testes.
-- **Sugestão**: validar variáveis `.env` no build, remover o cliente de exemplo e consolidar a fábrica Axios.
-
-### ARCH-04 — TypeScript estrito é enfraquecido pela política de lint
-
-**Severidade**: Médio
-
-**Local**: `eslint.config.js:68-74`; componentes base e gráficos
-
-- **Esperado**: `any`, promises ignoradas e símbolos sem uso devem ser exceções locais e justificadas.
-- **Implementado**: `no-explicit-any`, `no-unused-vars` e `no-floating-promises` estão desativadas globalmente.
-- **Impacto**: contratos críticos perdem verificação apesar do modo estrito anunciado.
-- **Sugestão**: reativar regras gradualmente, começando por serviços, stores e componentes compartilhados.
-
-### ARCH-05 — Componentes concentram responsabilidades demais
-
-**Severidade**: Médio
-
-**Local**: `SectionFiltrarPeriodo.vue` (638 linhas); `CategoriaConfig.vue` (534); `CustosFixosPage.vue` (558); `CompartilhamentoModal.vue` (497); `MothYearSelector.vue` (459)
-
-- **Esperado**: páginas orquestram; domínio, fetch e estado reutilizável ficam em stores/composables; blocos visuais permanecem focados.
-- **Implementado**: vários arquivos misturam template, serviços, watchers, transformação e centenas de linhas de CSS.
-- **Impacto**: aumenta o raio de mudança, dificulta testes e favorece duplicação.
-- **Sugestão**: extrair responsabilidades testáveis, começando por período, tabelas de transação e modais.
-
-### ARCH-06 — A suíte ainda não testa comportamento real
-
-**Severidade**: Médio
-
-**Local**: `package.json`; `scripts/check-*.mjs`
-
-- **Esperado**: componentes, stores e fluxos financeiros devem ter testes unitários/de componente e smoke E2E.
-- **Implementado**: o checker de performance já executa módulos puros e fluxos assíncronos reais, mas componentes Vue, store Pinia e jornadas de navegador ainda não usam Vitest, Vue Test Utils ou Playwright.
-- **Impacto**: payloads, watchers, renderização, foco e refresh de sessão podem regredir sem detecção runtime.
-- **Sugestão**: manter os checks rápidos e adicionar Vitest + Vue Test Utils e Playwright nos fluxos críticos.
+Nenhum achado crítico, alto ou médio permanece nesta dimensão. Os débitos abaixo são baixos e não bloqueiam a Fase 4.
 
 ### ARCH-07 — Nomenclatura e organização são inconsistentes
 
@@ -203,13 +183,35 @@ Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG: a F
 - **Impacto**: dificulta busca, onboarding e execução em sistemas case-sensitive.
 - **Sugestão**: corrigir em migração isolada, com atualização atômica dos imports.
 
+### ARCH-08 — Não há smoke E2E de jornada completa
+
+**Severidade**: Baixo
+
+**Local**: `tests/unit/`; `package.json`
+
+- **Esperado**: login, refresh, lançamento e logout também devem ter um smoke test no navegador.
+- **Implementado**: os contratos críticos agora têm testes unitários e de componente, mas ainda não há Playwright/Cypress.
+- **Impacto**: integração entre navegação, foco e backend pode regredir fora das fronteiras unitárias.
+- **Sugestão**: adicionar smoke E2E quando houver ambiente de API isolado e determinístico.
+
+### ARCH-09 — Auditoria mantém duas vulnerabilidades baixas de desenvolvimento
+
+**Severidade**: Baixo
+
+**Local**: `@quasar/app-vite` → `esbuild`
+
+- **Esperado**: lockfile sem advisories conhecidos.
+- **Implementado**: `npm audit` informa duas ocorrências baixas ligadas ao dev server no Windows; não há correção compatível adicional sem trocar a linha principal da toolchain.
+- **Impacto**: risco restrito ao ambiente local de desenvolvimento, sem dependência afetada no bundle de produção.
+- **Sugestão**: acompanhar a próxima versão compatível do builder Quasar e atualizar assim que o advisory for resolvido.
+
 ## 5. CSS/SCSS/Quasar
 
 ### CSS-01 — Overrides profundos dependem de `!important`
 
 **Severidade**: Médio
 
-**Local**: cards do dashboard; `MothYearSelector.vue:331-453`; `ModernDateInput.vue:127-142`
+**Local**: cards do dashboard; `MothYearSelector.styles.css`; `ModernDateInput.vue:127-142`
 
 - **Esperado**: customização via API do Quasar, wrappers e tokens com especificidade previsível.
 - **Implementado**: há vários `!important` para raio, sombra, cursor, borda e estados internos.
@@ -231,14 +233,15 @@ Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG: a F
 
 ## Evidências de validação
 
-- `npm test`: passou, incluindo `test:quality:a11y` e `test:quality:performance`.
+- `npm test`: passou, com 6 arquivos/8 testes Vitest e todos os checkers de regressão.
 - `npm run lint`: passou.
-- `npm run build`: passou.
+- `npm run build`: passou após validar `.env.prod`; URL com protocolo inválido também foi rejeitada no teste negativo.
 - `git diff --check`: passou.
-- Revisão independente final: PASS, sem achados críticos, altos ou médios no escopo.
-- Build: 1.194,68 KB de JS e 233,75 KB de CSS; entrypoint de 255,27 KB sem ApexCharts e dashboard lazy de 603,42 KB.
+- `npm audit`: 0 crítico, 0 alto, 0 médio e 2 baixos.
+- Revisão independente final: PASS após três ciclos, sem achados críticos, altos ou médios no escopo da Fase 3.
+- Build: 1.193,92 KB de JS e 229,19 KB de CSS; entrypoint de 91,50 KB e dashboard lazy de 596,86 KB.
 - Logo: 26.578 bytes, 90,3% menor que o PNG anterior.
 
 ## Próxima rodada recomendada
 
-Executar a Fase 3 do plano em `.specs/frontend-quality-improvements/IMPLEMENTATION-PLAN.md`: consolidar configuração HTTP, fortalecer tipagem/lint, implantar testes de componentes/fluxos e decompor responsabilidades. A nota ainda está abaixo da meta de 9,0 e restam 1 achado alto, 8 médios e 1 baixo.
+Executar a Fase 4 do plano em `.specs/frontend-quality-improvements/IMPLEMENTATION-PLAN.md`: centralizar tokens semânticos e shells de cards, reduzir estilos inline estáticos, overrides profundos e `!important`. A nota já superou 9,0, mas o gate final ainda exige resolver os quatro achados médios restantes; também permanecem três débitos baixos não bloqueantes.

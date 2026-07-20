@@ -21,12 +21,12 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
     return contextoAtivo.value?.permissao === NivelPermissao.Editar;
   });
 
-  const compartilhamentosAceitos = computed(() =>
-    convitesRecebidos.value.filter(c => c.status === StatusConvite.Aceito) // StatusConvite.Aceito
+  const compartilhamentosAceitos = computed(
+    () => convitesRecebidos.value.filter((c) => c.status === StatusConvite.Aceito), // StatusConvite.Aceito
   );
 
-  const convitesPendentes = computed(() =>
-    convitesRecebidos.value.filter(c => c.status === StatusConvite.Pendente) // StatusConvite.Pendente
+  const convitesPendentes = computed(
+    () => convitesRecebidos.value.filter((c) => c.status === StatusConvite.Pendente), // StatusConvite.Pendente
   );
 
   // Actions
@@ -35,7 +35,7 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
       loading.value = true;
       const [meus, convites] = await Promise.all([
         CompartilhamentoService.obterMeusCompartilhamentos(),
-        CompartilhamentoService.obterConvitesRecebidos()
+        CompartilhamentoService.obterConvitesRecebidos(),
       ]);
       meusCompartilhamentos.value = Array.isArray(meus) ? meus : [];
       convitesRecebidos.value = Array.isArray(convites) ? convites : [];
@@ -50,7 +50,7 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
     contextoAtivo.value = {
       proprietarioId: compartilhamento.proprietarioId,
       proprietarioNome: compartilhamento.proprietarioNome,
-      permissao: compartilhamento.permissao
+      permissao: compartilhamento.permissao,
     };
     // Salvar no localStorage para o interceptor do Axios
     localStorage.setItem(STORAGE_KEY, compartilhamento.proprietarioId);
@@ -66,13 +66,13 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
     if (proprietarioId) {
       // Buscar o compartilhamento correspondente
       const compartilhamento = convitesRecebidos.value.find(
-        c => c.proprietarioId === proprietarioId && c.status === StatusConvite.Aceito
+        (c) => c.proprietarioId === proprietarioId && c.status === StatusConvite.Aceito,
       );
       if (compartilhamento) {
         contextoAtivo.value = {
           proprietarioId: compartilhamento.proprietarioId,
           proprietarioNome: compartilhamento.proprietarioNome,
-          permissao: compartilhamento.permissao
+          permissao: compartilhamento.permissao,
         };
       } else {
         // Se não encontrou o compartilhamento correspondente, limpar contexto
@@ -85,7 +85,7 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
   async function convidar(email: string, permissao: NivelPermissao) {
     const novoCompartilhamento = await CompartilhamentoService.convidar({
       convidadoEmail: email,
-      permissao
+      permissao,
     });
     meusCompartilhamentos.value.push(novoCompartilhamento);
     return novoCompartilhamento;
@@ -94,10 +94,10 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
   async function responderConvite(compartilhamentoId: string, aceitar: boolean) {
     await CompartilhamentoService.responderConvite({
       compartilhamentoId,
-      aceitar
+      aceitar,
     });
     // Atualizar o status localmente
-    const convite = convitesRecebidos.value.find(c => c.id === compartilhamentoId);
+    const convite = convitesRecebidos.value.find((c) => c.id === compartilhamentoId);
     if (convite) {
       convite.status = aceitar ? StatusConvite.Aceito : StatusConvite.Recusado; // Aceito : Recusado
     }
@@ -106,10 +106,10 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
   async function atualizarPermissao(compartilhamentoId: string, novaPermissao: NivelPermissao) {
     await CompartilhamentoService.atualizarPermissao({
       compartilhamentoId,
-      novaPermissao
+      novaPermissao,
     });
     // Atualizar localmente
-    const compartilhamento = meusCompartilhamentos.value.find(c => c.id === compartilhamentoId);
+    const compartilhamento = meusCompartilhamentos.value.find((c) => c.id === compartilhamentoId);
     if (compartilhamento) {
       compartilhamento.permissao = novaPermissao;
     }
@@ -119,7 +119,7 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
     await CompartilhamentoService.revogar(compartilhamentoId);
     // Remover localmente
     meusCompartilhamentos.value = meusCompartilhamentos.value.filter(
-      c => c.id !== compartilhamentoId
+      (c) => c.id !== compartilhamentoId,
     );
   }
 
@@ -142,6 +142,6 @@ export const useCompartilhamentoStore = defineStore('compartilhamento', () => {
     convidar,
     responderConvite,
     atualizarPermissao,
-    revogar
+    revogar,
   };
 });

@@ -192,367 +192,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
-import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
-import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
-import { useGerenciamentoMensalStore } from 'src/stores/GerenciamentoMensal-store';
-import getCustoFixoService from 'src/services/CustoFixoService';
-import getDespesaService from 'src/services/transacao/DespesaService';
-import type { CustoFixoResult, CustoFixoCreate, UpdateCustoFixoDTO } from 'src/Model/CustoFixo';
-import type { DespesaCreate, LancarDespesaLoteDTO } from 'src/Model/Transacao';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CustoFixoCard from 'src/components/CustosFixos/CustoFixoCard.vue';
 import ModalCriarCustoFixo from 'src/components/CustosFixos/ModalCriarCustoFixo.vue';
 import ModalEditarCustoFixo from 'src/components/CustosFixos/ModalEditarCustoFixo.vue';
 import ModalDespesa from 'src/components/Despesa/ModalCreateUpdateDespesa.vue';
-import { notificarErro } from 'src/helpers/Notificacao';
+import { useCustosFixosPage } from 'src/composables/useCustosFixosPage';
 
-const $q = useQuasar();
-const router = useRouter();
-const compartilhamentoStore = useCompartilhamentoStore();
-const useGerenciamentoMensal = useGerenciamentoMensalStore();
-const service = getCustoFixoService();
-const despesaService = getDespesaService();
-
-const custosFixos = ref<CustoFixoResult[]>([]);
-const loading = ref(false);
-const modalCriarAberto = ref(false);
-const modalEditarAberto = ref(false);
-const modalDespesaAberto = ref(false);
-const custoSelecionado = ref<CustoFixoResult | null>(null);
-const dadosIniciaisDespesa = ref<DadosIniciaisDespesa | undefined>();
-
-interface DadosIniciaisDespesa {
-  descricao?: string | undefined;
-  categoriaId?: string | undefined;
-  categoriaNome?: string | undefined;
-}
-
-// Filtros locais
-const filtroNome = ref('');
-const filtroStatus = ref<'todos' | 'ativos' | 'inativos'>('todos');
-
-// Verifica se o usuário está acessando os dados de forma compartilhada
-function verificarModoCompartilhado() {
-  if (compartilhamentoStore.emModoCompartilhado) {
-    router.replace('/');
-  }
-}
-
-onMounted(() => {
-  verificarModoCompartilhado();
-  carregarDados();
-});
-
-// Acompanha mudanças no modo compartilhado para redirecionar se o usuário alternar de contexto
-watch(
-  () => compartilhamentoStore.emModoCompartilhado,
-  (novoValor) => {
-    if (novoValor) {
-      verificarModoCompartilhado();
-    }
-  },
-);
-
-const totalCustos = computed(() => custosFixos.value.length);
-const totalAtivos = computed(() => custosFixos.value.filter((c) => c.ativo).length);
-const totalInativos = computed(() => custosFixos.value.filter((c) => !c.ativo).length);
-
-// Filtro em memória
-const custosFixosFiltrados = computed(() => {
-  return custosFixos.value.filter((custo) => {
-    const nomeNormalizado = custo.nome.toLowerCase();
-    const termoBusca = filtroNome.value ? filtroNome.value.toLowerCase().trim() : '';
-    const bateNome = !termoBusca || nomeNormalizado.includes(termoBusca);
-
-    const bateStatus =
-      filtroStatus.value === 'todos' ||
-      (filtroStatus.value === 'ativos' && custo.ativo) ||
-      (filtroStatus.value === 'inativos' && !custo.ativo);
-
-    return bateNome && bateStatus;
-  });
-});
-
-async function carregarDados() {
-  loading.value = true;
-  try {
-    const res = await service.obterTodos();
-    custosFixos.value = res || [];
-  } catch (err) {
-    console.error(err);
-  } finally {
-    loading.value = false;
-  }
-}
-
-function atualizarStatusLocal(custoAtualizado: CustoFixoResult) {
-  const index = custosFixos.value.findIndex((c) => c.id === custoAtualizado.id);
-  if (index !== -1) {
-    custosFixos.value[index] = custoAtualizado;
-  }
-}
-
-function abrirModalCriar() {
-  modalCriarAberto.value = true;
-}
-
-async function criarCustoFixo(dto: CustoFixoCreate) {
-  try {
-    await service.criar(dto);
-    modalCriarAberto.value = false;
-    $q.notify({
-      type: 'positive',
-      message: 'Custo fixo criado com sucesso! 🎯',
-      position: 'top-right',
-    });
-    carregarDados();
-  } catch {
-    notificarErro('Erro ao criar o custo fixo. Verifique os campos.');
-  }
-}
-
-function abrirModalEditar(custo: CustoFixoResult) {
-  custoSelecionado.value = custo;
-  modalEditarAberto.value = true;
-}
-
-function abrirModalCadastrarDespesa(custo: CustoFixoResult) {
-  custoSelecionado.value = custo;
-  dadosIniciaisDespesa.value = {
-    descricao: custo.nome,
-    categoriaId: custo.categoriaId,
-    categoriaNome: custo.categoriaNome,
-  };
-  modalDespesaAberto.value = true;
-}
-
-function fecharModalDespesa() {
-  modalDespesaAberto.value = false;
-  dadosIniciaisDespesa.value = undefined;
-  custoSelecionado.value = null;
-}
-
-async function cadastrarDespesa(despesa: DespesaCreate) {
-  try {
-    despesa.ano = useGerenciamentoMensal.mesAtual.ano;
-    despesa.mes = useGerenciamentoMensal.mesAtual.mes;
-
-    await despesaService.create(despesa);
-    fecharModalDespesa();
-    $q.notify({
-      type: 'positive',
-      message: 'Despesa cadastrada com sucesso! 🎯',
-      position: 'top-right',
-    });
-  } catch {
-    notificarErro('Erro ao cadastrar despesa a partir do custo fixo. Verifique os campos.');
-  }
-}
-
-async function cadastrarDespesaEmLote(despesaLote: LancarDespesaLoteDTO) {
-  try {
-    await despesaService.criarEmLote(despesaLote);
-    fecharModalDespesa();
-    $q.notify({
-      type: 'positive',
-      message: 'Despesas cadastradas com sucesso!',
-      position: 'top-right',
-    });
-  } catch {
-    notificarErro(
-      'Erro ao cadastrar despesas em lote a partir do custo fixo. Verifique os campos.',
-    );
-  }
-}
-
-async function atualizarCustoFixo(dto: UpdateCustoFixoDTO) {
-  try {
-    await service.atualizar(dto);
-    modalEditarAberto.value = false;
-    $q.notify({
-      type: 'positive',
-      message: 'Custo fixo atualizado com sucesso! 🎯',
-      position: 'top-right',
-    });
-    carregarDados();
-  } catch {
-    notificarErro('Erro ao atualizar o custo fixo. Verifique os campos.');
-  }
-}
-
-function excluirCustoFixo(id: string) {
-  $q.dialog({
-    title: 'Excluir Custo Fixo',
-    message: 'Deseja realmente excluir este custo fixo?',
-    persistent: false,
-    ok: {
-      flat: true,
-      color: 'negative',
-      label: 'Excluir',
-    },
-    cancel: {
-      flat: true,
-      color: 'primary',
-      label: 'Cancelar',
-    },
-  }).onOk(() => {
-    void (async () => {
-      try {
-        await service.excluir(id);
-        $q.notify({
-          type: 'positive',
-          message: 'Custo fixo excluído com sucesso! 🎯',
-          position: 'top-right',
-        });
-        await carregarDados();
-      } catch (error) {
-        // Tratos automáticos do AxiosHelper
-      }
-    })();
-  });
-}
+const {
+  $q,
+  custosFixos,
+  loading,
+  modalCriarAberto,
+  modalEditarAberto,
+  modalDespesaAberto,
+  custoSelecionado,
+  dadosIniciaisDespesa,
+  filtroNome,
+  filtroStatus,
+  totalCustos,
+  totalAtivos,
+  totalInativos,
+  custosFixosFiltrados,
+  despesaService,
+  useGerenciamentoMensal,
+  atualizarStatusLocal,
+  abrirModalCriar,
+  criarCustoFixo,
+  abrirModalEditar,
+  abrirModalCadastrarDespesa,
+  fecharModalDespesa,
+  cadastrarDespesa,
+  cadastrarDespesaEmLote,
+  atualizarCustoFixo,
+  excluirCustoFixo,
+} = useCustosFixosPage();
 </script>
 
-<style lang="scss" scoped>
-.custos-page {
-  max-width: 1200px;
-  margin: 0 auto;
-
-  @media (max-width: 600px) {
-    padding: 16px !important;
-  }
-}
-
-.custos-grid-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
-  width: 100%;
-
-  @media (max-width: 650px) {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-}
-
-.custos-empty,
-.text-busca-vazia {
-  margin-top: 80px;
-}
-
-.skeleton-card {
-  border-radius: 16px;
-}
-
-.buscar-input {
-  width: 100%;
-  max-width: 450px;
-
-  @media (max-width: 599px) {
-    max-width: 100%;
-  }
-}
-
-.status-filter-column {
-  @media (max-width: 599px) {
-    display: block;
-  }
-}
-
-.flex.justify-end-sm {
-  @media (min-width: 600px) {
-    display: flex;
-    justify-content: flex-end;
-  }
-}
-
-.status-toggle-premium {
-  max-width: 100%;
-
-  :deep(.q-btn-group) {
-    max-width: 100%;
-  }
-
-  :deep(.q-btn) {
-    min-height: 40px;
-  }
-
-  @media (max-width: 599px) {
-    width: 100%;
-
-    :deep(.q-btn-group) {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      width: 100%;
-    }
-
-    :deep(.q-btn) {
-      min-width: 0;
-      width: 100%;
-      padding-left: 4px;
-      padding-right: 4px;
-    }
-  }
-
-  @media (max-width: 380px) {
-    :deep(.q-btn-group) {
-      grid-template-columns: 1fr;
-    }
-  }
-}
-
-.status-toggle-option {
-  min-width: 0;
-  justify-content: center;
-  white-space: nowrap;
-
-  span {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  @media (max-width: 420px) {
-    padding-left: 2px;
-    padding-right: 2px;
-
-    .q-icon {
-      margin-right: 2px;
-      font-size: 16px !important;
-    }
-  }
-
-  @media (max-width: 380px) {
-    justify-content: flex-start;
-    padding: 0 12px;
-  }
-}
-
-.border-sutil {
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-
-  .body--dark & {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-  }
-}
-
-.badge-contador {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 8px;
-}
-
-/* Transições com TransitionGroup */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.4s ease;
-}
-
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: scale(0.95) translateY(20px);
-}
-</style>
+<style lang="scss" scoped src="./CustosFixosPage.styles.scss"></style>

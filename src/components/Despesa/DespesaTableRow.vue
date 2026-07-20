@@ -1,7 +1,15 @@
 <template>
   <q-td key="categoriaNome">
-    <q-checkbox v-if="showSelected && !propsLocal.row.despesaOrigemId" v-model="propsLocal.selected" />
-    <q-icon v-else-if="showSelected && propsLocal.row.despesaOrigemId" name="lock" color="grey" size="xs">
+    <q-checkbox
+      v-if="showSelected && !propsLocal.row.despesaOrigemId"
+      v-model="propsLocal.selected"
+    />
+    <q-icon
+      v-else-if="showSelected && propsLocal.row.despesaOrigemId"
+      name="lock"
+      color="grey"
+      size="xs"
+    >
       <q-tooltip>Despesas em lote devem ser excluídas individualmente</q-tooltip>
     </q-icon>
   </q-td>
@@ -40,7 +48,13 @@
       {{ propsLocal.row.parcelaAtual }}/{{ propsLocal.row.totalParcelas }}
       <q-tooltip>Compra Parcelada</q-tooltip>
     </q-badge>
-    <q-icon v-if="propsLocal.row.isRecorrente" name="autorenew" color="deep-orange" size="xs" class="q-ml-sm align-middle cursor-pointer">
+    <q-icon
+      v-if="propsLocal.row.isRecorrente"
+      name="autorenew"
+      color="deep-orange"
+      size="xs"
+      class="q-ml-sm align-middle cursor-pointer"
+    >
       <q-tooltip>Despesa Recorrente</q-tooltip>
     </q-icon>
   </q-td>
@@ -129,19 +143,19 @@
 import { useQuasar } from 'quasar';
 import ValorPadraoBR from 'src/components/ValorPadraoBR.vue';
 import type { DespesaResult } from 'src/Model/Transacao';
-import type { NamedColor } from 'quasar';
+import type { NamedColor, QTableColumn } from 'quasar';
 import { computed } from 'vue';
 
 const $q = useQuasar();
 
 // Interface para os dados da linha
 interface RowProps {
-  key: any;
-  row: any;
+  key: string | number;
+  row: DespesaResult;
   rowIndex: number;
   pageIndex: number;
-  cols: any;
-  colsMap: any;
+  cols: QTableColumn<DespesaResult>[];
+  colsMap: Record<string, QTableColumn<DespesaResult>>;
   selected: boolean;
   expand: boolean; // Este agora vem do controle manual
   color: NamedColor;
@@ -175,10 +189,11 @@ const emit = defineEmits<{
   (e: 'excluir', id: string): void;
   (e: 'alterarValor', id: string, valor: number): void;
   (e: 'expandir', id: string, expand: boolean): void;
-  (e: 'update:modelValue', value: any): void;
+  (e: 'update:modelValue', value: RowProps): void;
 }>();
 
-function alterarValor(id: string, valor: number) {
+function alterarValor(id: string | null, valor: number) {
+  if (!id) return;
   emit('alterarValor', id, valor);
 }
 
@@ -187,12 +202,14 @@ function editarDespesa() {
 }
 
 function excluirDespesa() {
-  emit('excluir', props.props.row.id);
+  if (props.props.row.id) emit('excluir', props.props.row.id);
 }
 
 function onExpandClick() {
   propsLocal.value.expand = !propsLocal.value.expand;
-  emit('expandir', props.props.row.id, propsLocal.value.expand);
+  if (props.props.row.id) {
+    emit('expandir', props.props.row.id, propsLocal.value.expand);
+  }
 }
 </script>
 

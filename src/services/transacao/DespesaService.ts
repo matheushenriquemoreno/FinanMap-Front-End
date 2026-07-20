@@ -1,11 +1,16 @@
-import type { DespesaCreate, DespesaResult, LancarDespesaLoteDTO, AtualizarLoteDespesaDTO } from "src/Model/Transacao";
-import type { ModificadorLote } from "src/Model/Transacao";
-import { notificar } from "src/helpers/Notificacao";
-import TransacaoServiceBase from "../base/TransacaoBaseService";
+import type {
+  DespesaCreate,
+  DespesaResult,
+  LancarDespesaLoteDTO,
+  AtualizarLoteDespesaDTO,
+} from 'src/Model/Transacao';
+import type { ModificadorLote } from 'src/Model/Transacao';
+import { notificar } from 'src/helpers/Notificacao';
+import TransacaoServiceBase from '../base/TransacaoBaseService';
 
 class DespesaService extends TransacaoServiceBase<DespesaCreate, DespesaResult> {
   constructor() {
-    super("Despesas")
+    super('Despesas');
   }
 
   async getDespesasAgrupadas(id: string) {
@@ -35,7 +40,6 @@ class DespesaService extends TransacaoServiceBase<DespesaCreate, DespesaResult> 
       notificar('Despesa(s) excluída(s) com sucesso!');
     });
   }
-
 }
 
 export default function getDespesaService() {

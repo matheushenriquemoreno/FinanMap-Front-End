@@ -17,6 +17,8 @@ function requirePattern(content, pattern, message) {
 
 const card = await read('src/components/CustosFixos/CustoFixoCard.vue');
 const page = await read('src/pages/CustosFixos/CustosFixosPage.vue');
+const pageLogic = await read('src/composables/useCustosFixosPage.ts');
+const pageFeature = `${page}\n${pageLogic}`;
 const modal = await read('src/components/Despesa/ModalCreateUpdateDespesa.vue');
 
 requirePattern(
@@ -30,38 +32,38 @@ requirePattern(
   'CustoFixoCard deve exibir tooltip ou texto claro para cadastrar despesa.',
 );
 requirePattern(
-  page,
+  pageFeature,
   /ModalDespesa/,
   'CustosFixosPage deve renderizar o modal reutilizado de despesa.',
 );
 requirePattern(
-  page,
+  pageFeature,
   /dadosIniciaisDespesa/,
   'CustosFixosPage deve mapear o custo fixo para dados iniciais de despesa.',
 );
 requirePattern(
-  page,
+  pageFeature,
   /despesaService\.create/,
   'CustosFixosPage deve salvar despesa simples pelo DespesaService existente.',
 );
 requirePattern(
-  page,
+  pageFeature,
   /@on-submit-add-lote="cadastrarDespesaEmLote"/,
   'CustosFixosPage deve escutar a criacao de despesa em lote pelo modal reutilizado.',
 );
 requirePattern(
-  page,
+  pageFeature,
   /despesaService\.criarEmLote/,
   'CustosFixosPage deve salvar despesa em lote pelo DespesaService existente.',
 );
 requirePattern(
-  page,
-  /useGerenciamentoMensal\.mesAtual\.ano/,
+  pageFeature,
+  /(?:gerenciamentoMensalStore|useGerenciamentoMensal)\.mesAtual\.ano/,
   'CustosFixosPage deve preencher ano com o período mensal atual.',
 );
 requirePattern(
-  page,
-  /useGerenciamentoMensal\.mesAtual\.mes/,
+  pageFeature,
+  /(?:gerenciamentoMensalStore|useGerenciamentoMensal)\.mesAtual\.mes/,
   'CustosFixosPage deve preencher mês com o período mensal atual.',
 );
 requirePattern(

@@ -65,7 +65,7 @@ const props = defineProps({
     required: false,
   },
   modelValue: {
-    type: Object as PropType<any>,
+    type: null as unknown as PropType<unknown>,
     required: true,
   },
   rules: {
@@ -84,7 +84,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'modelAlterado']);
 
 // Estado
-const opcoes = ref<Array<any>>([]);
+const opcoes = ref<unknown[]>([]);
 
 // Métodos
 const preencherdados = async (filtro?: string) => {
@@ -92,7 +92,11 @@ const preencherdados = async (filtro?: string) => {
   opcoes.value = dados;
 };
 
-const filtrarPesquisa = (val: string, update: any, abort: any) => {
+const filtrarPesquisa = (
+  val: string,
+  update: (callback: () => Promise<void>) => void,
+  _abort: () => void,
+) => {
   update(async () => {
     if (val === '') {
       await preencherdados();
@@ -110,7 +114,7 @@ const optionsLocal = computed(() => {
 
 const localModelValue = computed({
   get: () => props.modelValue,
-  set: (newValue: any) => {
+  set: (newValue: unknown) => {
     emit('update:modelValue', newValue);
     emit('modelAlterado', newValue);
   },

@@ -27,7 +27,7 @@ const props = withDefaults(
     autofocus?: boolean;
     readonly?: boolean;
     for?: string;
-    rules?: ((val: any) => boolean | string)[];
+    rules?: ((val: number | null) => boolean | string)[];
     hint?: string;
     placeholder?: string;
     lazyRules?: boolean | 'ondemand';

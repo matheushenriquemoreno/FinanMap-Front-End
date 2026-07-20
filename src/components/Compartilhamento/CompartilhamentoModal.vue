@@ -241,11 +241,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
-import { NivelPermissao, StatusConvite } from 'src/models/Compartilhamento';
-import { useQuasar } from 'quasar';
-import { useEmailStore } from 'src/stores/UserEmail-Store';
+import { useCompartilhamentoModal } from 'src/composables/useCompartilhamentoModal';
+import { StatusConvite } from 'src/models/Compartilhamento';
 
 interface Props {
   modelValue: boolean;
@@ -260,238 +257,27 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
 }>();
 
-const compartilhamentoStore = useCompartilhamentoStore();
-const userStore = useEmailStore();
-const $q = useQuasar();
-
-const showDialog = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val),
-});
-
-const novoEmail = ref('');
-const novaPermissao = ref<NivelPermissao>(NivelPermissao.Visualizar);
-const loadingConvite = ref(false);
-const loadingResposta = ref<string | null>(null);
-
-const opcoesPermissao = [
-  { label: 'Visualização', value: NivelPermissao.Visualizar },
-  { label: 'Edição', value: NivelPermissao.Editar },
-];
-
-const nomeUsuario = computed(() => userStore.getName() || 'Usuário');
-const emailUsuario = computed(() => userStore.getEmail() || '');
-
-const compartilhamentosAtivos = computed(() => compartilhamentoStore.meusCompartilhamentos);
-
-const convitesPendentes = computed(() => compartilhamentoStore.convitesPendentes);
-
-function permissaoTexto(permissao: NivelPermissao): string {
-  return permissao === NivelPermissao.Editar ? 'Edição' : 'Visualização';
-}
-
-function statusTexto(status: StatusConvite): string {
-  switch (status) {
-    case StatusConvite.Pendente:
-      return 'Convite pendente';
-    case StatusConvite.Aceito:
-      return 'Acesso confirmado';
-    case StatusConvite.Recusado:
-      return 'Convite recusado';
-    default:
-      return '';
-  }
-}
-
-function corStatus(status: StatusConvite): string {
-  switch (status) {
-    case StatusConvite.Pendente:
-      return 'warning';
-    case StatusConvite.Aceito:
-      return 'positive';
-    case StatusConvite.Recusado:
-      return 'negative';
-    default:
-      return 'grey';
-  }
-}
-
-function iconePermissao(permissao: NivelPermissao): string {
-  return permissao === NivelPermissao.Editar ? 'edit' : 'visibility';
-}
-
-async function enviarConvite() {
-  const email = novoEmail.value.trim();
-  if (!email) return;
-
-  loadingConvite.value = true;
-  try {
-    await compartilhamentoStore.convidar(email, novaPermissao.value);
-    $q.notify({
-      type: 'positive',
-      message: 'Convite enviado com sucesso!',
-      position: 'top',
-    });
-    novoEmail.value = '';
-    novaPermissao.value = NivelPermissao.Visualizar;
-  } catch (error: any) {
-    $q.notify({
-      type: 'negative',
-      message: error.response?.data?.errors?.[0] || 'Erro ao enviar convite',
-      position: 'top',
-    });
-  } finally {
-    loadingConvite.value = false;
-  }
-}
-
-async function atualizarPermissao(compartilhamentoId: string, novaPermissao: NivelPermissao) {
-  try {
-    await compartilhamentoStore.atualizarPermissao(compartilhamentoId, novaPermissao);
-    $q.notify({
-      type: 'positive',
-      message: 'Permissão atualizada com sucesso!',
-      position: 'top',
-    });
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao atualizar permissão',
-      position: 'top',
-    });
-  }
-}
-
-function confirmarRevogacao(compartilhamentoId: string) {
-  $q.dialog({
-    title: 'Remover acesso',
-    message: 'Tem certeza que deseja remover o acesso desta pessoa?',
-    cancel: {
-      label: 'Cancelar',
-      flat: true,
-      color: 'grey',
-    },
-    ok: {
-      label: 'Remover',
-      flat: true,
-      color: 'negative',
-    },
-    persistent: true,
-  }).onOk(() => {
-    void (async () => {
-      try {
-        await compartilhamentoStore.revogar(compartilhamentoId);
-        $q.notify({
-          type: 'positive',
-          message: 'Acesso removido com sucesso!',
-          position: 'top',
-        });
-      } catch (error) {
-        $q.notify({
-          type: 'negative',
-          message: 'Erro ao remover acesso',
-          position: 'top',
-        });
-      }
-    })();
-  });
-}
-
-async function responderConviteModal(conviteId: string, aceitar: boolean) {
-  loadingResposta.value = conviteId;
-  try {
-    await compartilhamentoStore.responderConvite(conviteId, aceitar);
-    $q.notify({
-      type: 'positive',
-      message: aceitar ? 'Convite aceito com sucesso!' : 'Convite recusado.',
-      position: 'top',
-    });
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Erro ao responder convite',
-      position: 'top',
-    });
-  } finally {
-    loadingResposta.value = null;
-  }
-}
-
-function onHide() {
-  novoEmail.value = '';
-  novaPermissao.value = NivelPermissao.Visualizar;
-}
+const {
+  showDialog,
+  novoEmail,
+  novaPermissao,
+  loadingConvite,
+  loadingResposta,
+  opcoesPermissao,
+  nomeUsuario,
+  emailUsuario,
+  compartilhamentosAtivos,
+  convitesPendentes,
+  permissaoTexto,
+  statusTexto,
+  corStatus,
+  iconePermissao,
+  enviarConvite,
+  atualizarPermissao,
+  confirmarRevogacao,
+  responderConviteModal,
+  onHide,
+} = useCompartilhamentoModal(props, (value) => emit('update:modelValue', value));
 </script>
 
-<style scoped>
-.compartilhamento-modal {
-  width: 720px;
-  max-width: 92vw;
-  max-height: 88vh;
-  border-radius: 16px;
-}
-
-.convite-panel {
-  border: 1px solid;
-  border-radius: 16px;
-}
-
-.convite-panel--light {
-  background: #f8f8ff;
-  border-color: rgba(29, 22, 156, 0.14);
-}
-
-.convite-panel--dark {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.permissao-convite {
-  width: 180px;
-}
-
-.invite-button {
-  min-height: 40px;
-  border-radius: 8px;
-}
-
-.access-list {
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-.permission-select {
-  min-width: 132px;
-}
-
-.done-button {
-  min-width: 112px;
-  border-radius: 8px;
-}
-
-@media (max-width: 599px) {
-  .compartilhamento-modal {
-    width: 100%;
-    max-width: 100%;
-    max-height: 100vh;
-    border-radius: 16px 16px 0 0;
-    align-self: flex-end;
-  }
-
-  .permissao-convite {
-    width: auto;
-  }
-
-  .access-list :deep(.q-item) {
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .access-list :deep(.q-item__section--side) {
-    width: 100%;
-    align-items: flex-end;
-    padding-left: 56px;
-    padding-top: 8px;
-  }
-}
-</style>
+<style scoped src="./CompartilhamentoModal.styles.css"></style>

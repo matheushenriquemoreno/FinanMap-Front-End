@@ -2,14 +2,18 @@ import { handleErrorAxios, CreateIntanceAxios } from 'src/services/api/AxiosHelp
 import type { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import type { AcumuladoMensal } from 'src/Model/Transacao';
 
-export async function obterAcumuladoMensalReport(ano: number, mes: number, tipoCategoria: TipoCategoriaETransacao): Promise<AcumuladoMensal> {
+export async function obterAcumuladoMensalReport(
+  ano: number,
+  mes: number,
+  tipoCategoria: TipoCategoriaETransacao,
+): Promise<AcumuladoMensal> {
   const api = CreateIntanceAxios();
   try {
-    const response = await api.get<AcumuladoMensal>(process.env.URL_API + 'AcumuladoMensalReport/AcumuladoMensal', {
+    const response = await api.get<AcumuladoMensal>('AcumuladoMensalReport/AcumuladoMensal', {
       params: {
         ano,
         mes,
-        tipo: tipoCategoria
+        tipo: tipoCategoria,
       },
     });
     return response.data;

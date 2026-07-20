@@ -99,7 +99,7 @@ function openDialog() {
 }
 
 function onDateSelected(val: string | number | null) {
-  emit('update:modelValue', val as string);
+  emit('update:modelValue', val);
   dialogOpen.value = false;
 }
 

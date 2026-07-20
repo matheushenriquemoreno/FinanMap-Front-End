@@ -101,7 +101,7 @@ async function toggleAtivo(novoValor: boolean) {
       message: `Custo fixo ${novoValor ? 'ativado' : 'inativado'} com sucesso! 🎯`,
     });
     emit('statusAlterado', custoAtualizado);
-  } catch (error) {
+  } catch {
     notificarErro('Erro ao alterar o status do custo fixo.');
   }
 }

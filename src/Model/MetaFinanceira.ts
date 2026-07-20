@@ -109,6 +109,10 @@ export const CATEGORIA_META_CONFIG: Record<
   [CategoriaIconeMeta.Educacao]: { icon: 'school', label: 'Educação', color: '#27AE60' },
   [CategoriaIconeMeta.Veiculo]: { icon: 'directions_car', label: 'Veículo', color: '#E74C3C' },
   [CategoriaIconeMeta.Moradia]: { icon: 'home', label: 'Moradia', color: '#F39C12' },
-  [CategoriaIconeMeta.Investimento]: { icon: 'trending_up', label: 'Investimento', color: '#2ECC71' },
+  [CategoriaIconeMeta.Investimento]: {
+    icon: 'trending_up',
+    label: 'Investimento',
+    color: '#2ECC71',
+  },
   [CategoriaIconeMeta.Outro]: { icon: 'emoji_events', label: 'Outro', color: '#9B59B6' },
 };

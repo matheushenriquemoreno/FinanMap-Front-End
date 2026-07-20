@@ -8,7 +8,7 @@ export default class TransacaoServiceBase<CreateType, ReturnType> {
   protected axios = CreateIntanceAxios();
 
   constructor(path: string) {
-    this.baseUrl = process.env.URL_API + path;
+    this.baseUrl = path;
   }
 
   protected async requestWithLoading<T>(requestFn: () => Promise<T>) {
@@ -64,12 +64,16 @@ export default class TransacaoServiceBase<CreateType, ReturnType> {
 
   async updateValor(id: string, valor: number) {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.patch<ReturnType>(`${this.baseUrl}/UpdateValor`, {
-        id: id,
-        valor: valor
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const response = await this.axios.patch<ReturnType>(
+        `${this.baseUrl}/UpdateValor`,
+        {
+          id: id,
+          valor: valor,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
       return response.data;
     });
   }
@@ -84,7 +88,7 @@ export default class TransacaoServiceBase<CreateType, ReturnType> {
   async deleteMany(id: string[]) {
     return this.requestWithLoading(async () => {
       await this.axios.post(`${this.baseUrl}/DeleteMany`, {
-        idTransacoes: id
+        idTransacoes: id,
       });
       notificar('Registro(s) excluído(s) com sucesso!');
     });

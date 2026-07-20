@@ -62,6 +62,8 @@ import { useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
 import { notificar } from 'src/helpers/Notificacao';
+import { sessionService } from 'src/services/SessionService';
+import { tokenRenewalService } from 'src/services/TokenRenewalService';
 
 const authService = obterAuthService();
 const router = useRouter();
@@ -72,7 +74,7 @@ const userStore = useEmailStore();
 onMounted(() => {
   const email = userStore.getEmail();
   if (!email) {
-    router.push({ name: 'LoginPage' });
+    void router.push({ name: 'LoginPage' });
   }
 });
 
@@ -81,11 +83,10 @@ const handleVerify = async () => {
   if (email === null) return;
   const result = await authService.verifyCode(email, code.value);
   notificar('Login realizado com sucesso!');
-  localStorage.setItem('token', result.token);
-  localStorage.setItem('refreshToken', result.refreshToken);
-  localStorage.setItem('userName', result.nomeUsuario);
-  localStorage.setItem('userEmail', email);
+  sessionService.start(result, { userName: result.nomeUsuario, userEmail: email });
+  userStore.setName(result.nomeUsuario);
+  tokenRenewalService.start();
   message.value = 'Email verificado com sucesso!';
-  router.push('/');
+  void router.push('/');
 };
 </script>

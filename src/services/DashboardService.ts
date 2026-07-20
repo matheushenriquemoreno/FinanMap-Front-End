@@ -1,5 +1,9 @@
 import { handleErrorAxios, CreateIntanceAxios } from 'src/services/api/AxiosHelper';
-import type { ResumoFinanceiroModel, EvolucaoPeriodoModel, CategoriaDashboardModel } from 'src/models/Dashboard';
+import type {
+  ResumoFinanceiroModel,
+  EvolucaoPeriodoModel,
+  CategoriaDashboardModel,
+} from 'src/models/Dashboard';
 import { ref } from 'vue';
 
 export class DashboardService {
@@ -8,7 +12,7 @@ export class DashboardService {
   private axios = CreateIntanceAxios();
 
   constructor() {
-    this.baseUrl = process.env.URL_API + 'dashboard';
+    this.baseUrl = 'dashboard';
   }
 
   private async requestWithLoading<T>(requestFn: () => Promise<T>) {
@@ -25,24 +29,18 @@ export class DashboardService {
 
   async obterResumo(dataInicial: string, dataFinal: string) {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.get<ResumoFinanceiroModel>(
-        `${this.baseUrl}/resumo`,
-        {
-          params: { dataInicial, dataFinal },
-        }
-      );
+      const response = await this.axios.get<ResumoFinanceiroModel>(`${this.baseUrl}/resumo`, {
+        params: { dataInicial, dataFinal },
+      });
       return response.data;
     });
   }
 
   async obterEvolucao(dataInicial: string, dataFinal: string) {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.get<EvolucaoPeriodoModel[]>(
-        `${this.baseUrl}/evolucao`,
-        {
-          params: { dataInicial, dataFinal },
-        }
-      );
+      const response = await this.axios.get<EvolucaoPeriodoModel[]>(`${this.baseUrl}/evolucao`, {
+        params: { dataInicial, dataFinal },
+      });
       return response.data;
     });
   }
@@ -53,7 +51,7 @@ export class DashboardService {
         `${this.baseUrl}/categorias`,
         {
           params: { dataInicial, dataFinal, tipo },
-        }
+        },
       );
       return response.data;
     });

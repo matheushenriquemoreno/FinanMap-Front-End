@@ -54,7 +54,6 @@ export default defineConfig((/* ctx */) => {
       // analyze: true,
 
       env: {
-        URL_API: 'https://api.devmoreno.online/api/',
         LOGIN_URL: '/#/login',
       },
       // rawDefine: {}

@@ -1,7 +1,8 @@
-import type { AxiosError } from 'axios';
-import axios from 'axios';
+import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { notificarErro, notificarInfo } from '../../helpers/Notificacao';
 import { refreshTokenManager } from '../RefreshTokenManager';
+import { sessionService } from '../SessionService';
+import { getApiBaseUrl } from './ApiConfig';
 
 interface ApiResultError {
   errors: string[];
@@ -10,6 +11,20 @@ interface ApiResultError {
 interface MultiStatusResponse extends ApiResultError {
   quantidadeSucesso: number;
   quantidadeErros: number;
+}
+
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    skipSession?: boolean;
+  }
+
+  interface InternalAxiosRequestConfig {
+    skipSession?: boolean;
+  }
 }
 
 const TIMEOUT_MS = 30000;
@@ -23,18 +38,18 @@ const ERROR_MESSAGES = {
   tooManyRequests: 'Muitas requisições simultâneas. Aguarde um momento e tente novamente.',
 };
 
-export function CreateIntanceAxios() {
-  const AxiosInstance = axios.create({
-    headers: { 'Content-Type': 'application/json' },
-    timeout: TIMEOUT_MS, // Tempo limite de 30 segundos para a requisição
-  });
+export const apiClient = axios.create({
+  baseURL: getApiBaseUrl(),
+  headers: { 'Content-Type': 'application/json' },
+  timeout: TIMEOUT_MS,
+});
 
-  AxiosInstance.interceptors.request.use(
-    async (config) => {
+apiClient.interceptors.request.use(
+  async (config) => {
+    if (!config.skipSession) {
       try {
         await refreshTokenManager.refreshIfNeeded();
       } catch (error) {
-        console.error('[AxiosHelper] Erro durante o refresh no interceptor de requisição:', error);
         if (refreshTokenManager.shouldClearTokenOnRefreshError(error)) {
           refreshTokenManager.clearTokens();
           window.location.href = process.env.LOGIN_URL ?? '/#/login';
@@ -42,90 +57,60 @@ export function CreateIntanceAxios() {
         }
       }
 
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+      const token = sessionService.getAccessToken();
+      if (token) config.headers.Authorization = `Bearer ${token}`;
 
-      // Adicionar header x-proprietario-id se estiver em modo compartilhado
       const proprietarioIdAtivo = localStorage.getItem('proprietarioIdAtivo');
-      if (proprietarioIdAtivo) {
-        // console.log('Adicionando contexto ao header:', proprietarioIdAtivo);
-        config.headers['X-Proprietario-Id'] = proprietarioIdAtivo;
-      }
+      if (proprietarioIdAtivo) config.headers['X-Proprietario-Id'] = proprietarioIdAtivo;
+    }
 
-      return config;
-    },
-    (error: AxiosError) => {
+    return config;
+  },
+  (error: unknown) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
+);
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    if (isNetworkError(error)) {
+      notificarInfo(getNetworkErrorMessage(error));
       return Promise.reject(error);
-    },
-  );
+    }
 
-  AxiosInstance.interceptors.response.use(
-    (response) => response, // Se a resposta for bem-sucedida, retorna normalmente
-    async (error: AxiosError) => {
-      // Tratamento específico para erros de rede
-      if (isNetworkError(error)) {
-        const message = getNetworkErrorMessage(error);
-        notificarInfo(message);
-        return Promise.reject(error);
-      }
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
+    if (originalRequest?.skipSession) return Promise.reject(error);
 
-      // Tratamento baseado em status HTTP
-      const originalRequest = error.config as any;
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
-        originalRequest._retry = true;
+      try {
+        const result = await refreshTokenManager.refresh();
+        const token = result.token;
 
-        try {
-          const result = await refreshTokenManager.refreshIfNeeded();
-
-          if (result) {
-            // Atualiza o header da requisição original
-            originalRequest.headers.Authorization = `Bearer ${result.token}`;
-
-            // Reenvia a requisição original
-            return AxiosInstance(originalRequest);
-          } else {
-            // Se result for null, não foi necessário renovar (talvez outra aba já tenha feito).
-            // Tenta enviar com o token atual do storage
-            const tokenAtual = localStorage.getItem('token');
-            if (tokenAtual) {
-              originalRequest.headers.Authorization = `Bearer ${tokenAtual}`;
-              return AxiosInstance(originalRequest);
-            }
-          }
-        } catch (refreshError: any) {
-          if (!refreshTokenManager.shouldClearTokenOnRefreshError(refreshError)) {
-            // Se for erro de rede ou 5xx durante o refresh, não desloga.
-            // Apenas rejeita a requisição atual.
-            return Promise.reject(
-              refreshError instanceof Error ? refreshError : new Error(String(refreshError)),
-            );
-          }
-          // Se for erro de autenticação no refresh, deixa cair no tratamento padrão de 401 (logout)
+        if (token) {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        }
+      } catch (refreshError) {
+        if (!refreshTokenManager.shouldClearTokenOnRefreshError(refreshError)) {
+          return Promise.reject(
+            refreshError instanceof Error ? refreshError : new Error(String(refreshError)),
+          );
         }
       }
+    }
 
-      return handleHttpStatusError(error);
-    },
-  );
+    return handleHttpStatusError(error);
+  },
+);
 
-  return AxiosInstance;
+export function CreateIntanceAxios(): AxiosInstance {
+  return apiClient;
 }
 
-/**
- * Verifica se o erro é um erro de rede
- * @param {AxiosError} error Erro do Axios
- * @returns {boolean} Verdadeiro se for erro de rede
- */
 function isNetworkError(error: AxiosError): boolean {
-  // Verifica se não há resposta (indicando erro de rede)
-  if (error.response === undefined) {
-    return true;
-  }
+  if (error.response === undefined) return true;
 
-  // Lista de códigos de erro de rede
   const networkErrorCodes = [
     'ERR_CONNECTION_CLOSED',
     'ERR_NETWORK',
@@ -145,18 +130,12 @@ function isNetworkError(error: AxiosError): boolean {
     'ERR_CERT_AUTHORITY_INVALID',
   ];
 
-  return networkErrorCodes.includes(error.code as string);
+  return networkErrorCodes.includes(error.code ?? '');
 }
 
-/**
- * Determina a mensagem apropriada para o erro de rede
- * @param {AxiosError} error Erro do Axios
- * @returns {string} Mensagem de erro apropriada
- */
 function getNetworkErrorMessage(error: AxiosError): string {
   const { code, message } = error;
 
-  // Erros de timeout
   if (
     code === 'ETIMEDOUT' ||
     code === 'ECONNABORTED' ||
@@ -166,78 +145,51 @@ function getNetworkErrorMessage(error: AxiosError): string {
     return ERROR_MESSAGES.timeout;
   }
 
-  // Erros de SSL/TLS
   if (code?.includes('SSL') || code?.includes('CERT') || code?.includes('TLS')) {
     return ERROR_MESSAGES.ssl;
   }
 
-  // Erros de DNS e todos os outros erros de rede usam a mensagem genérica
   return ERROR_MESSAGES.network;
 }
 
-/**
- * Trata erros baseados em código de status HTTP
- * @param {AxiosError} error Erro do Axios
- * @returns {Promise<never>} Uma Promise rejeitada
- */
 function handleHttpStatusError(error: AxiosError): Promise<never> {
   const statusCode = error.response?.status;
 
-  if (statusCode === undefined || statusCode === null) {
-    return Promise.reject(error);
-  }
+  if (statusCode === undefined) return Promise.reject(error);
 
-  // Erros de autenticação
   if (statusCode === 401) {
     notificarInfo(ERROR_MESSAGES.unauthorized);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userName');
+    sessionService.clear();
     window.location.href = process.env.LOGIN_URL ?? '/#/login';
-  }
-  // Erros de autorização (permissão insuficiente)
-  else if (statusCode === 403) {
+  } else if (statusCode === 403) {
     notificarErro('Você não tem permissão para realizar esta ação.');
-  }
-  // Erros do lado do servidor
-  else if (statusCode >= 500) {
+  } else if (statusCode >= 500) {
     notificarErro(ERROR_MESSAGES.server);
-  }
-  // Erros específicos do cliente podem ser adicionados aqui (4xx)
-  else if (statusCode === 429) {
+  } else if (statusCode === 429) {
     notificarInfo(ERROR_MESSAGES.tooManyRequests);
   }
 
-  HandlerErrorStatusCode(error, statusCode);
-
+  handleErrorStatusCode(error, statusCode);
   return Promise.reject(error);
 }
 
 export function handleErrorAxios(error: unknown): void {
-  if (axios.isAxiosError(error)) {
-    const statusCode = error.response?.status ?? null;
+  if (!axios.isAxiosError(error)) return;
 
-    // Tratamento específico para erros de rede
-    if (isNetworkError(error)) {
-      const message = getNetworkErrorMessage(error);
-      notificarInfo(message);
-      return;
-    }
-
-    HandlerErrorStatusCode(error, statusCode);
-
+  if (isNetworkError(error)) {
+    notificarInfo(getNetworkErrorMessage(error));
     return;
   }
+
+  handleErrorStatusCode(error, error.response?.status ?? null);
 }
 
-function HandlerErrorStatusCode(error: AxiosError, statusCode: number | null) {
+function handleErrorStatusCode(error: AxiosError, statusCode: number | null): void {
   if (statusCode === 400 || statusCode === 422 || statusCode === 404) {
     const result = error.response?.data as ApiResultError;
-
     notificarErro(result.errors.join('\n'));
   } else if (statusCode === 207) {
     const result = error.response?.data as MultiStatusResponse;
-
     notificarInfo(
       `Solicitação com sucesso parcial, houve ${result.quantidadeSucesso} sucessos e ${result.quantidadeErros} erros.`,
     );

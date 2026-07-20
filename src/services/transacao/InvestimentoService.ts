@@ -1,9 +1,9 @@
-import type { InvestimentoCreate, InvestimentoResult } from "src/Model/Transacao";
-import TransacaoServiceBase from "../base/TransacaoBaseService";
+import type { InvestimentoCreate, InvestimentoResult } from 'src/Model/Transacao';
+import TransacaoServiceBase from '../base/TransacaoBaseService';
 
 class InvestimentoService extends TransacaoServiceBase<InvestimentoCreate, InvestimentoResult> {
   constructor() {
-    super("Investimentos")
+    super('Investimentos');
   }
 }
 

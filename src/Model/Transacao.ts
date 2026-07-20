@@ -5,7 +5,7 @@ export interface TransacaoCreate {
   categoriaId: string;
   ano: number;
   mes: number;
-  categoriaNome?: string,
+  categoriaNome?: string;
 }
 
 export interface TransacaoResult {
@@ -15,18 +15,14 @@ export interface TransacaoResult {
   categoriaId: string;
   ano: number;
   mes: number;
-  categoriaNome: string,
-  reportAcumulado: AcumuladoMensal | null
+  categoriaNome: string;
+  reportAcumulado: AcumuladoMensal | null;
 }
-
 
 // Rendimentos
-export interface RendimentosCreate extends TransacaoCreate {
-}
+export interface RendimentosCreate extends TransacaoCreate {}
 
-export interface RendimentosResult extends TransacaoResult {
-}
-
+export interface RendimentosResult extends TransacaoResult {}
 
 // Despesa
 
@@ -39,7 +35,7 @@ export interface DespesaResult extends TransacaoResult {
   idDespesaAgrupadora: string;
   agrupadora: DespesaResult | null;
   despesasFilhas?: DespesaResult[];
-  
+
   despesaOrigemId?: string;
   isParcelado: boolean;
   isRecorrente: boolean;
@@ -50,7 +46,7 @@ export interface DespesaResult extends TransacaoResult {
 export enum ModificadorLote {
   ApenasEsta = 0,
   EstaEProximas = 1,
-  TodasDoLote = 2
+  TodasDoLote = 2,
 }
 
 export interface LancarDespesaLoteDTO {
@@ -73,29 +69,27 @@ export interface AtualizarLoteDespesaDTO {
   modificador: ModificadorLote;
 }
 
-
 // Investimento
 
 export interface InvestimentoCreate extends TransacaoCreate {
   metaFinanceiraId?: string;
 }
 
-export interface InvestimentoResult extends TransacaoResult {
-}
+export interface InvestimentoResult extends TransacaoResult {}
 
 // Report
 
 export interface AcumuladoMensal {
-  valorRendimento: number,
-  valorInvestimentos: number,
-  valorDespesas: number,
-  valorFinal: number
-  rendimentos?: RendimentosResult[],
-  despesas?: DespesaResult[],
-  investimentos?: InvestimentoResult[]
+  valorRendimento: number;
+  valorInvestimentos: number;
+  valorDespesas: number;
+  valorFinal: number;
+  rendimentos?: RendimentosResult[];
+  despesas?: DespesaResult[];
+  investimentos?: InvestimentoResult[];
 }
 
 export interface MesAno {
-  ano: number,
-  mes: number
+  ano: number;
+  mes: number;
 }

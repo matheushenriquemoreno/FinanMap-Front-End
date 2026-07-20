@@ -27,8 +27,7 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue';
-import { computed, defineProps, defineEmits, ref } from 'vue';
-import { useAttrs } from 'vue';
+import { computed, useAttrs } from 'vue';
 import type { styles } from './types';
 const attrs = useAttrs();
 

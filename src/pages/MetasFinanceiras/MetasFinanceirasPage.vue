@@ -1,54 +1,73 @@
 <template>
-    <q-page class="metas-page q-pa-lg">
-        <!-- ===== HEADER ===== -->
-        <PageHeaderBanner
-            icon="emoji_events"
-            title="Metas Financeiras"
-            subtitle="Transforme seus sonhos em conquistas"
-            button-label="Nova Meta"
-            @action="abrirModalCriar"
+  <q-page class="metas-page q-pa-lg">
+    <!-- ===== HEADER ===== -->
+    <PageHeaderBanner
+      icon="emoji_events"
+      title="Metas Financeiras"
+      subtitle="Transforme seus sonhos em conquistas"
+      button-label="Nova Meta"
+      @action="abrirModalCriar"
+    />
+
+    <!-- ===== PAINEL DE RESUMO (3 Cards) ===== -->
+    <PainelResumoMetas :resumo="resumo" :loading="loading" />
+
+    <!-- ===== LISTAGEM DE METAS ===== -->
+    <div class="metas-grid q-mt-lg" v-if="metas.length > 0 || loading">
+      <template v-if="loading">
+        <!-- Skeleton Loaders -->
+        <q-card v-for="i in 3" :key="'skeleton-' + i" flat bordered class="q-pa-md skeleton-card">
+          <q-skeleton type="QAvatar" size="42px" class="q-mb-md" />
+          <q-skeleton type="text" width="60%" class="q-mb-sm" />
+          <q-skeleton type="text" width="40%" class="q-mb-md" />
+          <q-skeleton type="QSlider" class="q-mb-md" />
+          <q-skeleton type="QBtn" width="100%" />
+        </q-card>
+      </template>
+
+      <template v-else>
+        <MetaCard
+          v-for="meta in metas"
+          :key="meta.id"
+          :meta="meta"
+          @contribuir="abrirModalContribuir(meta)"
+          @detalhes="abrirModalDetalhes(meta)"
+          @excluir="excluirMeta(meta.id)"
         />
+      </template>
+    </div>
 
-        <!-- ===== PAINEL DE RESUMO (3 Cards) ===== -->
-        <PainelResumoMetas :resumo="resumo" :loading="loading" />
+    <!-- Empty state -->
+    <div v-if="!loading && metas.length === 0" class="metas-empty text-center q-pa-xl">
+      <q-icon name="flag" size="80px" color="grey-4" />
+      <p class="text-h6 text-grey-6 q-mt-md">Nenhuma meta criada ainda</p>
+      <p class="text-body2 text-grey-5">
+        Clique em "Nova Meta" para começar a planejar seus objetivos!
+      </p>
+    </div>
 
-        <!-- ===== LISTAGEM DE METAS ===== -->
-        <div class="metas-grid q-mt-lg" v-if="metas.length > 0 || loading">
-            <template v-if="loading">
-                <!-- Skeleton Loaders -->
-                <q-card v-for="i in 3" :key="'skeleton-' + i" flat bordered class="q-pa-md skeleton-card">
-                    <q-skeleton type="QAvatar" size="42px" class="q-mb-md" />
-                    <q-skeleton type="text" width="60%" class="q-mb-sm" />
-                    <q-skeleton type="text" width="40%" class="q-mb-md" />
-                    <q-skeleton type="QSlider" class="q-mb-md" />
-                    <q-skeleton type="QBtn" width="100%" />
-                </q-card>
-            </template>
+    <!-- ===== MODAIS ===== -->
+    <ModalCriarMeta v-model="modalCriarAberto" @criar="criarMeta" />
 
-            <template v-else>
-                <MetaCard v-for="meta in metas" :key="meta.id" :meta="meta" @contribuir="abrirModalContribuir(meta)"
-                    @detalhes="abrirModalDetalhes(meta)" @excluir="excluirMeta(meta.id)" />
-            </template>
-        </div>
+    <ModalContribuir
+      v-model="modalContribuirAberto"
+      :meta="metaSelecionada"
+      @contribuir="contribuir"
+    />
 
-        <!-- Empty state -->
-        <div v-if="!loading && metas.length === 0" class="metas-empty text-center q-pa-xl">
-            <q-icon name="flag" size="80px" color="grey-4" />
-            <p class="text-h6 text-grey-6 q-mt-md">Nenhuma meta criada ainda</p>
-            <p class="text-body2 text-grey-5">Clique em "Nova Meta" para começar a planejar seus objetivos!</p>
-        </div>
+    <ModalDetalhesMeta
+      v-model="modalDetalhesAberto"
+      :meta="metaSelecionada"
+      @remover-contribuicao="removerContribuicao"
+      @editar-contribuicao="abrirModalEditar"
+    />
 
-        <!-- ===== MODAIS ===== -->
-        <ModalCriarMeta v-model="modalCriarAberto" @criar="criarMeta" />
-
-        <ModalContribuir v-model="modalContribuirAberto" :meta="metaSelecionada" @contribuir="contribuir" />
-
-        <ModalDetalhesMeta v-model="modalDetalhesAberto" :meta="metaSelecionada"
-            @remover-contribuicao="removerContribuicao" @editar-contribuicao="abrirModalEditar" />
-
-        <ModalEditarContribuicao v-model="modalEditarAberto" :contribuicao="contribuicaoSelecionada"
-            @salvar="salvarEdicaoContribuicao" />
-    </q-page>
+    <ModalEditarContribuicao
+      v-model="modalEditarAberto"
+      :contribuicao="contribuicaoSelecionada"
+      @salvar="salvarEdicaoContribuicao"
+    />
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -56,12 +75,12 @@ import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import getMetaFinanceiraService from 'src/services/MetaFinanceiraService';
 import type {
-    MetaFinanceiraResult,
-    ResumoMetasDTO,
-    CreateMetaFinanceiraDTO,
-    ContribuicaoDTO,
-    ContribuicaoResult,
-    UpdateContribuicaoDTO,
+  MetaFinanceiraResult,
+  ResumoMetasDTO,
+  CreateMetaFinanceiraDTO,
+  ContribuicaoDTO,
+  ContribuicaoResult,
+  UpdateContribuicaoDTO,
 } from 'src/Model/MetaFinanceira';
 import PainelResumoMetas from 'src/components/MetasFinanceiras/PainelResumoMetas.vue';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
@@ -77,8 +96,11 @@ const service = getMetaFinanceiraService();
 
 const metas = ref<MetaFinanceiraResult[]>([]);
 const resumo = ref<ResumoMetasDTO>({
-    totalMetas: 0, totalInvestido: 0, percentualGeral: 0,
-    metasConcluidas: 0, totalDeMetasAtivas: 0,
+  totalMetas: 0,
+  totalInvestido: 0,
+  percentualGeral: 0,
+  metasConcluidas: 0,
+  totalDeMetasAtivas: 0,
 });
 const loading = ref(false);
 
@@ -90,181 +112,179 @@ const metaSelecionada = ref<MetaFinanceiraResult | null>(null);
 const contribuicaoSelecionada = ref<ContribuicaoResult | null>(null);
 
 onMounted(() => {
-    carregarDados();
+  void carregarDados();
 });
 
 async function carregarDados() {
-    loading.value = true;
-    try {
-        const [metasRes, resumoRes] = await Promise.all([
-            service.obterTodas(),
-            service.obterResumo(),
-        ]);
-        metas.value = metasRes || [];
-        resumo.value = resumoRes || {
-            totalMetas: 0, totalInvestido: 0, percentualGeral: 0, metasConcluidas: 0, totalDeMetasAtivas: 0,
-        };
-    } catch (err) {
-        console.error(err);
-    } finally {
-        loading.value = false;
-    }
+  loading.value = true;
+  try {
+    const [metasRes, resumoRes] = await Promise.all([service.obterTodas(), service.obterResumo()]);
+    metas.value = metasRes || [];
+    resumo.value = resumoRes || {
+      totalMetas: 0,
+      totalInvestido: 0,
+      percentualGeral: 0,
+      metasConcluidas: 0,
+      totalDeMetasAtivas: 0,
+    };
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
 }
 
 // ===== Utilitário de atualização local =====
 function atualizarEstadoAposOperacao(metaAtualizada: MetaFinanceiraResult) {
-    metaSelecionada.value = metaAtualizada;
-    const index = metas.value.findIndex(m => m.id === metaAtualizada.id);
-    if (index !== -1) {
-        metas.value[index] = metaAtualizada;
-    }
-    service.obterResumo().then(resResumo => {
-        if (resResumo) resumo.value = resResumo;
-    });
+  metaSelecionada.value = metaAtualizada;
+  const index = metas.value.findIndex((m) => m.id === metaAtualizada.id);
+  if (index !== -1) {
+    metas.value[index] = metaAtualizada;
+  }
+  void service.obterResumo().then((resResumo) => {
+    if (resResumo) resumo.value = resResumo;
+  });
 }
 
 function abrirModalCriar() {
-    modalCriarAberto.value = true;
+  modalCriarAberto.value = true;
 }
 
 function abrirModalContribuir(meta: MetaFinanceiraResult) {
-    metaSelecionada.value = meta;
-    modalContribuirAberto.value = true;
+  metaSelecionada.value = meta;
+  modalContribuirAberto.value = true;
 }
 
 function abrirModalDetalhes(meta: MetaFinanceiraResult) {
-    metaSelecionada.value = meta;
-    modalDetalhesAberto.value = true;
+  metaSelecionada.value = meta;
+  modalDetalhesAberto.value = true;
 }
 
 function abrirModalEditar(contribuicao: ContribuicaoResult) {
-    contribuicaoSelecionada.value = contribuicao;
-    modalEditarAberto.value = true;
+  contribuicaoSelecionada.value = contribuicao;
+  modalEditarAberto.value = true;
 }
 
 async function criarMeta(dto: CreateMetaFinanceiraDTO) {
-    try {
-        await service.criar(dto);
-        modalCriarAberto.value = false;
-        $q.notify({ type: 'positive', message: 'Meta criada com sucesso! 🎯' });
-        carregarDados();
-    } catch (error: any) {
-        notificarErro('Erro ao criar a meta. Verifique os campos.');
-    }
+  try {
+    await service.criar(dto);
+    modalCriarAberto.value = false;
+    $q.notify({ type: 'positive', message: 'Meta criada com sucesso! 🎯' });
+    void carregarDados();
+  } catch {
+    notificarErro('Erro ao criar a meta. Verifique os campos.');
+  }
 }
 
 async function contribuir(dto: ContribuicaoDTO) {
-    if (!metaSelecionada.value) return;
+  if (!metaSelecionada.value) return;
 
-    try {
-        const resultado = await service.adicionarContribuicao(metaSelecionada.value.id, dto);
+  try {
+    const resultado = await service.adicionarContribuicao(metaSelecionada.value.id, dto);
 
-        modalContribuirAberto.value = false;
+    modalContribuirAberto.value = false;
 
-        if (resultado.metaAtualizada) {
-            atualizarEstadoAposOperacao(resultado.metaAtualizada);
-        }
-
-        // Exibir notificação de incentivo se houve marco
-        if (resultado.notificacao) {
-            $q.notify({
-                type: 'positive',
-                message: resultado.notificacao.mensagem,
-                timeout: 10000,
-                position: 'center',
-                icon: 'emoji_events',
-                progress: true,
-                actions: [{ icon: 'close', color: 'dark' }]
-            });
-        } else {
-            $q.notify({ type: 'positive', message: 'Contribuição registrada!' });
-        }
-    } catch (error: any) {
-        // Apenas console, notificação já é exibida no AxiosHelper
+    if (resultado.metaAtualizada) {
+      atualizarEstadoAposOperacao(resultado.metaAtualizada);
     }
+
+    // Exibir notificação de incentivo se houve marco
+    if (resultado.notificacao) {
+      $q.notify({
+        type: 'positive',
+        message: resultado.notificacao.mensagem,
+        timeout: 10000,
+        position: 'center',
+        icon: 'emoji_events',
+        progress: true,
+        actions: [{ icon: 'close', color: 'dark' }],
+      });
+    } else {
+      $q.notify({ type: 'positive', message: 'Contribuição registrada!' });
+    }
+  } catch {
+    // Apenas console, notificação já é exibida no AxiosHelper
+  }
 }
 
 function removerContribuicao(contribuicaoId: string) {
-    if (!metaSelecionada.value) return;
+  if (!metaSelecionada.value) return;
 
-    $q.dialog({
-        title: 'Remover Contribuição',
-        message: 'Deseja remover o valor desta contribuição da meta?',
-        cancel: true,
-        persistent: false,
-    }).onOk(() => {
-        void (async () => {
-            try {
-                if (!metaSelecionada.value) return;
-                await service.removerContribuicao(metaSelecionada.value.id, contribuicaoId);
-                $q.notify({ type: 'positive', message: 'Contribuição removida.' });
+  $q.dialog({
+    title: 'Remover Contribuição',
+    message: 'Deseja remover o valor desta contribuição da meta?',
+    cancel: true,
+    persistent: false,
+  }).onOk(() => {
+    void (async () => {
+      try {
+        if (!metaSelecionada.value) return;
+        await service.removerContribuicao(metaSelecionada.value.id, contribuicaoId);
+        $q.notify({ type: 'positive', message: 'Contribuição removida.' });
 
-                const metaAtualizada = await service.obterPorId(metaSelecionada.value.id);
-                atualizarEstadoAposOperacao(metaAtualizada);
-            } catch (error) {
-                // AxiosHelper handles the errors
-            }
-        })();
-    });
+        const metaAtualizada = await service.obterPorId(metaSelecionada.value.id);
+        atualizarEstadoAposOperacao(metaAtualizada);
+      } catch {
+        // AxiosHelper handles the errors
+      }
+    })();
+  });
 }
 
 async function salvarEdicaoContribuicao(dto: UpdateContribuicaoDTO) {
-    if (!metaSelecionada.value) return;
+  if (!metaSelecionada.value) return;
 
-    try {
-        const resultado = await service.editarContribuicao(metaSelecionada.value.id, dto);
-        modalEditarAberto.value = false;
+  try {
+    const resultado = await service.editarContribuicao(metaSelecionada.value.id, dto);
+    modalEditarAberto.value = false;
 
-        if (resultado.metaAtualizada) {
-            atualizarEstadoAposOperacao(resultado.metaAtualizada);
-        }
-
-        $q.notify({ type: 'positive', message: 'Contribuição atualizada!' });
-    } catch (error) {
-        // AxiosHelper handles the errors
+    if (resultado.metaAtualizada) {
+      atualizarEstadoAposOperacao(resultado.metaAtualizada);
     }
+
+    $q.notify({ type: 'positive', message: 'Contribuição atualizada!' });
+  } catch {
+    // AxiosHelper handles the errors
+  }
 }
 
 function excluirMeta(id: string) {
-    $q.dialog({
-        title: 'Excluir Meta',
-        message: 'Deseja realmente excluir esta meta e todas as suas contribuições?',
-        cancel: true,
-        persistent: false,
-    }).onOk(() => {
-        void (async () => {
-            try {
-                await service.excluir(id);
-                $q.notify({ type: 'positive', message: 'Meta excluída.' });
-                await carregarDados();
-            } catch (error) {
-                // Handle via AxiosHelper
-            }
-        })();
-    });
+  $q.dialog({
+    title: 'Excluir Meta',
+    message: 'Deseja realmente excluir esta meta e todas as suas contribuições?',
+    cancel: true,
+    persistent: false,
+  }).onOk(() => {
+    void (async () => {
+      try {
+        await service.excluir(id);
+        $q.notify({ type: 'positive', message: 'Meta excluída.' });
+        await carregarDados();
+      } catch {
+        // Handle via AxiosHelper
+      }
+    })();
+  });
 }
-
 </script>
 
 <style lang="scss" scoped>
 .metas-page {
-    max-width: 1200px;
-    margin: 0 auto;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-
-
 .metas-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 .metas-empty {
-    margin-top: 80px;
+  margin-top: 80px;
 }
 
 .skeleton-card {
-    border-radius: 16px;
+  border-radius: 16px;
 }
 </style>

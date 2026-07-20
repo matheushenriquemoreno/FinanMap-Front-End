@@ -29,7 +29,7 @@ const compartilhamentoStore = useCompartilhamentoStore();
 const permissaoLabel = computed(() =>
   compartilhamentoStore.contextoAtivo?.permissao === NivelPermissao.Editar
     ? 'Edição'
-    : 'Somente leitura'
+    : 'Somente leitura',
 );
 </script>
 

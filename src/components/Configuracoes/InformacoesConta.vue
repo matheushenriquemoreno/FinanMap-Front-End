@@ -295,7 +295,7 @@ async function salvarAvatar() {
     avatarSelecionado.value = usuarioStore.avatarId;
     statusAvatar.value = 'Avatar atualizado com sucesso.';
     $q.notify({ type: 'positive', message: 'Avatar atualizado com sucesso!' });
-  } catch (error) {
+  } catch {
     avatarSelecionado.value = usuarioStore.avatarId;
     statusAvatar.value = 'Não foi possível salvar o avatar. A escolha anterior foi mantida.';
     $q.notify({
@@ -312,8 +312,8 @@ async function carregarConfiguracao() {
   try {
     const res = await service.obterConfiguracoes();
     receberNotificacoes.value = res.receberNotificacoes;
-  } catch (error) {
-    console.error('Erro ao obter configurações de custos fixos:', error);
+  } catch {
+    console.error('Erro ao obter configurações de custos fixos.');
   } finally {
     loadingConfig.value = false;
   }
@@ -326,7 +326,7 @@ async function salvarConfiguracao(novoValor: boolean) {
       type: 'positive',
       message: `Preferência de lembretes atualizada com sucesso! 🎯`,
     });
-  } catch (error) {
+  } catch {
     // Reverter localmente em caso de falha (handleErrorAxios já notifica)
     receberNotificacoes.value = !novoValor;
   }

@@ -453,7 +453,7 @@ async function responderConvite(conviteId: string, aceitar: boolean) {
       type: 'positive',
       message: aceitar ? 'Convite aceito!' : 'Convite recusado',
     });
-  } catch (error) {
+  } catch {
     $q.notify({
       type: 'negative',
       message: 'Erro ao responder convite',
@@ -481,7 +481,7 @@ async function salvarPermissao() {
       message: 'Permissão atualizada com sucesso!',
     });
     dialogEditarPermissao.value = false;
-  } catch (error) {
+  } catch {
     $q.notify({
       type: 'negative',
       message: 'Erro ao atualizar permissão',
