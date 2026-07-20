@@ -154,6 +154,14 @@ watch(
   ],
   syncRouteWithStore,
 );
+
+watch(
+  () => [dashboardStore.dataInicial, dashboardStore.dataFinal],
+  () => {
+    void dashboardStore.carregarDashboard();
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>

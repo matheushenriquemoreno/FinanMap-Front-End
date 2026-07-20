@@ -1,17 +1,10 @@
 <template>
-  <div
-    class="box"
-    :class="$q.dark.isActive ? 'box--dark' : 'box--light'"
-  >
+  <div class="box" :class="$q.dark.isActive ? 'box--dark' : 'box--light'">
     <div v-if="loading" class="flex flex-center full-height">
       <q-spinner color="primary" size="2em" />
     </div>
     <div v-else class="box__content q-pa-xs">
-      <apexchart
-        :options="configuracoesGrafico"
-        :series="valoresGrafico"
-        height="100%"
-      />
+      <VueApexCharts :options="configuracoesGrafico" :series="valoresGrafico" height="100%" />
     </div>
   </div>
 </template>
@@ -19,6 +12,7 @@
 <script setup lang="ts">
 import type { ApexOptions } from 'apexcharts';
 import { computed, type PropType } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
@@ -52,7 +46,7 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false,
-  }
+  },
 });
 
 const formatarValor = (valor: number) => {
@@ -146,7 +140,9 @@ const valoresGrafico = computed(() => [
   border-radius: 16px;
   overflow: hidden;
   cursor: default;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
   position: relative;
 }
 

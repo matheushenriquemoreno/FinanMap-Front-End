@@ -6,7 +6,7 @@
 
 **Data**: 19/07/2026
 
-**Rodada**: 2 — reauditoria após a Fase 1
+**Rodada**: 3 — reauditoria após a Fase 2
 
 **Stack identificada**: Vue 3.4, Quasar 2.18, Vite 6.2, TypeScript 5.5 em modo estrito, Pinia 3, Vue Router 4 em modo hash, Axios 1.2, ApexCharts 4 e SCSS.
 
@@ -14,39 +14,39 @@
 
 ## Resumo executivo
 
-A primeira rodada de correções eliminou todos os achados críticos e reduziu os altos de seis para três. Os fluxos centrais agora têm nomes acessíveis, headings semânticos, controles de período e data operáveis por teclado, zoom habilitado, autenticação responsiva e redirecionamento de sessão compatível com o router hash.
+A segunda fase eliminou os três achados de performance. ApexCharts não participa mais do boot global e ficou contido no chunk lazy do dashboard; o entrypoint de produção não contém tokens da biblioteca. O dashboard passou a orquestrar e compartilhar resumo, evolução e categorias por período/tipo, com deduplicação concorrente, cache multiperíodo e proteção contra respostas obsoletas.
 
-A regressão automatizada adicionada varre os componentes Vue, correlaciona `label`/`for`, verifica imagens e botões icon-only e cobre os contratos dos wrappers de input. O checker também contém casos negativos para não confundir `v-for`, `data-label` ou `some-for` com atributos acessíveis. A implementação passou por revisão independente após duas rodadas de endurecimento do teste.
+A regressão de performance executa os módulos reais de cache, registro de categorias e composição de snapshots. Ela cobre requisições concorrentes, A→B→A, retorno a A enquanto B está pendente e reidratação de categorias lazy em snapshots antigos. A implementação passou por quatro ciclos de revisão independente até não restar achado crítico, alto ou médio no escopo da fase.
 
-O principal risco restante está em performance: ApexCharts ainda participa do boot global e o dashboard continua repetindo chamadas equivalentes em componentes diferentes. A arquitetura de sessão também mantém access e refresh tokens no `localStorage`, o que exige alinhamento com o backend.
+O principal risco restante está na arquitetura de sessão: access e refresh tokens continuam no `localStorage`, o que exige alinhamento com o backend. Também permanecem débitos médios de configuração HTTP, tipagem/lint, testes de componentes, decomposição de arquivos grandes, Design System e CSS.
 
 | Dimensão                            |  Nota   | Crítico | Alto  | Médio | Baixo |
 | ----------------------------------- | :-----: | :-----: | :---: | :---: | :---: |
 | Design System / consistência visual |   9,0   |    0    |   0   |   2   |   0   |
-| Performance / Core Web Vitals       |   6,5   |    0    |   2   |   1   |   0   |
+| Performance / Core Web Vitals       |  10,0   |    0    |   0   |   0   |   0   |
 | Acessibilidade / UX                 |  10,0   |    0    |   0   |   0   |   0   |
 | Arquitetura Vue/Quasar              |   6,4   |    0    |   1   |   4   |   1   |
 | CSS/SCSS/Quasar                     |   9,0   |    0    |   0   |   2   |   0   |
-| **Nota geral ponderada**            | **8,0** |  **0**  | **3** | **9** | **1** |
+| **Nota geral ponderada**            | **8,9** |  **0**  | **1** | **8** | **1** |
 
 **Pesos**: Performance 25%, Acessibilidade/UX 25%, Arquitetura 25%, Design System 15% e CSS/SCSS/Quasar 10%. Tailwind não foi cobrado porque não faz parte da stack.
 
 ### Evolução da qualidade
 
-| Indicador      | Rodada 1 | Rodada 2 | Evolução |
-| -------------- | :------: | :------: | :------: |
-| Nota ponderada |   5,7    |   8,0    |   +2,3   |
-| Críticos       |    2     |    0     |    -2    |
-| Altos          |    6     |    3     |    -3    |
-| Médios         |    10    |    9     |    -1    |
+| Indicador      | Rodada 1 | Rodada 2 | Rodada 3 | Evolução total |
+| -------------- | :------: | :------: | :------: | :------------: |
+| Nota ponderada |   5,7    |   8,0    |   8,9    |      +3,2      |
+| Críticos       |    2     |    0     |    0     |       -2       |
+| Altos          |    6     |    3     |    1     |       -5       |
+| Médios         |    10    |    9     |    8     |       -2       |
 
 ---
 
 ## Top 3 prioridades restantes
 
-1. Remover ApexCharts do boot global e confirmar que autenticação não baixa o chunk de 561,98 KB.
-2. Centralizar e deduplicar as quatro chaves de dados do dashboard hoje solicitadas por vários componentes.
-3. Migrar a sessão para cookie `HttpOnly` em conjunto com o backend, retirando o refresh token do `localStorage`.
+1. Migrar a sessão para cookie `HttpOnly` em conjunto com o backend, retirando o refresh token do `localStorage`.
+2. Consolidar URL por ambiente e um único cliente Axios, removendo a instância de exemplo.
+3. Adicionar Vitest/Vue Test Utils e reativar regras de tipagem, começando por serviços e stores.
 
 ---
 
@@ -81,6 +81,24 @@ O principal risco restante está em performance: ApexCharts ainda participa do b
 - Os fallbacks usam `/#/login` em `AxiosHelper.ts:40,196` e `TokenRenewalService.ts:114`.
 - A regressão proíbe o casing incorreto nos dois contratos em `scripts/check-accessibility-ux.mjs:317-336`.
 
+### PERF-01 — ApexCharts no boot global — Resolvido
+
+- O boot contém apenas Axios em `quasar.config.ts:14`; `src/boot/apexchart.ts` foi removido.
+- Os gráficos importam `VueApexCharts` localmente, por exemplo em `DashboardCategoryChart.vue:48,55`.
+- O build confirmou **0 tokens ApexCharts no entrypoint de 255,27 KB**; a biblioteca ficou no chunk lazy do dashboard, com 603,42 KB / 163,88 KB gzip.
+
+### PERF-02 — Chamadas equivalentes repetidas no dashboard — Resolvido
+
+- A página orquestra a carga por período em `dashbord-Gerenciamento-Mensal.vue:158-163`.
+- O store centraliza a sequência e descarta respostas obsoletas em `dashboardStore.ts:94-120`.
+- Cache, registro e loader testáveis cobrem deduplicação, cache multiperíodo, categorias lazy e corridas em `dashboardRequestCache.mjs`, `dashboardCategoryRegistry.mjs` e `dashboardSnapshotLoader.mjs:13-53`.
+- A carga inicial realiza quatro chaves únicas — resumo, evolução, rendimentos e despesas — e Investimento permanece lazy até ser solicitado.
+
+### PERF-03 — Logo de autenticação superdimensionado — Resolvido
+
+- `logo-auth.webp` tem 360×299 e 26.578 bytes, redução de **90,3%** frente ao PNG de 273.115 bytes.
+- As três páginas públicas usam o asset com `width`, `height`, `fetchpriority="high"` e `decoding="async"`; exemplo em `LoginPage.vue:3-10,54`.
+
 ---
 
 ## Achados restantes
@@ -111,38 +129,7 @@ O principal risco restante está em performance: ApexCharts ainda participa do b
 
 ## 2. Performance / Core Web Vitals
 
-### PERF-01 — ApexCharts é carregado no boot global
-
-**Severidade**: Alto
-
-**Local**: `quasar.config.ts:14`; `src/boot/apexchart.ts:1`; build de produção
-
-- **Esperado**: uma biblioteca exclusiva de gráficos deve carregar apenas nas rotas que a utilizam.
-- **Implementado**: `apexchart` permanece no boot e o build gera um chunk de **561,98 KB minificado / 152,81 KB gzip**.
-- **Impacto**: páginas públicas pagam transferência, parsing e inicialização sem exibir gráficos.
-- **Sugestão**: remover o boot e usar wrapper assíncrono/import dinâmico nos componentes do dashboard.
-
-### PERF-02 — O dashboard repete chamadas equivalentes por componente
-
-**Severidade**: Alto
-
-**Local**: `DashboardSummaryCards.vue:94-117`; `DashboardBalanceCard.vue:147-157`; `DashboardRadialComposition.vue:181-192`; componentes de evolução e categoria
-
-- **Esperado**: dados compartilhados devem ser buscados uma vez por período/tipo e distribuídos de forma reativa.
-- **Implementado**: resumo, evolução e categorias são solicitados por componentes independentes e repetidos nos watchers.
-- **Impacto**: aumenta rede/backend, cria loaders concorrentes e permite recortes temporalmente inconsistentes.
-- **Sugestão**: cachear as quatro chaves no store por período/tipo e carregá-las com uma única orquestração.
-
-### PERF-03 — Logo de autenticação está superdimensionado
-
-**Severidade**: Médio
-
-**Local**: `src/assets/logo-sem-fundo-menor.png`; páginas de autenticação
-
-- **Esperado**: um logo exibido a 160–180 px deve usar vetor ou bitmap otimizado e dimensões reservadas.
-- **Implementado**: o PNG tem 753×626 e 273.115 bytes, mas é renderizado em tamanho muito menor.
-- **Impacto**: transfere bytes desnecessários nas três rotas públicas e pode atrasar o elemento visual principal.
-- **Sugestão**: substituir por SVG limpo ou WebP/AVIF recortado e declarar dimensões/aspect ratio.
+Nenhum achado aberto nesta rodada. O dashboard ainda gera um aviso por ultrapassar 500 KB, mas esse chunk é lazy e exclusivo da rota que usa os gráficos; não afeta mais a carga inicial das páginas públicas.
 
 ## 3. Acessibilidade / UX
 
@@ -201,7 +188,7 @@ Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG: a F
 **Local**: `package.json`; `scripts/check-*.mjs`
 
 - **Esperado**: componentes, stores e fluxos financeiros devem ter testes unitários/de componente e smoke E2E.
-- **Implementado**: os checks estruturais melhoraram e agora cobrem acessibilidade no código-fonte, mas ainda usam leitura de arquivos e regex; não há Vitest, Vue Test Utils ou Playwright.
+- **Implementado**: o checker de performance já executa módulos puros e fluxos assíncronos reais, mas componentes Vue, store Pinia e jornadas de navegador ainda não usam Vitest, Vue Test Utils ou Playwright.
 - **Impacto**: payloads, watchers, renderização, foco e refresh de sessão podem regredir sem detecção runtime.
 - **Sugestão**: manter os checks rápidos e adicionar Vitest + Vue Test Utils e Playwright nos fluxos críticos.
 
@@ -244,13 +231,14 @@ Nenhum achado aberto nesta rodada. Isso não equivale a certificação WCAG: a F
 
 ## Evidências de validação
 
-- `npm test`: passou, incluindo `test:quality:a11y`.
+- `npm test`: passou, incluindo `test:quality:a11y` e `test:quality:performance`.
 - `npm run lint`: passou.
 - `npm run build`: passou.
 - `git diff --check`: passou.
-- Revisão independente final: PASS, sem bloqueantes.
-- Build: 1.192,74 KB de JS e 233,74 KB de CSS; warning de chunk mantido para a Fase 2.
+- Revisão independente final: PASS, sem achados críticos, altos ou médios no escopo.
+- Build: 1.194,68 KB de JS e 233,75 KB de CSS; entrypoint de 255,27 KB sem ApexCharts e dashboard lazy de 603,42 KB.
+- Logo: 26.578 bytes, 90,3% menor que o PNG anterior.
 
 ## Próxima rodada recomendada
 
-Executar a Fase 2 do plano em `.specs/frontend-quality-improvements/IMPLEMENTATION-PLAN.md`: carregamento sob demanda do ApexCharts, store/orquestração única dos dados do dashboard e otimização do logo. Essa rodada deve remover os dois achados altos de performance e elevar a nota projetada para aproximadamente 8,9, desde que não introduza novas regressões.
+Executar a Fase 3 do plano em `.specs/frontend-quality-improvements/IMPLEMENTATION-PLAN.md`: consolidar configuração HTTP, fortalecer tipagem/lint, implantar testes de componentes/fluxos e decompor responsabilidades. A nota ainda está abaixo da meta de 9,0 e restam 1 achado alto, 8 médios e 1 baixo.

@@ -22,24 +22,13 @@
           </div>
         </div>
         <div class="trend-legend row q-gutter-sm gt-xs">
-          <q-chip
-            size="13px"
-            :style="{ background: 'rgba(33, 186, 69, 0.15)', color: '#21ba45' }"
-          >
+          <q-chip size="13px" :style="{ background: 'rgba(33, 186, 69, 0.15)', color: '#21ba45' }">
             <q-icon name="circle" size="8px" class="q-mr-xs" />Rendimentos
           </q-chip>
-          <q-chip
-            
-            size="13px"
-            :style="{ background: 'rgba(193, 0, 21, 0.15)', color: '#c10015' }"
-          >
+          <q-chip size="13px" :style="{ background: 'rgba(193, 0, 21, 0.15)', color: '#c10015' }">
             <q-icon name="circle" size="8px" class="q-mr-xs" />Despesas
           </q-chip>
-          <q-chip
-            
-            size="13px"
-            :style="{ background: 'rgba(49, 204, 236, 0.15)', color: '#31ccec' }"
-          >
+          <q-chip size="13px" :style="{ background: 'rgba(49, 204, 236, 0.15)', color: '#31ccec' }">
             <q-icon name="circle" size="8px" class="q-mr-xs" />Investimentos
           </q-chip>
         </div>
@@ -50,31 +39,28 @@
       <div v-if="loading" class="flex flex-center" style="height: 380px">
         <q-spinner color="primary" size="3em" />
       </div>
-      <apexchart
-        v-else
-        type="area"
-        height="380"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts v-else type="area" height="380" :options="chartOptions" :series="series" />
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
+const loading = computed(() => store.isLoading);
 
-const series = ref<any[]>([]);
-const categories = ref<string[]>([]);
+const categories = computed(() => store.evolucao.map((item) => item.label));
+const series = computed(() => [
+  { name: 'Rendimentos', data: store.evolucao.map((item) => item.rendimento) },
+  { name: 'Despesas', data: store.evolucao.map((item) => item.despesa) },
+  { name: 'Investimentos', data: store.evolucao.map((item) => item.investimento) },
+]);
 
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
@@ -168,7 +154,10 @@ const chartOptions = computed<ApexOptions>(() => ({
           <span class="trend-tooltip__val">${formatarValor(val)}</span>
         </div>`;
       });
-      const total = s.reduce((acc: number, serie: number[]) => acc + (serie[dataPointIndex] || 0), 0);
+      const total = s.reduce(
+        (acc: number, serie: number[]) => acc + (serie[dataPointIndex] || 0),
+        0,
+      );
       html += `<div class="trend-tooltip__total">Total: ${formatarValor(total)}</div></div>`;
       return html;
     },
@@ -184,29 +173,6 @@ function formatarValorCurto(valor: number) {
   if (Math.abs(valor) >= 1000) return 'R$' + (valor / 1000).toFixed(0) + 'k';
   return 'R$' + valor.toFixed(0);
 }
-
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resultado = await service.obterEvolucao(store.dataInicial, store.dataFinal);
-    categories.value = resultado.map((item) => item.label);
-    series.value = [
-      { name: 'Rendimentos', data: resultado.map((item) => item.rendimento) },
-      { name: 'Despesas', data: resultado.map((item) => item.despesa) },
-      { name: 'Investimentos', data: resultado.map((item) => item.investimento) },
-    ];
-  } catch {
-    // Erro já tratado pelo handleErrorAxios
-  } finally {
-    loading.value = false;
-  }
-}
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style>
@@ -217,7 +183,7 @@ watch(
   border-radius: 10px;
   padding: 10px 14px;
   min-width: 200px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 .trend-tooltip__header {
   font-size: 11px;
@@ -252,7 +218,7 @@ watch(
 .trend-tooltip__total {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 12px;
   font-weight: 700;
   color: #fff;

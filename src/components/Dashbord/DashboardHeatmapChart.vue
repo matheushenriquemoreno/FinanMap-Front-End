@@ -15,10 +15,7 @@
           >
             Intensidade Semanal
           </div>
-          <div
-            class="text-caption"
-            :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'"
-          >
+          <div class="text-caption" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">
             Distribuição por semana no mês — valores por tipo de transação
           </div>
         </div>
@@ -39,36 +36,55 @@
       <div v-if="loading" class="flex flex-center" style="height: 220px">
         <q-spinner color="primary" size="3em" />
       </div>
-      <apexchart
-        v-else
-        type="heatmap"
-        height="220"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts v-else type="heatmap" height="220" :options="chartOptions" :series="series" />
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
+const loading = computed(() => store.isLoading);
 
 // Só visível quando o período é de um único mês
 const visivel = computed(
-  () =>
-    store.mesInicial === store.mesFinal && store.anoInicial === store.anoFinal
+  () => store.mesInicial === store.mesFinal && store.anoInicial === store.anoFinal,
 );
 
-const series = ref<any[]>([]);
+const series = computed(() => {
+  if (!visivel.value) return [];
+
+  const labels = store.evolucao.map((item) => item.label);
+  return [
+    {
+      name: 'Rendimentos',
+      data: store.evolucao.map((item, i) => ({
+        x: labels[i] ?? `S${i + 1}`,
+        y: item.rendimento,
+      })),
+    },
+    {
+      name: 'Despesas',
+      data: store.evolucao.map((item, i) => ({
+        x: labels[i] ?? `S${i + 1}`,
+        y: item.despesa,
+      })),
+    },
+    {
+      name: 'Investimentos',
+      data: store.evolucao.map((item, i) => ({
+        x: labels[i] ?? `S${i + 1}`,
+        y: item.investimento,
+      })),
+    },
+  ];
+});
 
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
@@ -158,41 +174,6 @@ function formatarValorCurto(valor: number) {
   if (Math.abs(valor) >= 1000) return 'R$' + (valor / 1000).toFixed(1) + 'k';
   return 'R$' + valor.toFixed(0);
 }
-
-async function fetchData() {
-  if (!visivel.value) return;
-  loading.value = true;
-  try {
-    const resultado = await service.obterEvolucao(store.dataInicial, store.dataFinal);
-
-    // evolucao no mês único retorna semanas; transforma no formato heatmap
-    const labels = resultado.map((item) => item.label);
-    series.value = [
-      {
-        name: 'Rendimentos',
-        data: resultado.map((item, i) => ({ x: labels[i] ?? `S${i + 1}`, y: item.rendimento })),
-      },
-      {
-        name: 'Despesas',
-        data: resultado.map((item, i) => ({ x: labels[i] ?? `S${i + 1}`, y: item.despesa })),
-      },
-      {
-        name: 'Investimentos',
-        data: resultado.map((item, i) => ({ x: labels[i] ?? `S${i + 1}`, y: item.investimento })),
-      },
-    ];
-  } catch {
-    // Erro já tratado pelo handleErrorAxios
-  } finally {
-    loading.value = false;
-  }
-}
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>

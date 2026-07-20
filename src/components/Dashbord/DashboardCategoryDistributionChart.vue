@@ -29,7 +29,7 @@
           rounded
           unelevated
           :options="categoriasOptions"
-          @update:model-value="fetchData"
+          @update:model-value="carregarCategorias"
           size="13px"
         />
       </div>
@@ -39,18 +39,22 @@
       <div v-if="loading" class="flex flex-center" style="height: 350px; width: 100%">
         <q-spinner color="primary" size="3em" />
       </div>
-      <div v-else-if="semDados" class="flex flex-center column" style="height: 350px; width: 100%; gap: 12px">
+      <div
+        v-else-if="semDados"
+        class="flex flex-center column"
+        style="height: 350px; width: 100%; gap: 12px"
+      >
         <q-icon name="donut_large" size="48px" :color="$q.dark.isActive ? 'grey-7' : 'grey-4'" />
         <span :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
           Nenhum dado para o período
         </span>
       </div>
-      <div v-else style="width: 100%; display: flex; justify-content: center;">
-        <apexchart
+      <div v-else style="width: 100%; display: flex; justify-content: center">
+        <VueApexCharts
           type="donut"
           height="350"
           width="100%"
-          style="max-width: 460px;"
+          style="max-width: 460px"
           :options="chartOptions"
           :series="series"
         />
@@ -60,17 +64,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
 
 const tipoCategoriaSelecionada = ref(TipoCategoriaETransacao.Despesa);
 const categoriasOptions = [
@@ -79,8 +81,14 @@ const categoriasOptions = [
   { label: 'Investimentos', value: TipoCategoriaETransacao.Investimento },
 ];
 
-const series = ref<number[]>([]);
-const labels = ref<string[]>([]);
+const dadosCategorias = computed(() =>
+  store.obterCategoriasPorTipo(tipoCategoriaSelecionada.value),
+);
+const loading = computed(
+  () => store.isLoading || store.categoriaEstaCarregando(tipoCategoriaSelecionada.value),
+);
+const series = computed(() => dadosCategorias.value.map((item) => item.valor));
+const labels = computed(() => dadosCategorias.value.map((item) => item.categoria));
 const semDados = computed(() => series.value.length === 0);
 
 const chartOptions = computed<ApexOptions>(() => ({
@@ -163,28 +171,9 @@ function formatarValor(valor: any) {
   return valorNumerico.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
 }
 
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resultado = await service.obterCategorias(
-      store.dataInicial,
-      store.dataFinal,
-      tipoCategoriaSelecionada.value
-    );
-    labels.value = resultado.map((item) => item.categoria);
-    series.value = resultado.map((item) => item.valor);
-  } catch {
-    // Erro já tratado pelo handleErrorAxios no service
-  } finally {
-    loading.value = false;
-  }
+function carregarCategorias() {
+  void store.carregarCategorias(tipoCategoriaSelecionada.value);
 }
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>

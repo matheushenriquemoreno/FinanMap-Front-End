@@ -1,6 +1,14 @@
 <template>
   <div class="container-login">
-    <img :src="logo" class="logo" alt="FinanMap" />
+    <img
+      :src="logo"
+      class="logo"
+      alt="FinanMap"
+      width="360"
+      height="299"
+      fetchpriority="high"
+      decoding="async"
+    />
 
     <div class="card-login">
       <div class="q-pa-md text-center">
@@ -43,7 +51,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import logo from 'src/assets/logo-sem-fundo-menor.png';
+import logo from 'src/assets/logo-auth.webp';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';

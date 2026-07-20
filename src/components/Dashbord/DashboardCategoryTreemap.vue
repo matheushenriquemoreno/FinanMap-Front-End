@@ -14,10 +14,7 @@
           >
             Ranking de Categorias
           </div>
-          <div
-            class="text-caption"
-            :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'"
-          >
+          <div class="text-caption" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">
             Ordenado por valor decrescente
           </div>
         </div>
@@ -29,7 +26,7 @@
           rounded
           unelevated
           :options="opcoes"
-          @update:model-value="fetchData"
+          @update:model-value="carregarCategorias"
           size="13px"
         />
       </div>
@@ -40,34 +37,30 @@
         <q-spinner color="primary" size="3em" />
       </div>
       <div v-else-if="semDados" class="flex flex-center column" style="height: 380px; gap: 12px">
-        <q-icon name="format_list_bulleted" size="48px" :color="$q.dark.isActive ? 'grey-7' : 'grey-4'" />
+        <q-icon
+          name="format_list_bulleted"
+          size="48px"
+          :color="$q.dark.isActive ? 'grey-7' : 'grey-4'"
+        />
         <span :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
           Nenhum dado para o período
         </span>
       </div>
-      <apexchart
-        v-else
-        type="bar"
-        height="380"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts v-else type="bar" height="380" :options="chartOptions" :series="series" />
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
 
 const tipoSelecionado = ref(TipoCategoriaETransacao.Despesa);
 const opcoes = [
@@ -76,7 +69,16 @@ const opcoes = [
   { label: 'Investimentos', value: TipoCategoriaETransacao.Investimento },
 ];
 
-const rawData = ref<{ x: string; y: number }[]>([]);
+const loading = computed(
+  () => store.isLoading || store.categoriaEstaCarregando(tipoSelecionado.value),
+);
+const rawData = computed(() =>
+  store
+    .obterCategoriasPorTipo(tipoSelecionado.value)
+    .filter((item) => item.valor > 0)
+    .map((item) => ({ x: item.categoria, y: item.valor }))
+    .sort((a, b) => b.y - a.y),
+);
 const semDados = computed(() => rawData.value.length === 0);
 
 const MAX_CATEGORIES = 8;
@@ -85,30 +87,30 @@ const processedData = computed(() => {
   if (rawData.value.length <= MAX_CATEGORIES) {
     return rawData.value;
   }
-  
+
   const topCategories = rawData.value.slice(0, MAX_CATEGORIES - 1);
   const otherCategories = rawData.value.slice(MAX_CATEGORIES - 1);
-  
+
   const sumOthers = otherCategories.reduce((acc, curr) => acc + curr.y, 0);
-  
+
   if (sumOthers > 0) {
     topCategories.push({
       x: 'Outras',
-      y: sumOthers
+      y: sumOthers,
     });
   }
-  
+
   return topCategories.sort((a, b) => b.y - a.y); // Mantendo ordenado mesmo com 'Outras'
 });
 
 const series = computed(() => [
   {
     name: 'Valor',
-    data: processedData.value.map(item => item.y),
+    data: processedData.value.map((item) => item.y),
   },
 ]);
 
-const categories = computed(() => processedData.value.map(item => item.x));
+const categories = computed(() => processedData.value.map((item) => item.x));
 
 const corPorTipo: Record<string, [string, string]> = {
   [TipoCategoriaETransacao.Rendimento]: ['#21ba45', '#2e7d32'],
@@ -235,30 +237,9 @@ function formatarValorCurto(valor: number) {
   return 'R$' + valor.toFixed(0);
 }
 
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resultado = await service.obterCategorias(
-      store.dataInicial,
-      store.dataFinal,
-      tipoSelecionado.value
-    );
-    rawData.value = resultado
-      .filter((item) => item.valor > 0)
-      .map((item) => ({ x: item.categoria, y: item.valor }))
-      .sort((a, b) => b.y - a.y);
-  } catch {
-    // Erro já tratado
-  } finally {
-    loading.value = false;
-  }
+function carregarCategorias() {
+  void store.carregarCategorias(tipoSelecionado.value);
 }
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>

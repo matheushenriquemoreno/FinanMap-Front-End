@@ -7,14 +7,16 @@
 - [x] Task 3: corrigir zoom, responsividade e redirecionamento hash
 - [x] Task 4: validar, revisar e reauditar a rodada
 
-**Status da fase**: concluída e pronta para o commit da rodada.
+**Status da fase**: concluída e versionada no commit `152eb8b`.
 
 ## Phase 2 -- Performance de carregamento e dashboard
 
-- [ ] Task 1: remover ApexCharts do boot global
-- [ ] Task 2: deduplicar dados do dashboard
-- [ ] Task 3: otimizar o logo de autenticação
-- [ ] Task 4: validar, revisar, reauditar e versionar a rodada
+- [x] Task 1: remover ApexCharts do boot global
+- [x] Task 2: deduplicar dados do dashboard
+- [x] Task 3: otimizar o logo de autenticação
+- [x] Task 4: validar, revisar, reauditar e versionar a rodada
+
+**Status da fase**: concluída; validação independente final em PASS após corrigir cache multiperíodo, deduplicação inicial/lazy, reidratação de snapshots e navegação A → B pendente → A.
 
 ## Phase 3 -- Arquitetura, testes e configuração
 

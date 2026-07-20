@@ -12,41 +12,25 @@
       >
         Resumo Financeiro
       </div>
-      <div
-        class="text-caption"
-        :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'"
-      >
+      <div class="text-caption" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">
         Valores totais no período selecionado
       </div>
     </q-card-section>
 
-    <q-card-section class="q-pt-none" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+    <q-card-section
+      class="q-pt-none"
+      style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center"
+    >
       <div v-if="loading" class="flex flex-center" style="height: 250px">
         <q-spinner color="primary" size="3em" />
       </div>
-      <apexchart
-        v-else
-        type="bar"
-        height="220"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts v-else type="bar" height="220" :options="chartOptions" :series="series" />
 
       <!-- Legenda customizada -->
       <div class="row justify-around q-mt-sm" v-if="!loading">
-        <div
-          v-for="(item, i) in legendItems"
-          :key="i"
-          class="text-center"
-        >
-          <div
-            class="radial-legend-dot"
-            :style="{ background: item.color }"
-          />
-          <div
-            class="text-caption"
-            :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'"
-          >
+        <div v-for="(item, i) in legendItems" :key="i" class="text-center">
+          <div class="radial-legend-dot" :style="{ background: item.color }" />
+          <div class="text-caption" :class="$q.dark.isActive ? 'text-grey-5' : 'text-grey-6'">
             {{ item.label }}
           </div>
           <div
@@ -62,36 +46,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
+const loading = computed(() => store.isLoading);
 
-const rendimento = ref(0);
-const despesa = ref(0);
-const investimento = ref(0);
+const rendimento = computed(() => store.resumo?.rendimento.total ?? 0);
+const despesa = computed(() => store.resumo?.despesa.total ?? 0);
+const investimento = computed(() => store.resumo?.investimento.total ?? 0);
 
-const series = computed(() => [{
-  name: 'Valor',
-  data: [rendimento.value, despesa.value, investimento.value]
-}]);
+const series = computed(() => [
+  {
+    name: 'Valor',
+    data: [rendimento.value, despesa.value, investimento.value],
+  },
+]);
 
 const COLORS = ['#21ba45', '#c10015', '#31ccec'];
 const LABELS = ['Rendimentos', 'Despesas', 'Investimentos'];
 
-const legendItems = computed(() =>
-  [
-    { label: 'Rendimentos', valor: rendimento.value, color: COLORS[0] },
-    { label: 'Despesas', valor: despesa.value, color: COLORS[1] },
-    { label: 'Investimentos', valor: investimento.value, color: COLORS[2] },
-  ]
-);
+const legendItems = computed(() => [
+  { label: 'Rendimentos', valor: rendimento.value, color: COLORS[0] },
+  { label: 'Despesas', valor: despesa.value, color: COLORS[1] },
+  { label: 'Investimentos', valor: investimento.value, color: COLORS[2] },
+]);
 
 const chartOptions = computed<ApexOptions>(() => ({
   chart: {
@@ -129,15 +112,15 @@ const chartOptions = computed<ApexOptions>(() => ({
     style: {
       fontSize: '12px',
       fontWeight: 600,
-      colors: ['#fff']
+      colors: ['#fff'],
     },
     dropShadow: {
       enabled: true,
       top: 1,
       left: 1,
       blur: 1,
-      opacity: 0.45
-    }
+      opacity: 0.45,
+    },
   },
   xaxis: {
     categories: LABELS,
@@ -151,8 +134,8 @@ const chartOptions = computed<ApexOptions>(() => ({
         colors: $q.dark.isActive ? '#ccc' : '#444',
         fontSize: '12px',
         fontWeight: 600,
-      }
-    }
+      },
+    },
   },
   grid: { show: false },
   legend: { show: false },
@@ -160,9 +143,9 @@ const chartOptions = computed<ApexOptions>(() => ({
     theme: $q.dark.isActive ? 'dark' : 'light',
     y: {
       formatter: (val: number) => formatarValor(val),
-      title: { formatter: () => '' }
-    }
-  }
+      title: { formatter: () => '' },
+    },
+  },
 }));
 
 function formatarValor(valor: number) {
@@ -174,26 +157,6 @@ function formatarValorCurto(valor: number) {
   if (Math.abs(valor) >= 1000) return 'R$' + (valor / 1000).toFixed(1) + 'k';
   return 'R$' + valor.toFixed(0);
 }
-
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resumo = await service.obterResumo(store.dataInicial, store.dataFinal);
-    rendimento.value = resumo.rendimento.total;
-    despesa.value = resumo.despesa.total;
-    investimento.value = resumo.investimento.total;
-  } catch {
-    // Erro já tratado pelo handleErrorAxios
-  } finally {
-    loading.value = false;
-  }
-}
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>

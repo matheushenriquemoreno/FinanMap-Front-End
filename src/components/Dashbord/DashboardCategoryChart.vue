@@ -29,7 +29,7 @@
           rounded
           unelevated
           :options="categoriasOptions"
-          @update:model-value="fetchData"
+          @update:model-value="carregarCategorias"
           size="13px"
         />
       </div>
@@ -45,29 +45,21 @@
           Nenhum dado para o período
         </span>
       </div>
-      <apexchart
-        v-else
-        type="bar"
-        height="350"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts v-else type="bar" height="350" :options="chartOptions" :series="series" />
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { TipoCategoriaETransacao } from 'src/Model/Categoria';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
 
 const tipoCategoriaSelecionada = ref(TipoCategoriaETransacao.Rendimento);
 const categoriasOptions = [
@@ -76,8 +68,16 @@ const categoriasOptions = [
   { label: 'Investimentos', value: TipoCategoriaETransacao.Investimento },
 ];
 
-const series = ref([{ name: 'Valor', data: [] as number[] }]);
-const categories = ref<string[]>([]);
+const dadosCategorias = computed(() =>
+  store.obterCategoriasPorTipo(tipoCategoriaSelecionada.value),
+);
+const loading = computed(
+  () => store.isLoading || store.categoriaEstaCarregando(tipoCategoriaSelecionada.value),
+);
+const series = computed(() => [
+  { name: 'Valor', data: dadosCategorias.value.map((item) => item.valor) },
+]);
+const categories = computed(() => dadosCategorias.value.map((item) => item.categoria));
 const semDados = computed(() => !series.value[0]?.data.length);
 
 const corPorTipo: Record<string, [string, string]> = {
@@ -192,28 +192,9 @@ function formatarValor(valor: any, style: 'currency' | 'decimal' = 'currency') {
   });
 }
 
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resultado = await service.obterCategorias(
-      store.dataInicial,
-      store.dataFinal,
-      tipoCategoriaSelecionada.value
-    );
-    categories.value = resultado.map((item) => item.categoria);
-    series.value = [{ name: 'Valor', data: resultado.map((item) => item.valor) }];
-  } catch {
-    // Erro já tratado pelo handleErrorAxios no service
-  } finally {
-    loading.value = false;
-  }
+function carregarCategorias() {
+  void store.carregarCategorias(tipoCategoriaSelecionada.value);
 }
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>

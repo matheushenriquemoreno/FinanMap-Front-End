@@ -33,7 +33,9 @@
         </div>
         <div
           class="balance-icon-wrapper"
-          :class="saldoPositivo ? 'balance-icon-wrapper--positive' : 'balance-icon-wrapper--negative'"
+          :class="
+            saldoPositivo ? 'balance-icon-wrapper--positive' : 'balance-icon-wrapper--negative'
+          "
         >
           <q-icon
             :name="saldoPositivo ? 'savings' : 'money_off'"
@@ -44,7 +46,10 @@
       </div>
     </q-card-section>
 
-    <q-card-section class="q-pt-md" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+    <q-card-section
+      class="q-pt-md"
+      style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center"
+    >
       <div v-if="loading" class="flex flex-center" style="height: 180px">
         <q-spinner color="primary" size="2em" />
       </div>
@@ -53,10 +58,20 @@
         <div class="balance-row q-mb-md">
           <div class="row justify-between q-mb-xs">
             <span class="text-caption text-weight-bold text-positive">Rendimentos</span>
-            <span class="text-caption text-weight-bold" :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'">{{ formatarValor(rendimento) }}</span>
+            <span
+              class="text-caption text-weight-bold"
+              :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
+              >{{ formatarValor(rendimento) }}</span
+            >
           </div>
-          <div class="balance-track" :class="$q.dark.isActive ? 'balance-track--dark' : 'balance-track--light'">
-            <div class="balance-fill bg-positive" :style="{ width: percentualRendimentoVisual + '%' }"></div>
+          <div
+            class="balance-track"
+            :class="$q.dark.isActive ? 'balance-track--dark' : 'balance-track--light'"
+          >
+            <div
+              class="balance-fill bg-positive"
+              :style="{ width: percentualRendimentoVisual + '%' }"
+            ></div>
           </div>
         </div>
 
@@ -64,15 +79,32 @@
         <div class="balance-row q-mb-md">
           <div class="row justify-between q-mb-xs">
             <span class="text-caption text-weight-bold text-negative">Despesas</span>
-            <span class="text-caption text-weight-bold" :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'">{{ formatarValor(despesa) }}</span>
+            <span
+              class="text-caption text-weight-bold"
+              :class="$q.dark.isActive ? 'text-white' : 'text-grey-9'"
+              >{{ formatarValor(despesa) }}</span
+            >
           </div>
-          <div class="balance-track" :class="$q.dark.isActive ? 'balance-track--dark' : 'balance-track--light'">
-            <div class="balance-fill bg-negative" :style="{ width: percentualDespesaVisual + '%' }"></div>
+          <div
+            class="balance-track"
+            :class="$q.dark.isActive ? 'balance-track--dark' : 'balance-track--light'"
+          >
+            <div
+              class="balance-fill bg-negative"
+              :style="{ width: percentualDespesaVisual + '%' }"
+            ></div>
           </div>
         </div>
 
         <!-- Resumo info -->
-        <div class="text-center q-mt-lg q-pt-md" :style="{ borderTop: $q.dark.isActive ? '1px dashed rgba(255,255,255,0.1)' : '1px dashed rgba(0,0,0,0.1)' }">
+        <div
+          class="text-center q-mt-lg q-pt-md"
+          :style="{
+            borderTop: $q.dark.isActive
+              ? '1px dashed rgba(255,255,255,0.1)'
+              : '1px dashed rgba(0,0,0,0.1)',
+          }"
+        >
           <q-chip
             v-if="rendimento > 0"
             outline
@@ -93,7 +125,11 @@
           >
             Gastos sem rendimento no período
           </q-chip>
-          <div v-else class="text-caption" :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'">
+          <div
+            v-else
+            class="text-caption"
+            :class="$q.dark.isActive ? 'text-grey-6' : 'text-grey-5'"
+          >
             Nenhuma movimentação no período
           </div>
         </div>
@@ -103,18 +139,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
+const loading = computed(() => store.isLoading);
 
-const rendimento = ref(0);
-const despesa = ref(0);
+const rendimento = computed(() => store.resumo?.rendimento.total ?? 0);
+const despesa = computed(() => store.resumo?.despesa.total ?? 0);
 
 const saldo = computed(() => rendimento.value - despesa.value);
 const saldoPositivo = computed(() => saldo.value >= 0);
@@ -140,25 +174,6 @@ const percentualDespesaVisual = computed(() => {
 function formatarValor(valor: number) {
   return valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
 }
-
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resumo = await service.obterResumo(store.dataInicial, store.dataFinal);
-    rendimento.value = resumo.rendimento.total;
-    despesa.value = resumo.despesa.total;
-  } catch {
-    // Erro já tratado pelo handleErrorAxios
-  } finally {
-    loading.value = false;
-  }
-}
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>
@@ -166,7 +181,9 @@ watch(
   border-radius: 16px !important;
   overflow: hidden;
   height: 100%;
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
   display: flex;
   flex-direction: column;
 }

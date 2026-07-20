@@ -38,31 +38,40 @@
       <div v-if="loading" class="flex flex-center" style="height: 440px">
         <q-spinner color="primary" size="3em" />
       </div>
-      <apexchart
-        v-else
-        type="bar"
-        height="440"
-        :options="chartOptions"
-        :series="series"
-      />
+      <VueApexCharts v-else type="bar" height="440" :options="chartOptions" :series="series" />
     </q-card-section>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
 import { useQuasar } from 'quasar';
 import type { ApexOptions } from 'apexcharts';
 import { useDashboardStore } from 'src/stores/dashboardStore';
-import obterDashboardService from 'src/services/DashboardService';
 
 const $q = useQuasar();
 const store = useDashboardStore();
-const service = obterDashboardService();
-const loading = ref(false);
+const loading = computed(() => store.isLoading);
 
-const series = ref<any[]>([]);
-const categories = ref<string[]>([]);
+const categories = computed(() => store.evolucao.map((item) => item.label));
+const series = computed(() => [
+  {
+    name: 'Rendimentos',
+    group: 'Total',
+    data: store.evolucao.map((item) => item.rendimento),
+  },
+  {
+    name: 'Despesas',
+    group: 'Total',
+    data: store.evolucao.map((item) => item.despesa),
+  },
+  {
+    name: 'Investimentos',
+    group: 'Total',
+    data: store.evolucao.map((item) => item.investimento),
+  },
+]);
 
 const legendItems = [
   { label: 'Rendimentos', color: '#21ba45', bg: 'rgba(33, 186, 69, 0.15)' },
@@ -76,7 +85,15 @@ const chartOptions = computed<ApexOptions>(() => ({
     stacked: true,
     toolbar: {
       show: true,
-      tools: { download: true, selection: false, zoom: true, zoomin: true, zoomout: true, pan: true, reset: true },
+      tools: {
+        download: true,
+        selection: false,
+        zoom: true,
+        zoomin: true,
+        zoomout: true,
+        pan: true,
+        reset: true,
+      },
     },
     background: 'transparent',
     foreColor: $q.dark.isActive ? '#ccc' : '#444',
@@ -167,29 +184,6 @@ function formatarValorCurto(valor: number) {
   if (Math.abs(valor) >= 1000) return 'R$' + (valor / 1000).toFixed(0) + 'k';
   return 'R$' + valor.toFixed(0);
 }
-
-async function fetchData() {
-  loading.value = true;
-  try {
-    const resultado = await service.obterEvolucao(store.dataInicial, store.dataFinal);
-    categories.value = resultado.map((item) => item.label);
-    series.value = [
-      { name: 'Rendimentos', group: 'Total', data: resultado.map((item) => item.rendimento) },
-      { name: 'Despesas', group: 'Total', data: resultado.map((item) => item.despesa) },
-      { name: 'Investimentos', group: 'Total', data: resultado.map((item) => item.investimento) },
-    ];
-  } catch {
-    // Erro já tratado pelo handleErrorAxios no service
-  } finally {
-    loading.value = false;
-  }
-}
-
-watch(
-  () => [store.dataInicial, store.dataFinal],
-  () => fetchData(),
-  { immediate: true }
-);
 </script>
 
 <style scoped>
