@@ -1,24 +1,28 @@
 <template>
   <div class="container-login">
-    <img :src="logo" class="logo" />
+    <img :src="logo" class="logo" alt="FinanMap" />
 
     <div class="card-login">
       <div class="q-pa-md text-center">
-        <div class="text-h4 text-weight-bolder q-mb-sm">Confirmação de Login</div>
+        <h1 class="text-h4 text-weight-bolder q-mb-sm">Confirmação de Login</h1>
         <div class="text-body1 text-weight-regular q-mb-lg">{{ message }}</div>
         <q-form @submit="handleVerify" class="q-gutter-xs">
           <q-input
             filled
             v-model="code"
             type="text"
+            label="Código de verificação"
             placeholder="Digite o código de verificação"
+            autocomplete="one-time-code"
             lazy-rules
             dense
-            @update:model-value="(value) => {
-              if(value && typeof value === 'string') {
-                code = value.toUpperCase().trim();
+            @update:model-value="
+              (value) => {
+                if (value && typeof value === 'string') {
+                  code = value.toUpperCase().trim();
+                }
               }
-            }"
+            "
             :rules="[(val) => (val && val.length > 0) || 'código de verificação obrigatório']"
           />
 

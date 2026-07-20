@@ -1,17 +1,19 @@
 <template>
   <div class="container-login">
-    <img :src="logo" class="logo" />
+    <img :src="logo" class="logo" alt="FinanMap" />
 
     <div class="card-login">
       <div class="q-pa-md text-center">
-        <div class="text-h5 text-weight-bolder q-mb-md">Seja bem vindo!</div>
+        <h1 class="text-h5 text-weight-bolder q-mb-md">Seja bem-vindo!</h1>
         <div class="text-body1 text-weight-regular q-mb-lg">Para login digite seu e-mail</div>
         <q-form @submit="handleLogin">
           <q-input
             filled
             v-model.trim="email"
-            type="text"
+            type="email"
+            label="E-mail"
             placeholder="E-mail"
+            autocomplete="email"
             lazy-rules
             dense
             :rules="[(val) => (val && val.length > 0) || 'E-mail obrigatório']"

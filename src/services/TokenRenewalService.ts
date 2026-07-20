@@ -68,7 +68,7 @@ class TokenRenewalService {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
-    
+
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
     this.isRunning = false;
   }
@@ -91,12 +91,14 @@ class TokenRenewalService {
       await refreshTokenManager.refreshIfNeeded();
     } catch (error) {
       console.error('[TokenRenewalService] Erro ao verificar token:', error);
-      
+
       if (refreshTokenManager.shouldClearTokenOnRefreshError(error)) {
         this.stop();
         this.handleRenewalFailure();
       } else {
-        console.warn('[TokenRenewalService] Falha temporária (rede/servidor). Mantendo serviço ativo.');
+        console.warn(
+          '[TokenRenewalService] Falha temporária (rede/servidor). Mantendo serviço ativo.',
+        );
       }
     }
   }
@@ -109,7 +111,7 @@ class TokenRenewalService {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userName');
 
-    window.location.href = process.env.LOGIN_URL ?? '/login';
+    window.location.href = process.env.LOGIN_URL ?? '/#/login';
   }
 }
 

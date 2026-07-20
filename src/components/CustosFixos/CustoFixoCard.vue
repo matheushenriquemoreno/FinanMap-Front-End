@@ -1,7 +1,15 @@
 <template>
   <q-card flat bordered class="custo-card" :class="{ 'custo-card--inativo': !custo.ativo }">
-    <q-btn class="custo-card__delete-btn" flat round dense icon="delete_outline" color="red-4"
-      @click.stop="emit('excluir', custo.id)">
+    <q-btn
+      class="custo-card__delete-btn"
+      flat
+      round
+      dense
+      icon="delete_outline"
+      color="red-4"
+      :aria-label="`Excluir custo fixo ${custo.nome}`"
+      @click.stop="emit('excluir', custo.id)"
+    >
       <q-tooltip>Excluir custo fixo</q-tooltip>
     </q-btn>
 
@@ -16,9 +24,7 @@
             <q-icon name="label" size="14px" class="q-mr-xs" />
             {{ custo.categoriaNome }}
           </div>
-          <div class="text-caption text-grey-5" v-else>
-            Sem categoria
-          </div>
+          <div class="text-caption text-grey-5" v-else>Sem categoria</div>
         </div>
       </div>
 
@@ -105,7 +111,10 @@ async function toggleAtivo(novoValor: boolean) {
 .custo-card {
   border-radius: 16px;
   position: relative;
-  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
   height: 100%;
   display: flex;
   flex-direction: column;

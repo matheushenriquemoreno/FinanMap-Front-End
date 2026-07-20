@@ -4,12 +4,22 @@
       <!-- Campo de seleção de meses -->
       <div class="row items-center justify-center">
         <div class="row items-center">
-          <q-btn flat round dense icon="chevron_left" @click="voltarMesAnterior" />
+          <q-btn
+            flat
+            round
+            dense
+            icon="chevron_left"
+            aria-label="Ir para o mês anterior"
+            @click="voltarMesAnterior"
+          />
 
           <q-btn
             flat
             no-caps
             class="text-body1 q-px-md"
+            :aria-expanded="showSelector"
+            aria-controls="period-selector-dialog"
+            aria-haspopup="dialog"
             @click="showSelector = !showSelector"
             :loading="loading"
             style="width: 185px"
@@ -30,26 +40,36 @@
             </div>
           </q-btn>
 
-          <q-btn flat round dense icon="chevron_right" @click="passarParaProximoMes" />
+          <q-btn
+            flat
+            round
+            dense
+            icon="chevron_right"
+            aria-label="Ir para o próximo mês"
+            @click="passarParaProximoMes"
+          />
         </div>
       </div>
-      
+
       <!-- Dialog de seleção de meses e anos - Modernizado -->
       <q-dialog v-model="showSelector">
-        <q-card class="period-selector-card">
+        <q-card id="period-selector-dialog" class="period-selector-card">
           <!-- Header com título e botão de data atual -->
           <q-card-section class="q-pb-sm">
             <div class="row items-center justify-between">
               <div class="text-h6 text-weight-regular">Selecionar Período</div>
-              <q-btn 
-                flat 
-                round 
-                icon="event_available" 
+              <q-btn
+                flat
+                round
+                icon="event_available"
+                aria-label="Voltar para o período atual"
                 @click="selecionarDataAtual"
                 class="text-primary"
-                size="16px" 
+                size="16px"
               >
-                <q-tooltip class="bg-grey-7" style="font-size: 14px;">Voltar para data atual</q-tooltip>
+                <q-tooltip class="bg-grey-7" style="font-size: 14px"
+                  >Voltar para data atual</q-tooltip
+                >
               </q-btn>
             </div>
           </q-card-section>
@@ -59,31 +79,37 @@
             <div class="q-mb-lg">
               <div class="text-subtitle2 q-mb-md">Ano</div>
               <div class="year-selector">
-                <q-btn 
-                  flat 
-                  round 
-                  dense 
-                  icon="chevron_left" 
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="chevron_left"
+                  aria-label="Exibir anos anteriores"
                   @click="voltarAnoAnterior"
                   class="year-nav-btn"
                 />
-                
-                <div class="years-container">
-                  <div
+
+                <div class="years-container" role="group" aria-label="Selecione o ano">
+                  <q-btn
                     v-for="year in visibleYears"
                     :key="year"
+                    flat
+                    round
+                    dense
+                    no-caps
+                    :label="String(year)"
                     :class="['year-item', { 'year-selected': selectedYear === year }]"
+                    :aria-pressed="selectedYear === year"
                     @click="selectedYear = year"
-                  >
-                    {{ year }}
-                  </div>
+                  />
                 </div>
-                
-                <q-btn 
-                  flat 
-                  round 
-                  dense 
-                  icon="chevron_right" 
+
+                <q-btn
+                  flat
+                  round
+                  dense
+                  icon="chevron_right"
+                  aria-label="Exibir anos seguintes"
                   @click="passarParaProximoAno"
                   class="year-nav-btn"
                 />
@@ -93,28 +119,33 @@
             <!-- Seletor de Mês -->
             <div>
               <div class="text-subtitle2 q-mb-md">Mês</div>
-              <div class="months-grid">
-                <div
+              <div class="months-grid" role="group" aria-label="Selecione o mês">
+                <q-btn
                   v-for="month in months"
                   :key="month.mes"
+                  flat
+                  round
+                  dense
+                  no-caps
+                  :label="month.name.substring(0, 3)"
                   :class="['month-item', { 'month-selected': selectedMonth === month.mes }]"
+                  :aria-label="month.name"
+                  :aria-pressed="selectedMonth === month.mes"
                   @click="selectedMonth = month.mes"
-                >
-                  {{ month.name.substring(0, 3) }}
-                </div>
+                />
               </div>
             </div>
           </q-card-section>
 
           <!-- Ações -->
           <q-card-actions class="q-px-md q-pb-md" align="right">
-            <q-btn 
+            <q-btn
               unelevated
-              label="APLICAR" 
+              label="APLICAR"
               color="primary"
               class="apply-btn"
-              @click="aplicarSelecao" 
-              v-close-popup 
+              @click="aplicarSelecao"
+              v-close-popup
             />
           </q-card-actions>
         </q-card>
@@ -353,24 +384,24 @@ const aplicarSelecao = () => {
   .period-selector-card {
     min-width: 300px;
   }
-  
+
   .months-grid {
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
-  
+
   .month-item {
     width: 50px;
     height: 50px;
     font-size: 12px;
   }
-  
+
   .year-item {
     min-width: 50px;
     height: 50px;
     font-size: 14px;
   }
-  
+
   .year-selected {
     width: 65px;
     height: 65px;

@@ -4,28 +4,41 @@
       <q-card-section class="modal-header row items-center q-pb-none">
         <div class="text-h6 text-bold">Editar Custo Fixo</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          v-close-popup
+          aria-label="Fechar edição de custo fixo"
+        />
       </q-card-section>
 
       <q-card-section class="modal-body">
         <q-form @submit.prevent="submeter" class="q-gutter-md">
           <!-- Nome -->
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Nome do Custo Fixo</label>
+            <label for="custo-fixo-nome-editar" class="text-subtitle2 text-bold q-mb-xs block"
+              >Nome do Custo Fixo</label
+            >
             <q-input
+              for="custo-fixo-nome-editar"
               v-model="form.nome"
               outlined
               rounded
               dense
               placeholder="Ex: Aluguel, Netflix, Academia"
-              :rules="[val => !!val || 'Nome é obrigatório']"
+              :rules="[(val) => !!val || 'Nome é obrigatório']"
             />
           </div>
 
           <!-- Dia do Vencimento -->
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Dia do Vencimento</label>
+            <label for="custo-fixo-vencimento-editar" class="text-subtitle2 text-bold q-mb-xs block"
+              >Dia do Vencimento</label
+            >
             <q-select
+              for="custo-fixo-vencimento-editar"
               v-model="form.diaVencimento"
               :options="opcoesDias"
               outlined
@@ -34,14 +47,17 @@
               emit-value
               map-options
               placeholder="Selecione o dia"
-              :rules="[val => !!val || 'Dia do vencimento é obrigatório']"
+              :rules="[(val) => !!val || 'Dia do vencimento é obrigatório']"
             />
           </div>
 
           <!-- Categoria (Opcional) -->
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Categoria (Opcional)</label>
+            <label for="custo-fixo-categoria-editar" class="text-subtitle2 text-bold q-mb-xs block"
+              >Categoria (Opcional)</label
+            >
             <CampoSelect
+              for="custo-fixo-categoria-editar"
               :configuracoes="{
                 labelObjeto: 'nome',
                 valueObjeto: 'id',
@@ -102,18 +118,21 @@ const categoriaSelecionada = ref<any>(null);
 const opcoesDias = Array.from({ length: 31 }, (_, i) => i + 1);
 
 // Sincronizar dados ao abrir com o custo selecionado
-watch(() => props.modelValue, (aberto) => {
-  if (aberto && props.custo) {
-    form.value = {
-      nome: props.custo.nome,
-      diaVencimento: props.custo.diaVencimento,
-      categoriaId: props.custo.categoriaId || null,
-    };
-    categoriaSelecionada.value = props.custo.categoriaId
-      ? { id: props.custo.categoriaId, nome: props.custo.categoriaNome }
-      : null;
-  }
-});
+watch(
+  () => props.modelValue,
+  (aberto) => {
+    if (aberto && props.custo) {
+      form.value = {
+        nome: props.custo.nome,
+        diaVencimento: props.custo.diaVencimento,
+        categoriaId: props.custo.categoriaId || null,
+      };
+      categoriaSelecionada.value = props.custo.categoriaId
+        ? { id: props.custo.categoriaId, nome: props.custo.categoriaNome }
+        : null;
+    }
+  },
+);
 
 async function buscarCategorias(filtro: string) {
   try {

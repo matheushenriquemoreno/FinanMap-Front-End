@@ -6,7 +6,8 @@
       <div>
         <div class="text-h5 text-weight-bold">Categorias</div>
         <div class="text-caption text-grey-7">
-          Gerencie as categorias de rendimentos, despesas e investimentos para classificar seu orçamento.
+          Gerencie as categorias de rendimentos, despesas e investimentos para classificar seu
+          orçamento.
         </div>
       </div>
     </div>
@@ -44,6 +45,7 @@
           <div class="row q-gutter-sm items-center">
             <q-input
               v-model="filter"
+              label="Pesquisar categorias"
               dense
               outlined
               placeholder="Pesquisar"
@@ -148,8 +150,11 @@
       <q-card-section>
         <q-form class="q-gutter-md" @submit="salvarCategoria">
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Nome da categoria</label>
+            <label for="categoria-nome" class="text-subtitle2 text-bold q-mb-xs block"
+              >Nome da categoria</label
+            >
             <q-input
+              for="categoria-nome"
               v-model="categoriaForm.nome"
               outlined
               rounded
@@ -167,11 +172,17 @@
 
           <div>
             <div class="row items-center justify-between q-mb-sm">
-              <label class="text-subtitle2 text-bold">Tipo da categoria</label>
+              <div id="categoria-tipo-label" class="text-subtitle2 text-bold">
+                Tipo da categoria
+              </div>
               <span v-if="modalEdicao" class="text-caption text-grey-7">Não pode ser alterado</span>
             </div>
 
-            <div class="categoria-type-grid">
+            <div
+              class="categoria-type-grid"
+              role="radiogroup"
+              aria-labelledby="categoria-tipo-label"
+            >
               <div
                 v-for="option in categoryOptions"
                 :key="option.value"
@@ -180,9 +191,9 @@
                   'categoria-type-option--selected': categoriaForm.tipo === option.value,
                   'categoria-type-option--disabled': modalEdicao,
                 }"
-                role="button"
+                role="radio"
                 tabindex="0"
-                :aria-pressed="categoriaForm.tipo === option.value"
+                :aria-checked="categoriaForm.tipo === option.value"
                 :aria-disabled="modalEdicao"
                 @click="selecionarTipoCategoria(option.value)"
                 @keydown.enter="selecionarTipoCategoria(option.value)"

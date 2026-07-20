@@ -6,7 +6,7 @@
 
         <q-toolbar-title v-if="$q.screen.gt.xs" shrink class="row items-center no-wrap">
           <q-avatar>
-            <img src="/favicon.ico" />
+            <img src="/favicon.ico" alt="" />
           </q-avatar>
           <span class="text-white text-h6 q-ml-sm">FinanMap</span>
         </q-toolbar-title>
@@ -18,7 +18,14 @@
         <DateDisplay v-if="$q.screen.gt.xs" />
 
         <div class="q-gutter-sm row items-center no-wrap">
-          <q-btn round dense flat color="grey-4" @click="themeStore.toggleTheme()">
+          <q-btn
+            round
+            dense
+            flat
+            color="grey-4"
+            :aria-label="themeStore.isDark ? 'Ativar modo claro' : 'Ativar modo escuro'"
+            @click="themeStore.toggleTheme()"
+          >
             <q-icon :name="themeStore.isDark ? 'light_mode' : 'dark_mode'" size="25px" />
             <q-tooltip>{{ themeStore.isDark ? 'Modo Claro' : 'Modo Escuro' }}</q-tooltip>
           </q-btn>
@@ -27,12 +34,13 @@
             dense
             flat
             color="grey-4"
+            aria-label="Abrir configurações"
             @click="() => (abrirModalConfig = !abrirModalConfig)"
           >
             <q-icon name="settings" size="25px" />
             <q-tooltip>Configurações</q-tooltip>
           </q-btn>
-          <q-btn round flat>
+          <q-btn round flat aria-label="Abrir menu da conta" aria-haspopup="menu">
             <UserAvatar :avatar-id="usuarioStore.avatarId" size="32px" alt="Avatar do usuário" />
             <q-tooltip>Conta</q-tooltip>
             <q-menu>

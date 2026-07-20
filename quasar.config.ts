@@ -55,7 +55,7 @@ export default defineConfig((/* ctx */) => {
 
       env: {
         URL_API: 'https://api.devmoreno.online/api/',
-        lOGIN_URL: '/#/login'
+        LOGIN_URL: '/#/login',
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

@@ -1,49 +1,104 @@
 <template>
-  <q-dialog v-model="localModelValue" @before-hide="closeModal" @hide="closeModal" position="top"
-    backdrop-filter="brightness(60%)">
+  <q-dialog
+    v-model="localModelValue"
+    @before-hide="closeModal"
+    @hide="closeModal"
+    position="top"
+    backdrop-filter="brightness(60%)"
+  >
     <q-card style="width: 700px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
         <div class="text-h6">{{ ehEdicao ? tituloEdit : tituloAdd }}</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn icon="close" flat round dense v-close-popup aria-label="Fechar transação" />
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <div>
           <q-form @submit.prevent="submitFormulario" class="q-gutter-xs">
-            <q-input rounded filled v-model="dadosFormulario.descricao" label="Descricao" lazy-rules hint="" />
-            <MoneyInputBR v-model="valorNumerico" filled rounded :dense="false" :outlined="false" label="Valor"
-              lazy-rules :rules="[(val) => Boolean(val) || 'Campo obrigatorio']" />
+            <q-input
+              rounded
+              filled
+              v-model="dadosFormulario.descricao"
+              label="Descricao"
+              lazy-rules
+              hint=""
+            />
+            <MoneyInputBR
+              v-model="valorNumerico"
+              filled
+              rounded
+              :dense="false"
+              :outlined="false"
+              label="Valor"
+              lazy-rules
+              :rules="[(val) => Boolean(val) || 'Campo obrigatorio']"
+            />
             <div>
-              <CampoSelectServer :configuracoes="{
-                labelObjeto: 'nome',
-                valueObjeto: 'id',
-                emitirSomenteValor: false,
-                obterDados: buscarCategorias,
-              }" v-model="categoriaSelecionada" label="Selecione a categoria"
+              <CampoSelectServer
+                :configuracoes="{
+                  labelObjeto: 'nome',
+                  valueObjeto: 'id',
+                  emitirSomenteValor: false,
+                  obterDados: buscarCategorias,
+                }"
+                v-model="categoriaSelecionada"
+                label="Selecione a categoria"
                 @model-alterado="(val) => (dadosFormulario.categoriaId = val.id)"
-                :rules="[(val) => Boolean(val) || 'Campo obrigatorio']" />
+                :rules="[(val) => Boolean(val) || 'Campo obrigatorio']"
+              />
             </div>
 
             <div
-              v-if="props.tipoCategoriaTransacao === TipoCategoriaETransacao.Investimento && compartilhamentoStore.podeEditar"
-              class="q-mt-sm">
-              <q-select v-model="(dadosFormulario as any).metaFinanceiraId" :options="metasDisponiveis"
-                option-label="nome" option-value="id" filled rounded label="Vincular a uma Meta (opcional)"
-                clearable emit-value map-options :loading="loadingMetas" options-cover transition-show="scale"
-                transition-hide="scale" behavior="menu">
+              v-if="
+                props.tipoCategoriaTransacao === TipoCategoriaETransacao.Investimento &&
+                compartilhamentoStore.podeEditar
+              "
+              class="q-mt-sm"
+            >
+              <q-select
+                v-model="(dadosFormulario as any).metaFinanceiraId"
+                :options="metasDisponiveis"
+                option-label="nome"
+                option-value="id"
+                filled
+                rounded
+                label="Vincular a uma Meta (opcional)"
+                clearable
+                emit-value
+                map-options
+                :loading="loadingMetas"
+                options-cover
+                transition-show="scale"
+                transition-hide="scale"
+                behavior="menu"
+              >
                 <template v-slot:option="{ opt, itemProps }">
                   <q-item v-bind="itemProps">
                     <q-item-section avatar>
                       <q-icon
-                        :name="CATEGORIA_META_CONFIG[opt.categoria as keyof typeof CATEGORIA_META_CONFIG]?.icon || 'emoji_events'"
-                        color="primary" />
+                        :name="
+                          CATEGORIA_META_CONFIG[opt.categoria as keyof typeof CATEGORIA_META_CONFIG]
+                            ?.icon || 'emoji_events'
+                        "
+                        color="primary"
+                      />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ opt.nome }}</q-item-label>
                       <q-item-label caption>
-                        R$ {{ Number(opt.valorAtual || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }} / R$
-                        {{ Number(opt.valorAlvo || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}
+                        R$
+                        {{
+                          Number(opt.valorAtual || 0).toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                          })
+                        }}
+                        / R$
+                        {{
+                          Number(opt.valorAlvo || 0).toLocaleString('pt-BR', {
+                            minimumFractionDigits: 2,
+                          })
+                        }}
                       </q-item-label>
                     </q-item-section>
                   </q-item>
@@ -53,8 +108,13 @@
 
             <q-card-actions class="text-primary" align="between">
               <q-btn flat label="Cancelar" v-close-popup />
-              <q-btn flat :loading="loading" :label="ehEdicao ? 'Editar' : 'Adicionar'"
-                :icon-right="ehEdicao ? 'edit' : 'add'" type="submit" />
+              <q-btn
+                flat
+                :loading="loading"
+                :label="ehEdicao ? 'Editar' : 'Adicionar'"
+                :icon-right="ehEdicao ? 'edit' : 'add'"
+                type="submit"
+              />
             </q-card-actions>
           </q-form>
         </div>
@@ -140,7 +200,10 @@ watch(localModelValue, (valor) => {
       dadosFormulario.value = {} as TransacaoCreate;
     }
 
-    if (props.tipoCategoriaTransacao === TipoCategoriaETransacao.Investimento && metasDisponiveis.value.length === 0) {
+    if (
+      props.tipoCategoriaTransacao === TipoCategoriaETransacao.Investimento &&
+      metasDisponiveis.value.length === 0
+    ) {
       carregarMetas();
     }
   }
@@ -165,7 +228,7 @@ async function carregarMetas() {
   try {
     const res = await metaService.obterTodas();
     // Filtra apenas metas não concluídas
-    metasDisponiveis.value = (res || []).filter(m => !m.concluida);
+    metasDisponiveis.value = (res || []).filter((m) => !m.concluida);
   } catch (error) {
     console.error('Erro ao buscar metas', error);
   } finally {

@@ -1,4 +1,5 @@
 <template>
+  <h1 class="visually-hidden">Gerenciamento mensal</h1>
   <div class="q-pa-md q-gutter-sm flex justify-between">
     <q-breadcrumbs class="text-grey" active-color="black">
       <template v-slot:separator>

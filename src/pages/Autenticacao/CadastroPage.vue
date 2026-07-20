@@ -1,16 +1,18 @@
 <template>
   <div class="container-login">
-    <img :src="logo" class="logo" />
+    <img :src="logo" class="logo" alt="FinanMap" />
 
     <div class="card-login">
       <div class="q-pa-md text-center">
-        <div class="text-h4 text-weight-bolder q-mb-md">Criar nova conta</div>
+        <h1 class="text-h4 text-weight-bolder q-mb-md">Criar nova conta</h1>
 
         <q-form @submit="handleRegister" class="q-gutter-xs">
           <q-input
             filled
             v-model.trim="name"
+            label="Nome"
             placeholder="Digite seu nome"
+            autocomplete="name"
             lazy-rules
             dense
             :rules="[(val) => (val && val.length > 0) || 'Nome obrigatório']"
@@ -19,8 +21,10 @@
           <q-input
             filled
             v-model.trim="email"
-            type="text"
+            type="email"
+            label="E-mail"
             placeholder="Digite seu e-mail"
+            autocomplete="email"
             lazy-rules
             dense
             :rules="[(val) => (val && val.length > 0) || 'E-mail obrigatório']"

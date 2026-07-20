@@ -9,7 +9,7 @@
     <meta name="msapplication-tap-highlight" content="no" />
     <meta
       name="viewport"
-      content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>"
+      content="initial-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>"
     />
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -63,11 +63,18 @@
         animation: _spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
       }
       @keyframes _pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.06); }
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.06);
+        }
       }
       @keyframes _spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
@@ -83,15 +90,17 @@
 
     <script>
       // Remove the initial loader once the Vue app is mounted
-      (function() {
-        var observer = new MutationObserver(function(mutations) {
+      (function () {
+        var observer = new MutationObserver(function (mutations) {
           // Look for Vue's root element being populated
           var appEl = document.getElementById('q-app') || document.querySelector('[data-v-app]');
           if (appEl && appEl.children.length > 0) {
             var loader = document.getElementById('app-initial-loader');
             if (loader) {
               loader.classList.add('fade-out');
-              setTimeout(function() { loader.remove(); }, 500);
+              setTimeout(function () {
+                loader.remove();
+              }, 500);
             }
             observer.disconnect();
           }
@@ -99,11 +108,13 @@
         observer.observe(document.body, { childList: true, subtree: true });
 
         // Fallback: remove after 8 seconds regardless
-        setTimeout(function() {
+        setTimeout(function () {
           var loader = document.getElementById('app-initial-loader');
           if (loader) {
             loader.classList.add('fade-out');
-            setTimeout(function() { loader.remove(); }, 500);
+            setTimeout(function () {
+              loader.remove();
+            }, 500);
           }
         }, 8000);
       })();

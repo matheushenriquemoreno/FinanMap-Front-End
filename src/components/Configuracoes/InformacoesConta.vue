@@ -44,7 +44,7 @@
                   icon="edit"
                   @click="abrirSeletorAvatar"
                 />
-                
+
                 <q-btn
                   v-if="avatarSelecionado !== usuario.avatarId"
                   color="primary"
@@ -53,7 +53,7 @@
                   :loading="salvandoAvatar"
                   @click="salvarAvatar"
                 />
-                
+
                 <q-btn
                   v-if="avatarSelecionado !== usuario.avatarId"
                   flat
@@ -64,7 +64,10 @@
                   @click="descartarAlteracao"
                 />
               </div>
-              <div v-if="avatarSelecionado !== usuario.avatarId" class="text-caption text-amber-8 q-mt-xs flex items-center q-gutter-x-xs">
+              <div
+                v-if="avatarSelecionado !== usuario.avatarId"
+                class="text-caption text-amber-8 q-mt-xs flex items-center q-gutter-x-xs"
+              >
                 <q-icon name="warning" size="16px" />
                 <span>Você tem alterações não salvas. Clique em Salvar para aplicar.</span>
               </div>
@@ -157,14 +160,21 @@
 
     <!-- Dialog Seletor de Avatar -->
     <q-dialog v-model="seletorAvatarAberto" @hide="aoEsconderDialog">
-      <q-card style="width: 440px; max-width: 90vw;" class="rounded-borders-xl shadow-2">
+      <q-card style="width: 440px; max-width: 90vw" class="rounded-borders-xl shadow-2">
         <q-card-section class="row items-center q-pb-none">
           <div class="text-subtitle1 text-weight-bold flex items-center q-gutter-x-sm">
             <q-icon name="face" size="sm" color="primary" />
             <span>Escolha seu Avatar</span>
           </div>
           <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            aria-label="Fechar seleção de avatar"
+          />
         </q-card-section>
 
         <q-card-section class="q-pt-md">
@@ -181,7 +191,10 @@
               @click="avatarSelecionado = avatar.id"
             >
               <UserAvatar :avatar-id="avatar.id" size="56px" alt="" />
-              <span class="avatar-nome text-grey-8" :class="{ 'text-primary text-weight-bold': avatarSelecionado === avatar.id }">
+              <span
+                class="avatar-nome text-grey-8"
+                :class="{ 'text-primary text-weight-bold': avatarSelecionado === avatar.id }"
+              >
                 {{ avatar.nome }}
               </span>
             </q-btn>

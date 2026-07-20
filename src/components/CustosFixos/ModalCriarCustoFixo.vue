@@ -4,28 +4,41 @@
       <q-card-section class="modal-header row items-center q-pb-none">
         <div class="text-h6 text-bold">Criar Custo Fixo</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          v-close-popup
+          aria-label="Fechar criação de custo fixo"
+        />
       </q-card-section>
 
       <q-card-section class="modal-body">
         <q-form @submit.prevent="submeter" class="q-gutter-md">
           <!-- Nome -->
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Nome do Custo Fixo</label>
+            <label for="custo-fixo-nome-criar" class="text-subtitle2 text-bold q-mb-xs block"
+              >Nome do Custo Fixo</label
+            >
             <q-input
+              for="custo-fixo-nome-criar"
               v-model="form.nome"
               outlined
               rounded
               dense
               placeholder="Ex: Aluguel, Netflix, Academia"
-              :rules="[val => !!val || 'Nome é obrigatório']"
+              :rules="[(val) => !!val || 'Nome é obrigatório']"
             />
           </div>
 
           <!-- Dia do Vencimento -->
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Dia do Vencimento</label>
+            <label for="custo-fixo-vencimento-criar" class="text-subtitle2 text-bold q-mb-xs block"
+              >Dia do Vencimento</label
+            >
             <q-select
+              for="custo-fixo-vencimento-criar"
               v-model="form.diaVencimento"
               :options="opcoesDias"
               outlined
@@ -34,14 +47,17 @@
               emit-value
               map-options
               placeholder="Selecione o dia"
-              :rules="[val => !!val || 'Dia do vencimento é obrigatório']"
+              :rules="[(val) => !!val || 'Dia do vencimento é obrigatório']"
             />
           </div>
 
           <!-- Categoria (Opcional) -->
           <div>
-            <label class="text-subtitle2 text-bold q-mb-xs block">Categoria (Opcional)</label>
+            <label for="custo-fixo-categoria-criar" class="text-subtitle2 text-bold q-mb-xs block"
+              >Categoria (Opcional)</label
+            >
             <CampoSelect
+              for="custo-fixo-categoria-criar"
               :configuracoes="{
                 labelObjeto: 'nome',
                 valueObjeto: 'id',
@@ -57,7 +73,14 @@
           <!-- Botões -->
           <div class="modal-actions row justify-end q-gutter-sm q-mt-md">
             <q-btn flat label="Cancelar" color="grey" v-close-popup class="modal-action-btn" />
-            <q-btn type="submit" label="Salvar 🎯" color="primary" rounded unelevated class="modal-action-btn" />
+            <q-btn
+              type="submit"
+              label="Salvar 🎯"
+              color="primary"
+              rounded
+              unelevated
+              class="modal-action-btn"
+            />
           </div>
         </q-form>
       </q-card-section>
@@ -91,16 +114,19 @@ const categoriaSelecionada = ref<any>(null);
 const opcoesDias = Array.from({ length: 31 }, (_, i) => i + 1);
 
 // Limpar formulário ao abrir
-watch(() => props.modelValue, (aberto) => {
-  if (aberto) {
-    form.value = {
-      nome: '',
-      diaVencimento: null,
-      categoriaId: null,
-    };
-    categoriaSelecionada.value = null;
-  }
-});
+watch(
+  () => props.modelValue,
+  (aberto) => {
+    if (aberto) {
+      form.value = {
+        nome: '',
+        diaVencimento: null,
+        categoriaId: null,
+      };
+      categoriaSelecionada.value = null;
+    }
+  },
+);
 
 async function buscarCategorias(filtro: string) {
   try {

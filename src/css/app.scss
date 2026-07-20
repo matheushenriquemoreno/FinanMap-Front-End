@@ -4,6 +4,17 @@
   box-sizing: border-box;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 // ===== VARIÁVEIS DE TEMA =====
 :root {
@@ -20,16 +31,15 @@
 
 body.body--dark {
   --bg-primary: var(--q-dark-page); // Background principal
-  --bg-secondary: #181a1b;      // Drawer e elementos secundários
-  --bg-card: #1e2021;           // Cards e tabelas (ligeiramente mais claro)
+  --bg-secondary: #181a1b; // Drawer e elementos secundários
+  --bg-card: #1e2021; // Cards e tabelas (ligeiramente mais claro)
   --bg-icon: rgba(255, 255, 255, 0.08); // Background dos ícones
-  --text-primary: #ffffff;       // Texto principal mais claro
-  --text-secondary: #b0b0b0;    // Texto secundário
-  --border-color: #2a2a2a;      // Bordas mais sutis
+  --text-primary: #ffffff; // Texto principal mais claro
+  --text-secondary: #b0b0b0; // Texto secundário
+  --border-color: #2a2a2a; // Bordas mais sutis
   --shadow-color: rgba(0, 0, 0, 0.5); // Sombras mais profundas
   --login-gradient-start: #0a1929;
   --login-gradient-end: #1a2332;
-
 
   //--q-dark: #181a1b;
   --q-dark-page: #121313;
@@ -40,7 +50,9 @@ body.body--dark {
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .q-page-container,
@@ -50,11 +62,7 @@ body {
 }
 
 .container-login {
-  background: linear-gradient(
-    to bottom,
-    var(--login-gradient-start),
-    var(--login-gradient-end)
-  );
+  background: linear-gradient(to bottom, var(--login-gradient-start), var(--login-gradient-end));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -72,10 +80,12 @@ body {
   background: var(--bg-card);
   padding: 30px;
   border-radius: 10px;
-  width: 450px;
+  width: min(450px, calc(100% - 32px));
   text-align: center;
   box-shadow: 0 0 10px var(--shadow-color);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 @media (max-width: 450px) {
@@ -90,7 +100,7 @@ body {
   }
 
   .card-login {
-    width: 370px;
+    padding: 24px 20px;
   }
 }
 
@@ -104,7 +114,9 @@ body {
     rgba(50, 50, 93, 0.25) 0px 6px 12px -2px,
     rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   max-height: 600px;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* ===== Celulares ===== */
@@ -254,4 +266,3 @@ body.body--dark {
   background: rgba(17, 24, 39, 0.96) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
 }
-

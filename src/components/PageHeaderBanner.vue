@@ -3,9 +3,9 @@
     <div class="page-header-banner__info">
       <q-icon :name="icon" size="40px" color="white" />
       <div>
-        <h4 class="text-h4 text-bold text-white q-mb-none" style="line-height: 1">
+        <h1 class="text-h4 text-bold text-white q-mb-none" style="line-height: 1">
           {{ title }}
-        </h4>
+        </h1>
         <span class="page-header-banner__subtitle">{{ subtitle }}</span>
       </div>
     </div>

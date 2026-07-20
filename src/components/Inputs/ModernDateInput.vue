@@ -1,24 +1,61 @@
 <template>
   <div class="modern-date-wrapper">
     <!-- Visual Input -->
-    <q-input :model-value="formattedDisplayDate" outlined rounded dense readonly
-      class="cursor-pointer hide-readonly-cursor" @click="openDialog" v-bind="$attrs">
+    <q-input
+      :model-value="formattedDisplayDate"
+      outlined
+      rounded
+      dense
+      readonly
+      class="cursor-pointer hide-readonly-cursor"
+      aria-haspopup="dialog"
+      :aria-expanded="dialogOpen"
+      @click="openDialog"
+      @keydown.enter.prevent="openDialog"
+      @keydown.space.prevent="openDialog"
+      v-bind="$attrs"
+    >
       <template v-slot:append>
-        <q-icon name="calendar_month" color="primary" class="cursor-pointer" @click="openDialog" />
+        <q-btn
+          flat
+          round
+          dense
+          icon="calendar_month"
+          color="primary"
+          aria-label="Abrir calendário"
+          @click.stop="openDialog"
+        />
       </template>
     </q-input>
 
     <!-- Dialog / Bottom Sheet for picking date -->
     <q-dialog v-model="dialogOpen" :position="$q.screen.lt.sm ? 'bottom' : 'standard'">
-      <q-card class="date-picker-card" :class="{ 'mobile-sheet': $q.screen.lt.sm, 'desktop-dialog': !$q.screen.lt.sm }">
+      <q-card
+        class="date-picker-card"
+        :class="{ 'mobile-sheet': $q.screen.lt.sm, 'desktop-dialog': !$q.screen.lt.sm }"
+      >
         <q-card-section class="q-pb-none row items-center justify-between">
           <div class="text-h6 text-bold">{{ dialogTitle }}</div>
-          <q-btn icon="close" flat round dense v-close-popup style="background: rgba(0,0,0,0.05)" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            aria-label="Fechar calendário"
+            style="background: rgba(0, 0, 0, 0.05)"
+          />
         </q-card-section>
 
         <q-card-section class="q-pt-md flex flex-center">
-          <q-date v-model="internalDate" mask="YYYY-MM-DD" color="primary" flat class="full-width custom-q-date"
-            @update:model-value="onDateSelected" />
+          <q-date
+            v-model="internalDate"
+            mask="YYYY-MM-DD"
+            color="primary"
+            flat
+            class="full-width custom-q-date"
+            @update:model-value="onDateSelected"
+          />
         </q-card-section>
       </q-card>
     </q-dialog>
@@ -27,8 +64,8 @@
 
 <script lang="ts">
 export default {
-  inheritAttrs: false
-}
+  inheritAttrs: false,
+};
 </script>
 
 <script setup lang="ts">
@@ -37,12 +74,12 @@ import { ref, watch, computed } from 'vue';
 const props = defineProps({
   modelValue: {
     type: String,
-    default: ''
+    default: '',
   },
   dialogTitle: {
     type: String,
-    default: 'Selecione a Data'
-  }
+    default: 'Selecione a Data',
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -75,7 +112,7 @@ const formattedDisplayDate = computed(() => {
   return dateObj.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
   });
 });
 </script>

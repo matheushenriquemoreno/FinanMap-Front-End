@@ -1,12 +1,25 @@
 <template>
   <!--Modal Adicionar/Editar Rendimento-->
-  <q-dialog persistent v-model="localModelValue" @before-hide="closeModal" @hide="closeModal" position="top"
-    backdrop-filter="brightness(60%)">
+  <q-dialog
+    persistent
+    v-model="localModelValue"
+    @before-hide="closeModal"
+    @hide="closeModal"
+    position="top"
+    backdrop-filter="brightness(60%)"
+  >
     <q-card style="width: 550px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
         <div class="text-h6">Replicar registros.</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          v-close-popup
+          aria-label="Fechar replicação de registros"
+        />
       </q-card-section>
       <q-separator />
       <q-card-section class="q-pt-none">
@@ -15,15 +28,23 @@
         </div>
 
         <q-form class="q-gutter-md" @submit.prevent="handleCriarRegistroProximoMes">
-          <InputSelectMesAno label="Periodo Inicial" :styled="{
-            rounded: true,
-            filled: true,
-          }" v-model:model-value="mesAno" />
+          <InputSelectMesAno
+            label="Periodo Inicial"
+            :styled="{
+              rounded: true,
+              filled: true,
+            }"
+            v-model:model-value="mesAno"
+          />
           <q-separator />
-          <InputSelectMesAno label="Periodo Final" :styled="{
-            rounded: true,
-            filled: true,
-          }" v-model:model-value="mesAnoFinal" />
+          <InputSelectMesAno
+            label="Periodo Final"
+            :styled="{
+              rounded: true,
+              filled: true,
+            }"
+            v-model:model-value="mesAnoFinal"
+          />
           <q-card-actions class="text-primary" align="between">
             <q-btn flat label="Fechar" dense v-close-popup />
             <q-btn flat icon-right="add" dense label="Replicar" type="submit" :loading="loading" />

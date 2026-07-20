@@ -21,7 +21,16 @@
             >
               Configurações
             </div>
-            <q-btn v-if="isMobile" icon="close" flat round dense v-close-popup color="grey-7" />
+            <q-btn
+              v-if="isMobile"
+              icon="close"
+              flat
+              round
+              dense
+              v-close-popup
+              color="grey-7"
+              aria-label="Fechar configurações"
+            />
           </div>
           <div v-if="isMobile" class="text-caption text-grey-7 q-mb-md">
             Selecione uma opção abaixo para visualizar os detalhes
@@ -31,6 +40,7 @@
             dense
             outlined
             v-model="search"
+            label="Pesquisar configurações"
             placeholder="Pesquisar configuração"
             class="rounded-borders"
             :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-white'"
@@ -77,7 +87,7 @@
           class="row items-center border-bottom"
           :class="[
             $q.dark.isActive ? 'border-color-dark' : 'border-color-light',
-            isMobile ? 'q-pa-md' : 'q-py-sm q-px-md'
+            isMobile ? 'q-pa-md' : 'q-py-sm q-px-md',
           ]"
         >
           <q-btn
@@ -89,6 +99,7 @@
             class="q-mr-sm"
             @click="showMobileMenu = true"
             :color="$q.dark.isActive ? 'white' : 'grey-8'"
+            aria-label="Voltar ao menu de configurações"
           />
           <div
             v-if="isMobile"
@@ -98,7 +109,15 @@
             {{ currentTabLabel }}
           </div>
           <q-space />
-          <q-btn icon="close" flat round dense v-close-popup color="grey-7" />
+          <q-btn
+            icon="close"
+            flat
+            round
+            dense
+            v-close-popup
+            color="grey-7"
+            aria-label="Fechar configurações"
+          />
         </div>
 
         <!-- Body Content -->

@@ -1,57 +1,110 @@
 <template>
-  <q-dialog v-model="localModelValue" @before-hide="closeModal" @hide="closeModal" position="top"
-    backdrop-filter="brightness(60%)">
+  <q-dialog
+    v-model="localModelValue"
+    @before-hide="closeModal"
+    @hide="closeModal"
+    position="top"
+    backdrop-filter="brightness(60%)"
+  >
     <q-card style="width: 700px; max-width: 90vw; margin-top: 40px; border-radius: 15px">
       <q-card-section class="row items-center q-pb-md">
         <div class="text-h6">{{ ehEdicao ? tituloEdit : tituloAdd }}</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn icon="close" flat round dense v-close-popup aria-label="Fechar despesa" />
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <div>
           <q-form @submit.prevent="submitFormulario" class="q-gutter-xs">
-            <q-input rounded filled v-model="dadosFormulario.descricao" label="Descricao" lazy-rules hint="" />
-            <MoneyInputBR v-model="valorNumerico" filled rounded :dense="false" :outlined="false" label="Valor"
-              lazy-rules :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']" />
+            <q-input
+              rounded
+              filled
+              v-model="dadosFormulario.descricao"
+              label="Descricao"
+              lazy-rules
+              hint=""
+            />
+            <MoneyInputBR
+              v-model="valorNumerico"
+              filled
+              rounded
+              :dense="false"
+              :outlined="false"
+              label="Valor"
+              lazy-rules
+              :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']"
+            />
             <div>
-              <CampoSelect :configuracoes="{
-                labelObjeto: 'nome',
-                valueObjeto: 'id',
-                emitirSomenteValor: false,
-                obterDados: buscarCategorias,
-              }" v-model="categoriaSelecionada" label="Selecione a categoria"
+              <CampoSelect
+                :configuracoes="{
+                  labelObjeto: 'nome',
+                  valueObjeto: 'id',
+                  emitirSomenteValor: false,
+                  obterDados: buscarCategorias,
+                }"
+                v-model="categoriaSelecionada"
+                label="Selecione a categoria"
                 @model-alterado="(val: any) => (dadosFormulario.categoriaId = val.id)"
-                :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']" />
+                :rules="[(val: any) => Boolean(val) || 'Campo obrigatorio']"
+              />
             </div>
 
-            <CampoSelect :configuracoes="{
-              labelObjeto: 'descricaoECategoria',
-              valueObjeto: 'id',
-              emitirSomenteValor: false,
-              obterDados: buscarDespesas,
-            }" v-model="despesaAgrupadora" label="Selecione a despesa agrupadora" />
+            <CampoSelect
+              :configuracoes="{
+                labelObjeto: 'descricaoECategoria',
+                valueObjeto: 'id',
+                emitirSomenteValor: false,
+                obterDados: buscarDespesas,
+              }"
+              v-model="despesaAgrupadora"
+              label="Selecione a despesa agrupadora"
+            />
 
             <div v-if="!ehEdicao" class="q-py-sm">
-              <q-toggle v-model="modoLote" label="Lançamento em Lote (Recorrência/Parcelamento)" color="primary" />
+              <q-toggle
+                v-model="modoLote"
+                label="Lançamento em Lote (Recorrência/Parcelamento)"
+                color="primary"
+              />
             </div>
 
             <template v-if="modoLote && !ehEdicao">
               <div class="row q-col-gutter-sm q-mb-md">
                 <div class="col-12 col-sm-6">
-                  <q-select filled rounded v-model="tipoLote" :options="opcoesTipoLote" label="Tipo de Lote" emit-value
-                    map-options />
+                  <q-select
+                    filled
+                    rounded
+                    v-model="tipoLote"
+                    :options="opcoesTipoLote"
+                    label="Tipo de Lote"
+                    emit-value
+                    map-options
+                  />
                 </div>
                 <div class="col-12 col-sm-6">
-                  <q-input filled rounded type="number" min="2" max="24" v-model.number="quantidadeMeses"
-                    label="Quantidade de Meses" :rules="[
+                  <q-input
+                    filled
+                    rounded
+                    type="number"
+                    min="2"
+                    max="24"
+                    v-model.number="quantidadeMeses"
+                    label="Quantidade de Meses"
+                    :rules="[
                       (val: any) => val >= 2 || 'Mínimo de 2 meses',
-                      (val: any) => val <= 24 || 'Máximo de 24 meses'
-                    ]" />
+                      (val: any) => val <= 24 || 'Máximo de 24 meses',
+                    ]"
+                  />
                 </div>
               </div>
 
-              <q-banner v-if="tipoLote && Boolean(dadosFormulario.valor)" :class="[$q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-grey-2 text-black', 'q-mb-md rounded-borders']">
+              <q-banner
+                v-if="tipoLote && Boolean(dadosFormulario.valor)"
+                :class="[
+                  $q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-grey-2 text-black',
+                  'q-mb-md rounded-borders',
+                ]"
+              >
                 <template v-slot:avatar>
                   <q-icon name="info" :color="$q.dark.isActive ? 'white' : 'primary'" />
                 </template>
@@ -60,25 +113,33 @@
                 </div>
               </q-banner>
 
-              <q-banner v-if="modoLote && despesaAgrupadora" :class="[$q.dark.isActive ? 'bg-blue-9 text-white' : 'bg-blue-1 text-black', 'q-mb-md rounded-borders']">
+              <q-banner
+                v-if="modoLote && despesaAgrupadora"
+                :class="[
+                  $q.dark.isActive ? 'bg-blue-9 text-white' : 'bg-blue-1 text-black',
+                  'q-mb-md rounded-borders',
+                ]"
+              >
                 <template v-slot:avatar>
                   <q-icon name="account_tree" :color="$q.dark.isActive ? 'white' : 'blue'" />
                 </template>
                 <div class="text-caption">
                   As {{ quantidadeMeses }} despesas serão automaticamente vinculadas a
-                  <strong>"{{ despesaAgrupadora.descricao }}"</strong> em cada mês.
-                  Nos meses onde a agrupadora ainda não existir, ela será criada automaticamente.
+                  <strong>"{{ despesaAgrupadora.descricao }}"</strong> em cada mês. Nos meses onde a
+                  agrupadora ainda não existir, ela será criada automaticamente.
                 </div>
               </q-banner>
             </template>
 
-
-
-
             <q-card-actions class="text-primary" align="between">
               <q-btn flat label="Cancelar" v-close-popup />
-              <q-btn flat :loading="loading" :label="labelBotaoSubmit"
-                :icon-right="ehEdicao ? 'edit' : 'add'" type="submit" />
+              <q-btn
+                flat
+                :loading="loading"
+                :label="labelBotaoSubmit"
+                :icon-right="ehEdicao ? 'edit' : 'add'"
+                type="submit"
+              />
             </q-card-actions>
           </q-form>
         </div>

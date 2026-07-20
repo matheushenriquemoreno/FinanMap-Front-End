@@ -14,6 +14,7 @@
   </div>
 
   <q-page padding>
+    <h1 class="visually-hidden">Dashboard financeiro</h1>
     <div class="content-limit">
       <!-- Filter Section -->
       <div class="dashboard-section dashboard-section--delay-0">

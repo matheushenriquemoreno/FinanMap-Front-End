@@ -59,6 +59,7 @@
       round
       flat
       icon="share"
+      aria-label="Abrir compartilhamentos"
       :style="$q.dark.isActive ? '' : 'background-color: #ffffff'"
       :class="$q.dark.isActive ? 'bg-grey-9 text-white' : 'text-grey-9'"
       @click="abrirModalCompartilhamento"

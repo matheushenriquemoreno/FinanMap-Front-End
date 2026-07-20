@@ -13,7 +13,15 @@
           </div>
         </div>
         <q-space />
-        <q-btn icon="close" flat round dense color="grey-7" v-close-popup>
+        <q-btn
+          icon="close"
+          flat
+          round
+          dense
+          color="grey-7"
+          v-close-popup
+          aria-label="Fechar compartilhamento"
+        >
           <q-tooltip>Fechar</q-tooltip>
         </q-btn>
       </q-card-section>
@@ -137,6 +145,7 @@
                   v-if="comp.status === StatusConvite.Aceito"
                   :model-value="comp.permissao"
                   :options="opcoesPermissao"
+                  :aria-label="`Permissão de ${comp.convidadoEmail}`"
                   outlined
                   dense
                   emit-value
