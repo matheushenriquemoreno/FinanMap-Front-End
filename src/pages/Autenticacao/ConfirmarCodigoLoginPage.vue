@@ -14,11 +14,13 @@
             placeholder="Digite o código de verificação"
             lazy-rules
             dense
-            @update:model-value="(value) => {
-              if(value && typeof value === 'string') {
-                code = value.toUpperCase().trim();
+            @update:model-value="
+              (value) => {
+                if (value && typeof value === 'string') {
+                  code = value.toUpperCase().trim();
+                }
               }
-            }"
+            "
             :rules="[(val) => (val && val.length > 0) || 'código de verificação obrigatório']"
           />
 
@@ -46,13 +48,18 @@
 <script setup lang="ts">
 import logo from 'src/assets/logo-sem-fundo-menor.png';
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
 import { notificar } from 'src/helpers/Notificacao';
+import {
+  preserveAuthReturnQuery,
+  resolvePostAuthenticationLocation,
+} from 'src/helpers/McpAuthorizationFlow';
 
 const authService = obterAuthService();
 const router = useRouter();
+const route = useRoute();
 const code = ref('');
 const message = ref('Digite o código enviado para seu email');
 const userStore = useEmailStore();
@@ -60,7 +67,10 @@ const userStore = useEmailStore();
 onMounted(() => {
   const email = userStore.getEmail();
   if (!email) {
-    router.push({ name: 'LoginPage' });
+    router.push({
+      name: 'LoginPage',
+      query: preserveAuthReturnQuery(route.query),
+    });
   }
 });
 
@@ -74,6 +84,6 @@ const handleVerify = async () => {
   localStorage.setItem('userName', result.nomeUsuario);
   localStorage.setItem('userEmail', email);
   message.value = 'Email verificado com sucesso!';
-  router.push('/');
+  router.push(resolvePostAuthenticationLocation(route.query));
 };
 </script>

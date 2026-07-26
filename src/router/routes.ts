@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/login',
-    name: "LoginPage",
+    name: 'LoginPage',
     component: () => import('src/pages/Autenticacao/LoginPage.vue'),
   },
   {
@@ -15,6 +15,17 @@ const routes: RouteRecordRaw[] = [
     component: () => import('src/pages/Autenticacao/ConfirmarCodigoLoginPage.vue'),
   },
   {
+    path: '/mcp/authorize',
+    name: 'McpAuthorizationConsent',
+    component: () => import('src/pages/McpAuthorizationConsentPage.vue'),
+    props: (route) => ({
+      interactionId:
+        typeof route.query.mcpAuthorizationInteraction === 'string'
+          ? route.query.mcpAuthorizationInteraction
+          : '',
+    }),
+  },
+  {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
@@ -23,24 +34,26 @@ const routes: RouteRecordRaw[] = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
-        path: '', name: 'MesAMes', component: () => import('pages/GerenciamentoMensal/GerenciamentoMensalPageIndex.vue'),
+        path: '',
+        name: 'MesAMes',
+        component: () => import('pages/GerenciamentoMensal/GerenciamentoMensalPageIndex.vue'),
         children: [
           {
             path: '',
             name: 'RecebimentosPage',
-            component: () => import('pages/GerenciamentoMensal/RendimentoPage.vue')
+            component: () => import('pages/GerenciamentoMensal/RendimentoPage.vue'),
           },
           {
             path: 'Despesas',
             name: 'DespesaPage',
-            component: () => import('pages/GerenciamentoMensal/DespesaPage.vue')
+            component: () => import('pages/GerenciamentoMensal/DespesaPage.vue'),
           },
           {
             path: 'Investimentos',
             name: 'InvestimentoPage',
-            component: () => import('pages/GerenciamentoMensal/InvestimentoPage.vue')
+            component: () => import('pages/GerenciamentoMensal/InvestimentoPage.vue'),
           },
-        ]
+        ],
       },
       {
         path: '/dashbord',

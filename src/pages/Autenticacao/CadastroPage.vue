@@ -42,7 +42,13 @@
             </q-btn>
           </div>
           <div class="q-gutter-xs q-mt-md">
-            <q-btn flat color="primary" to="/login" dense no-caps>
+            <q-btn
+              flat
+              color="primary"
+              :to="{ path: '/login', query: authFlowQuery }"
+              dense
+              no-caps
+            >
               Já tem uma conta? Entre aqui
             </q-btn>
           </div>
@@ -54,22 +60,25 @@
 
 <script setup lang="ts">
 import logo from 'src/assets/logo-sem-fundo-menor.png';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
+import { preserveAuthReturnQuery } from 'src/helpers/McpAuthorizationFlow';
 
 const router = useRouter();
+const route = useRoute();
 const email = ref('');
 const name = ref('');
 const userStore = useEmailStore();
 const authService = obterAuthService();
+const authFlowQuery = computed(() => preserveAuthReturnQuery(route.query));
 
 const handleRegister = async () => {
   try {
     await authService.register(email.value, name.value);
     userStore.setEmail(email.value);
-    await router.push('/verify');
+    await router.push({ path: '/verify', query: authFlowQuery.value });
   } catch (error) {
     console.error('Erro durante o cadastro:', error);
   }

@@ -77,7 +77,7 @@
           class="row items-center border-bottom"
           :class="[
             $q.dark.isActive ? 'border-color-dark' : 'border-color-light',
-            isMobile ? 'q-pa-md' : 'q-py-sm q-px-md'
+            isMobile ? 'q-pa-md' : 'q-py-sm q-px-md',
           ]"
         >
           <q-btn
@@ -107,6 +107,7 @@
             <InformacoesConta v-if="tab === 'conta'" />
             <CategoriaConfig v-else-if="tab === 'categoria'" />
             <CompartilhamentoConfig v-else-if="tab === 'compartilhamento'" />
+            <IntegracaoIaConfig v-else-if="tab === 'integracao-ia'" />
           </div>
         </q-scroll-area>
       </div>
@@ -120,6 +121,7 @@ import { useQuasar } from 'quasar';
 import CategoriaConfig from './CategoriaConfig.vue';
 import InformacoesConta from './InformacoesConta.vue';
 import CompartilhamentoConfig from '../Compartilhamento/CompartilhamentoConfig.vue';
+import IntegracaoIaConfig from './IntegracaoIaConfig.vue';
 
 // props
 const props = defineProps({
@@ -151,6 +153,7 @@ const isMobile = computed(() => $q.screen.lt.md);
 const menuItems = [
   { label: 'Categorias', value: 'categoria', icon: 'category' },
   { label: 'Compartilhamento', value: 'compartilhamento', icon: 'share' },
+  { label: 'Integração com IA', value: 'integracao-ia', icon: 'smart_toy' },
   { label: 'Conta', value: 'conta', icon: 'person' },
 ];
 

@@ -8,6 +8,7 @@ import {
 import routes from './routes';
 import { isTokenExpired } from '../helpers/JwtHelper';
 import { refreshTokenManager } from '../services/RefreshTokenManager';
+import { authReturnQuery } from '../helpers/McpAuthorizationFlow';
 
 /*
  * If not building with SSR mode, you can
@@ -21,7 +22,9 @@ import { refreshTokenManager } from '../services/RefreshTokenManager';
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory;
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -39,9 +42,21 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     const token = localStorage.getItem('token');
     const refreshToken = localStorage.getItem('refreshToken');
 
+    if (to.path === '/' && typeof to.query.mcpAuthorizationInteraction === 'string') {
+      return next({
+        name: 'McpAuthorizationConsent',
+        query: {
+          mcpAuthorizationInteraction: to.query.mcpAuthorizationInteraction,
+        },
+      });
+    }
+
     if (authRequired) {
       if (!token) {
-        return next({ name: 'LoginPage' });
+        return next({
+          name: 'LoginPage',
+          query: authReturnQuery(to.fullPath),
+        });
       }
 
       const isExpired = isTokenExpired(token);
@@ -56,7 +71,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
             // Falha no refresh. Verifica se deve limpar o token
             if (refreshTokenManager.shouldClearTokenOnRefreshError(error)) {
               refreshTokenManager.clearTokens();
-              return next({ name: 'LoginPage' });
+              return next({
+                name: 'LoginPage',
+                query: authReturnQuery(to.fullPath),
+              });
             } else {
               // Erro de rede ou servidor (500), permite prosseguir (a requisição deve falhar no componente e mostrar erro genérico)
               return next();
@@ -64,7 +82,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
           }
         } else {
           // Token expirado e sem refresh token
-          return next({ name: 'LoginPage' });
+          return next({
+            name: 'LoginPage',
+            query: authReturnQuery(to.fullPath),
+          });
         }
       }
     }
@@ -74,4 +95,3 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
   return Router;
 });
-

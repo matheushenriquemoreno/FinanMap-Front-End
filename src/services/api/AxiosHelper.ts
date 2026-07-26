@@ -1,10 +1,10 @@
-import type { AxiosError } from "axios";
-import axios from "axios";
-import { notificarErro, notificarInfo } from "../../helpers/Notificacao";
-import { refreshTokenManager } from "../RefreshTokenManager";
+import type { AxiosError } from 'axios';
+import axios from 'axios';
+import { notificarErro, notificarInfo } from '../../helpers/Notificacao';
+import { refreshTokenManager } from '../RefreshTokenManager';
 
 interface ApiResultError {
-  errors: string[]
+  errors: string[];
 }
 
 interface MultiStatusResponse extends ApiResultError {
@@ -15,14 +15,20 @@ interface MultiStatusResponse extends ApiResultError {
 const TIMEOUT_MS = 30000;
 const ERROR_MESSAGES = {
   network: 'Atualmente o servidor está indisponível. Tente novamente mais tarde.',
-  timeout: 'O tempo limite da requisição foi excedido. Verifique sua conexão com a internet e tente novamente.',
+  timeout:
+    'O tempo limite da requisição foi excedido. Verifique sua conexão com a internet e tente novamente.',
   unauthorized: 'Por favor realizar o login novamente!',
   server: 'Ocorreu um erro inesperado, tente novamente mais tarde!',
   ssl: 'Ocorreu um erro de segurança na conexão. Tente novamente mais tarde.',
-  tooManyRequests: 'Muitas requisições simultâneas. Aguarde um momento e tente novamente.'
+  tooManyRequests: 'Muitas requisições simultâneas. Aguarde um momento e tente novamente.',
 };
 
-export function CreateIntanceAxios() {
+interface AxiosInstanceOptions {
+  includeSharedContext?: boolean;
+}
+
+export function CreateIntanceAxios(options: AxiosInstanceOptions = {}) {
+  const { includeSharedContext = true } = options;
   const AxiosInstance = axios.create({
     headers: { 'Content-Type': 'application/json' },
     timeout: TIMEOUT_MS, // Tempo limite de 30 segundos para a requisição
@@ -41,14 +47,14 @@ export function CreateIntanceAxios() {
         }
       }
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
 
       // Adicionar header x-proprietario-id se estiver em modo compartilhado
-      const proprietarioIdAtivo = localStorage.getItem("proprietarioIdAtivo");
-      if (proprietarioIdAtivo) {
+      const proprietarioIdAtivo = localStorage.getItem('proprietarioIdAtivo');
+      if (includeSharedContext && proprietarioIdAtivo) {
         // console.log('Adicionando contexto ao header:', proprietarioIdAtivo);
         config.headers['X-Proprietario-Id'] = proprietarioIdAtivo;
       }
@@ -57,13 +63,12 @@ export function CreateIntanceAxios() {
     },
     (error: AxiosError) => {
       return Promise.reject(error);
-    }
+    },
   );
 
   AxiosInstance.interceptors.response.use(
     (response) => response, // Se a resposta for bem-sucedida, retorna normalmente
     async (error: AxiosError) => {
-
       // Tratamento específico para erros de rede
       if (isNetworkError(error)) {
         const message = getNetworkErrorMessage(error);
@@ -99,14 +104,16 @@ export function CreateIntanceAxios() {
           if (!refreshTokenManager.shouldClearTokenOnRefreshError(refreshError)) {
             // Se for erro de rede ou 5xx durante o refresh, não desloga.
             // Apenas rejeita a requisição atual.
-            return Promise.reject(refreshError instanceof Error ? refreshError : new Error(String(refreshError)));
+            return Promise.reject(
+              refreshError instanceof Error ? refreshError : new Error(String(refreshError)),
+            );
           }
           // Se for erro de autenticação no refresh, deixa cair no tratamento padrão de 401 (logout)
         }
       }
 
       return handleHttpStatusError(error);
-    }
+    },
   );
 
   return AxiosInstance;
@@ -155,8 +162,12 @@ function getNetworkErrorMessage(error: AxiosError): string {
   const { code, message } = error;
 
   // Erros de timeout
-  if (code === 'ETIMEDOUT' || code === 'ECONNABORTED' ||
-    code === 'ERR_CONNECTION_TIMED_OUT' || message?.includes('timeout')) {
+  if (
+    code === 'ETIMEDOUT' ||
+    code === 'ECONNABORTED' ||
+    code === 'ERR_CONNECTION_TIMED_OUT' ||
+    message?.includes('timeout')
+  ) {
     return ERROR_MESSAGES.timeout;
   }
 
@@ -184,9 +195,9 @@ function handleHttpStatusError(error: AxiosError): Promise<never> {
   // Erros de autenticação
   if (statusCode === 401) {
     notificarInfo(ERROR_MESSAGES.unauthorized);
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userName");
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userName');
     window.location.href = process.env.LOGIN_URL ?? '/login';
   }
   // Erros de autorização (permissão insuficiente)
@@ -206,8 +217,6 @@ function handleHttpStatusError(error: AxiosError): Promise<never> {
 
   return Promise.reject(error);
 }
-
-
 
 export function handleErrorAxios(error: unknown): void {
   if (axios.isAxiosError(error)) {
@@ -231,12 +240,12 @@ function HandlerErrorStatusCode(error: AxiosError, statusCode: number | null) {
     const result = error.response?.data as ApiResultError;
 
     notificarErro(result.errors.join('\n'));
-  }
-  else if (statusCode === 207) {
-
+  } else if (statusCode === 207) {
     const result = error.response?.data as MultiStatusResponse;
 
-    notificarInfo(`Solicitação com sucesso parcial, houve ${result.quantidadeSucesso} sucessos e ${result.quantidadeErros} erros.`);
+    notificarInfo(
+      `Solicitação com sucesso parcial, houve ${result.quantidadeSucesso} sucessos e ${result.quantidadeErros} erros.`,
+    );
     notificarErro(result.errors.join('\n'));
   }
 }

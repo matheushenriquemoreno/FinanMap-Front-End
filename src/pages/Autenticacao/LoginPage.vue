@@ -31,7 +31,14 @@
             </q-btn>
           </div>
           <div class="q-gutter-xs q-mt-md">
-            <q-btn flat color="primary" to="/register" dense no-caps style="cursor: pointer">
+            <q-btn
+              flat
+              color="primary"
+              :to="{ path: '/register', query: authFlowQuery }"
+              dense
+              no-caps
+              style="cursor: pointer"
+            >
               Não tem uma conta? Cadastre-se
             </q-btn>
           </div>
@@ -42,22 +49,25 @@
 </template>
 <script setup lang="ts">
 import logo from 'src/assets/logo-sem-fundo-menor.png';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useEmailStore } from 'src/stores/UserEmail-Store';
 import { obterAuthService } from 'src/services/AuthService';
 import { notificar } from 'src/helpers/Notificacao';
+import { preserveAuthReturnQuery } from 'src/helpers/McpAuthorizationFlow';
 
 const router = useRouter();
+const route = useRoute();
 const email = ref('');
 const userStore = useEmailStore();
 const authService = obterAuthService();
+const authFlowQuery = computed(() => preserveAuthReturnQuery(route.query));
 
 const handleLogin = async () => {
   await authService.login(email.value);
   userStore.setEmail(email.value);
   notificar('Código enviado para o seu e-mail!');
-  await router.push('/verify');
+  await router.push({ path: '/verify', query: authFlowQuery.value });
 };
 </script>
 
