@@ -207,6 +207,20 @@ describe('IntegracaoIaConfig', () => {
     expect(wrapper.get('[data-testid="mcp-history"]').text()).toContain('25/07/2026');
   });
 
+  it('integra todos os prompts de leitura mantendo o aviso de processamento externo', async () => {
+    const wrapper = mountComponent();
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="mcp-query-guides"]').text()).toContain(
+      'Guias e prompts de leitura',
+    );
+    expect(wrapper.findAll('[data-testid="mcp-query-guide-card"]')).toHaveLength(9);
+    expect(wrapper.text()).toContain('fornecedor externo processará');
+    expect(wrapper.get('[data-testid="mcp-future-capabilities"]').text()).toContain(
+      'não fazem parte destes guias de leitura',
+    );
+  });
+
   it('informa quando as ferramentas de escrita estão indisponíveis', async () => {
     vi.mocked(McpService.obterConfiguracao).mockResolvedValue({
       ...configuration,
@@ -221,5 +235,8 @@ describe('IntegracaoIaConfig', () => {
 
     expect(wrapper.get('[data-testid="mcp-write-disabled"]').text()).toContain('Somente leitura');
     expect(wrapper.get('[data-testid="mcp-write-disabled"]').text()).toContain('indisponíveis');
+    expect(wrapper.get('[data-testid="mcp-future-capabilities"]').text()).toContain(
+      'capacidades futuras',
+    );
   });
 });

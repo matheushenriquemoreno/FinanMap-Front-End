@@ -130,12 +130,17 @@
         política de privacidade do agente escolhido.
       </q-banner>
 
+      <McpQueryGuides
+        v-if="configuration"
+        :write-tools-enabled="configuration.features.writeToolsEnabled"
+      />
+
       <q-card
         v-if="connections.length === 0"
         data-testid="mcp-empty"
         flat
         bordered
-        class="rounded-borders q-pa-lg text-center"
+        class="rounded-borders q-pa-lg q-mt-md text-center"
       >
         <q-icon name="link_off" size="40px" color="grey-6" />
         <div class="text-subtitle1 text-weight-medium q-mt-sm">Nenhum agente conectado</div>
@@ -278,6 +283,7 @@ import type {
 } from 'src/models/Mcp';
 import McpService from 'src/services/McpService';
 import { onMounted, ref } from 'vue';
+import McpQueryGuides from './McpQueryGuides.vue';
 
 const loading = ref(true);
 const loadError = ref(false);
