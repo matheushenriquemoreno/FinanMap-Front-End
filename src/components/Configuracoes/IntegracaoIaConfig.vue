@@ -135,6 +135,8 @@
         :write-tools-enabled="configuration.features.writeToolsEnabled"
       />
 
+      <McpWriteGuides v-if="configuration?.features.writeToolsEnabled" />
+
       <q-card
         v-if="connections.length === 0"
         data-testid="mcp-empty"
@@ -240,6 +242,7 @@ import McpService from 'src/services/McpService';
 import { onMounted, ref } from 'vue';
 import McpAuditHistory from './McpAuditHistory.vue';
 import McpQueryGuides from './McpQueryGuides.vue';
+import McpWriteGuides from './McpWriteGuides.vue';
 
 const loading = ref(true);
 const loadError = ref(false);

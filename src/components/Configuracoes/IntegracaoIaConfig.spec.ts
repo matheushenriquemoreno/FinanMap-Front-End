@@ -219,6 +219,7 @@ describe('IntegracaoIaConfig', () => {
     expect(wrapper.get('[data-testid="mcp-future-capabilities"]').text()).toContain(
       'não fazem parte destes guias de leitura',
     );
+    expect(wrapper.findAll('[data-testid="mcp-write-guide-card"]')).toHaveLength(15);
   });
 
   it('informa quando as ferramentas de escrita estão indisponíveis', async () => {
@@ -238,5 +239,6 @@ describe('IntegracaoIaConfig', () => {
     expect(wrapper.get('[data-testid="mcp-future-capabilities"]').text()).toContain(
       'capacidades futuras',
     );
+    expect(wrapper.find('[data-testid="mcp-write-guides"]').exists()).toBe(false);
   });
 });
