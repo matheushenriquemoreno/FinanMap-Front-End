@@ -229,60 +229,16 @@
         Não foi possível revogar a conexão. Tente novamente.
       </q-banner>
 
-      <q-card
-        v-if="configuration?.features.historyEnabled"
-        data-testid="mcp-history"
-        flat
-        bordered
-        class="rounded-borders q-mt-md"
-      >
-        <q-card-section>
-          <div class="text-subtitle1 text-weight-bold">Atividade recente</div>
-          <div class="text-caption text-grey-7">Últimas operações realizadas via MCP.</div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section v-if="historyError" class="text-negative">
-          Não foi possível carregar o histórico recente.
-        </q-card-section>
-        <q-card-section v-else-if="history.length === 0" class="text-grey-7">
-          Nenhuma atividade registrada.
-        </q-card-section>
-        <q-list v-else separator>
-          <q-item v-for="event in history" :key="event.id">
-            <q-item-section>
-              <q-item-label class="text-weight-medium">{{ event.toolName }}</q-item-label>
-              <q-item-label caption>{{ auditSummary(event) }}</q-item-label>
-            </q-item-section>
-            <q-item-section side top>
-              <q-badge
-                :color="auditStatePresentation(event.state).color"
-                :label="auditStatePresentation(event.state).label"
-              >
-                {{ auditStatePresentation(event.state).label }}
-              </q-badge>
-              <span class="text-caption text-grey-7 q-mt-xs">
-                {{ formatDate(event.startedAtUtc) }}
-              </span>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card>
+      <McpAuditHistory v-if="configuration?.features.historyEnabled" />
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
-import type {
-  McpConfiguration,
-  McpAuditEvent,
-  McpAuditState,
-  McpConnectionStatus,
-  McpConnectionSummary,
-} from 'src/models/Mcp';
+import type { McpConfiguration, McpConnectionStatus, McpConnectionSummary } from 'src/models/Mcp';
 import McpService from 'src/services/McpService';
 import { onMounted, ref } from 'vue';
+import McpAuditHistory from './McpAuditHistory.vue';
 import McpQueryGuides from './McpQueryGuides.vue';
 
 const loading = ref(true);
@@ -293,13 +249,10 @@ const connectionPendingRevocation = ref<McpConnectionSummary | null>(null);
 const revoking = ref(false);
 const revocationError = ref(false);
 const copyFeedback = ref('');
-const history = ref<McpAuditEvent[]>([]);
-const historyError = ref(false);
 
 async function loadIntegration() {
   loading.value = true;
   loadError.value = false;
-  historyError.value = false;
   try {
     const [configurationResponse, connectionResponse] = await Promise.all([
       McpService.obterConfiguracao(),
@@ -307,23 +260,10 @@ async function loadIntegration() {
     ]);
     configuration.value = configurationResponse;
     connections.value = connectionResponse.items;
-
-    if (configurationResponse.features.historyEnabled) {
-      try {
-        const historyResponse = await McpService.listarHistorico({ limit: 10 });
-        history.value = historyResponse.items;
-      } catch {
-        history.value = [];
-        historyError.value = true;
-      }
-    } else {
-      history.value = [];
-    }
   } catch {
     loadError.value = true;
     configuration.value = null;
     connections.value = [];
-    history.value = [];
   } finally {
     loading.value = false;
   }
@@ -380,28 +320,6 @@ function formatDate(value: string): string {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value));
-}
-
-function auditStatePresentation(state: McpAuditState): { label: string; color: string } {
-  const presentation: Record<McpAuditState, { label: string; color: string }> = {
-    received: { label: 'Recebida', color: 'blue-grey' },
-    executing: { label: 'Em execução', color: 'info' },
-    reconciling: { label: 'Verificando', color: 'warning' },
-    completed: { label: 'Concluída', color: 'positive' },
-    partiallyCompleted: { label: 'Parcial', color: 'warning' },
-    failed: { label: 'Falhou', color: 'negative' },
-    rejected: { label: 'Rejeitada', color: 'negative' },
-    unknown: { label: 'Resultado desconhecido', color: 'warning' },
-  };
-  return presentation[state];
-}
-
-function auditSummary(event: McpAuditEvent): string {
-  const { summary, message, description } = event.resultSummary;
-  const safeSummary = summary ?? message ?? description;
-  return typeof safeSummary === 'string' && safeSummary.trim()
-    ? safeSummary
-    : 'Operação registrada.';
 }
 
 onMounted(loadIntegration);

@@ -54,9 +54,74 @@ export type McpAuditState =
   | 'partiallyCompleted'
   | 'failed'
   | 'rejected'
-  | 'unknown';
+  | 'unknown'
+  | 'expired';
 
 export type McpOperationClass = 'read' | 'preview' | 'confirm' | 'import' | 'auth' | 'revoke';
+export type McpWriteAction = 'create' | 'update' | 'delete' | 'cancel' | 'status';
+export type McpRequiredDecision = 'APPLY_CHANGES' | 'DELETE_PERMANENTLY' | 'IMPORT_VALID_ITEMS';
+export type McpConfirmationActor = 'resource_owner';
+export type McpReconciliationStatus =
+  | 'not_required'
+  | 'completed'
+  | 'rejected'
+  | 'unknown'
+  | 'pending'
+  | 'checking'
+  | 'confirmed'
+  | 'not_applied'
+  | 'inconclusive';
+export type McpAuditResultState = 'completed' | 'failed' | 'rejected' | 'processing' | 'unknown';
+export type McpAuditSafeValue = string | number | boolean | null;
+
+export interface McpAuditPreviewChange {
+  field: string;
+  label: string;
+  currentValue?: McpAuditSafeValue;
+  proposedValue?: McpAuditSafeValue;
+}
+
+export interface McpAuditPreview {
+  resourceType: string;
+  recordReference: string;
+  changes: McpAuditPreviewChange[];
+  irreversible: boolean;
+  expiresAtUtc: string;
+  requiredDecision: McpRequiredDecision;
+}
+
+export interface McpAuditConfirmation {
+  decision: McpRequiredDecision;
+  confirmedBy: McpConfirmationActor;
+  confirmedAtUtc: string;
+}
+
+export interface McpAuditReconciliation {
+  status: McpReconciliationStatus;
+  attempts: number;
+  lastCheckedAtUtc?: string | null;
+  summary: string;
+  guidance?: string | null;
+}
+
+export interface McpAuditResultItem {
+  reference: string;
+  status: McpAuditResultState;
+  summary: string;
+  errorCode?: string | null;
+  guidance?: string | null;
+}
+
+export interface McpAuditWriteResult {
+  summary: string;
+  items: McpAuditResultItem[];
+}
+
+export interface McpAuditFailure {
+  code: string;
+  message: string;
+  guidance: string;
+}
 
 export interface McpAuditEvent {
   id: string;
@@ -65,10 +130,19 @@ export interface McpAuditEvent {
   toolName: string;
   operationClass: McpOperationClass;
   state: McpAuditState;
+  action?: McpWriteAction | null;
   startedAtUtc: string;
   finishedAtUtc?: string | null;
   resultSummary: Record<string, unknown>;
   errorCodes: string[];
+}
+
+export interface McpAuditEventDetail extends McpAuditEvent {
+  preview?: McpAuditPreview | null;
+  confirmation?: McpAuditConfirmation | null;
+  reconciliation?: McpAuditReconciliation | null;
+  result?: McpAuditWriteResult | null;
+  failure?: McpAuditFailure | null;
 }
 
 export interface McpAuditPage {

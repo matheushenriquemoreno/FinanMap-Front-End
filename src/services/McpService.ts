@@ -1,6 +1,7 @@
 import type { AxiosInstance } from 'axios';
 import type {
   McpAuditEvent,
+  McpAuditEventDetail,
   McpAuditFilters,
   McpAuditPage,
   McpAuthorizationDecision,
@@ -63,8 +64,8 @@ export class McpService {
     return response.data;
   }
 
-  async obterEventoHistorico(id: string): Promise<McpAuditEvent> {
-    const response = await this.axios.get<McpAuditEvent>(
+  async obterEventoHistorico(id: string): Promise<McpAuditEventDetail> {
+    const response = await this.axios.get<McpAuditEventDetail>(
       `${this.baseUrl}/audit-events/${encodeURIComponent(id)}`,
     );
     return response.data;
