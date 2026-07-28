@@ -73,8 +73,8 @@
         <q-card-section>
           <div class="text-subtitle1 text-weight-bold">Como conectar</div>
           <ol class="text-body2 q-pl-lg q-mb-md">
-            <li>Abra as configurações de MCP no agente compatível de sua preferência.</li>
-            <li>Informe o endpoint abaixo e inicie a conexão.</li>
+            <li>Escolha o bloco compatível com o cliente que você usa.</li>
+            <li>Salve a configuração e reinicie o cliente quando ele solicitar.</li>
             <li>Conclua a autorização no navegador com sua conta FinanMap.</li>
           </ol>
 
@@ -100,6 +100,81 @@
             aria-live="polite"
           >
             {{ copyFeedback }}
+          </div>
+
+          <div class="mcp-client-configs q-mt-md">
+            <div class="client-config rounded-borders q-pa-md">
+              <div class="row items-start justify-between q-gutter-sm q-mb-sm">
+                <div>
+                  <div class="text-subtitle2 text-weight-bold">Codex</div>
+                  <p class="text-caption text-grey-7 q-my-none">
+                    Adicione ao `config.toml` e autentique com `codex mcp login finanmap`.
+                  </p>
+                </div>
+                <q-btn
+                  data-testid="copy-mcp-codex-config"
+                  round
+                  flat
+                  color="primary"
+                  icon="content_copy"
+                  aria-label="Copiar configuração Codex"
+                  @click="copySnippet(codexConfigSnippet)"
+                />
+              </div>
+              <pre class="config-snippet rounded-borders q-pa-sm q-mb-none"><code
+                data-testid="mcp-codex-config"
+                >{{ codexConfigSnippet }}</code
+              ></pre>
+            </div>
+
+            <div class="client-config rounded-borders q-pa-md">
+              <div class="row items-start justify-between q-gutter-sm q-mb-sm">
+                <div>
+                  <div class="text-subtitle2 text-weight-bold">Claude Code CLI</div>
+                  <p class="text-caption text-grey-7 q-my-none">
+                    Depois de adicionar, use `/mcp` para autenticar se aparecer "Needs
+                    authentication".
+                  </p>
+                </div>
+                <q-btn
+                  data-testid="copy-mcp-claude-cli-config"
+                  round
+                  flat
+                  color="primary"
+                  icon="content_copy"
+                  aria-label="Copiar comando Claude Code"
+                  @click="copySnippet(claudeCliConfigSnippet)"
+                />
+              </div>
+              <pre class="config-snippet rounded-borders q-pa-sm q-mb-none"><code
+                data-testid="mcp-claude-cli-config"
+                >{{ claudeCliConfigSnippet }}</code
+              ></pre>
+            </div>
+
+            <div class="client-config rounded-borders q-pa-md">
+              <div class="row items-start justify-between q-gutter-sm q-mb-sm">
+                <div>
+                  <div class="text-subtitle2 text-weight-bold">Claude JSON</div>
+                  <p class="text-caption text-grey-7 q-my-none">
+                    O campo type é obrigatório para o Claude interpretar o servidor como HTTP.
+                  </p>
+                </div>
+                <q-btn
+                  data-testid="copy-mcp-claude-json-config"
+                  round
+                  flat
+                  color="primary"
+                  icon="content_copy"
+                  aria-label="Copiar JSON Claude"
+                  @click="copySnippet(claudeJsonConfigSnippet)"
+                />
+              </div>
+              <pre class="config-snippet rounded-borders q-pa-sm q-mb-none"><code
+                data-testid="mcp-claude-json-config"
+                >{{ claudeJsonConfigSnippet }}</code
+              ></pre>
+            </div>
           </div>
         </q-card-section>
 
@@ -274,6 +349,25 @@ const importToolsEnabled = computed(
       ),
     ),
 );
+const endpoint = computed(() => configuration.value?.endpoint ?? '');
+const codexConfigSnippet = computed(
+  () => `[mcp_servers.finanmap]
+url = "${endpoint.value}"
+auth = "oauth"`,
+);
+const claudeCliConfigSnippet = computed(
+  () => `claude mcp add --transport http finanmap ${endpoint.value}`,
+);
+const claudeJsonConfigSnippet = computed(() =>
+  JSON.stringify(
+    {
+      type: 'http',
+      url: endpoint.value,
+    },
+    null,
+    2,
+  ),
+);
 
 async function loadIntegration() {
   loading.value = true;
@@ -315,12 +409,20 @@ async function revokeConnection() {
 async function copyEndpoint() {
   if (!configuration.value) return;
 
+  await copyText(configuration.value.endpoint, 'Endpoint copiado.');
+}
+
+async function copySnippet(snippet: string) {
+  await copyText(snippet, 'Configuração copiada.');
+}
+
+async function copyText(value: string, successMessage: string) {
   copyFeedback.value = '';
   try {
-    await navigator.clipboard.writeText(configuration.value.endpoint);
-    copyFeedback.value = 'Endpoint copiado.';
+    await navigator.clipboard.writeText(value);
+    copyFeedback.value = successMessage;
   } catch {
-    copyFeedback.value = 'Não foi possível copiar. Selecione o endpoint manualmente.';
+    copyFeedback.value = 'Não foi possível copiar. Selecione o texto manualmente.';
   }
 }
 
@@ -359,6 +461,21 @@ onMounted(loadIntegration);
   display: block;
   min-width: 0;
   overflow-wrap: anywhere;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.mcp-client-configs {
+  display: grid;
+  gap: 12px;
+}
+
+.client-config {
+  border: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+.config-snippet {
+  overflow-x: auto;
+  white-space: pre;
   background: rgba(127, 127, 127, 0.12);
 }
 

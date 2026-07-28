@@ -193,6 +193,46 @@ describe('IntegracaoIaConfig', () => {
     expect(wrapper.get('[data-testid="copy-feedback"]').text()).toContain('Endpoint copiado');
   });
 
+  it('apresenta configurações específicas para Codex e Claude sem credencial manual', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    const wrapper = mountComponent();
+    await flushPromises();
+
+    const codexSnippet = wrapper.get('[data-testid="mcp-codex-config"]').text();
+    const claudeCliSnippet = wrapper.get('[data-testid="mcp-claude-cli-config"]').text();
+    const claudeJsonSnippet = wrapper.get('[data-testid="mcp-claude-json-config"]').text();
+
+    expect(codexSnippet).toContain('[mcp_servers.finanmap]');
+    expect(codexSnippet).toContain(`url = "${configuration.endpoint}"`);
+    expect(codexSnippet).toContain('auth = "oauth"');
+    expect(wrapper.text()).toContain('codex mcp login finanmap');
+
+    expect(claudeCliSnippet).toContain(
+      `claude mcp add --transport http finanmap ${configuration.endpoint}`,
+    );
+    expect(claudeJsonSnippet).toContain('"type": "http"');
+    expect(claudeJsonSnippet).toContain(`"url": "${configuration.endpoint}"`);
+    expect(wrapper.text()).toContain('O campo type é obrigatório');
+
+    expect(wrapper.text()).not.toContain('Bearer');
+    expect(wrapper.text()).not.toContain('chave de API');
+
+    await wrapper.get('[data-testid="copy-mcp-codex-config"]').trigger('click');
+    await wrapper.get('[data-testid="copy-mcp-claude-cli-config"]').trigger('click');
+    await wrapper.get('[data-testid="copy-mcp-claude-json-config"]').trigger('click');
+    await flushPromises();
+
+    expect(writeText).toHaveBeenNthCalledWith(1, codexSnippet);
+    expect(writeText).toHaveBeenNthCalledWith(2, claudeCliSnippet);
+    expect(writeText).toHaveBeenNthCalledWith(3, claudeJsonSnippet);
+    expect(wrapper.get('[data-testid="copy-feedback"]').text()).toContain('Configuração copiada');
+  });
+
   it('mostra no histórico a ação, data, status e resumo seguro da chamada MCP', async () => {
     vi.mocked(McpService.listarHistorico).mockResolvedValue({
       items: [
