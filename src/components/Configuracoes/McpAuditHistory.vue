@@ -7,6 +7,40 @@
 
     <q-separator />
 
+    <div
+      data-testid="mcp-history-filters"
+      aria-label="Filtros do histórico"
+      class="history-filters q-pa-md"
+    >
+      <label class="filter-field">
+        Classe
+        <select v-model="filterClass" data-testid="history-filter-class">
+          <option value="">Todas</option>
+          <option v-for="option in operationClassOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </label>
+      <label class="filter-field">
+        Estado
+        <select v-model="filterState" data-testid="history-filter-state">
+          <option value="">Todos</option>
+          <option v-for="option in stateOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </label>
+      <q-btn
+        data-testid="history-filter-reset"
+        flat
+        no-caps
+        color="primary"
+        label="Limpar filtros"
+        :disable="!filterClass && !filterState"
+        @click="resetFilters"
+      />
+    </div>
+
     <q-card-section
       v-if="loading"
       data-testid="mcp-history-loading"
@@ -29,15 +63,21 @@
     </q-card-section>
 
     <q-card-section
-      v-else-if="history.length === 0"
+      v-else-if="filteredHistory.length === 0"
       data-testid="mcp-history-empty"
       class="text-grey-7"
     >
-      Nenhuma atividade registrada.
+      <span data-testid="history-filter-empty">
+        {{
+          history.length
+            ? 'Nenhuma atividade corresponde aos filtros.'
+            : 'Nenhuma atividade registrada.'
+        }}
+      </span>
     </q-card-section>
 
     <q-list v-else separator>
-      <div v-for="event in history" :key="event.id" class="audit-event">
+      <div v-for="event in filteredHistory" :key="event.id" class="audit-event">
         <q-item :data-testid="`history-event-${event.id}`" class="audit-event__summary">
           <q-item-section>
             <q-item-label :id="`event-title-${event.id}`" class="text-weight-medium">
@@ -400,7 +440,7 @@ import type {
   McpWriteAction,
 } from 'src/models/Mcp';
 import McpService from 'src/services/McpService';
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 
 const loading = ref(true);
 const loadingMore = ref(false);
@@ -411,6 +451,39 @@ const expandedEventId = ref<string | null>(null);
 const details = reactive<Record<string, McpAuditEventDetail | undefined>>({});
 const detailLoading = reactive<Record<string, boolean>>({});
 const detailErrors = reactive<Record<string, boolean>>({});
+const filterClass = ref<McpAuditEvent['operationClass'] | ''>('');
+const filterState = ref<McpAuditState | ''>('');
+const operationClassOptions = [
+  { value: 'read', label: 'Consultas' },
+  { value: 'preview', label: 'Pré-visualizações' },
+  { value: 'confirm', label: 'Confirmações' },
+  { value: 'import', label: 'Importações' },
+  { value: 'auth', label: 'Autorizações' },
+  { value: 'revoke', label: 'Revogações' },
+] as const;
+const stateOptions = [
+  { value: 'received', label: 'Recebidas' },
+  { value: 'executing', label: 'Em execução' },
+  { value: 'reconciling', label: 'Em reconciliação' },
+  { value: 'completed', label: 'Concluídas' },
+  { value: 'partiallyCompleted', label: 'Parciais' },
+  { value: 'failed', label: 'Falhas' },
+  { value: 'rejected', label: 'Rejeitadas' },
+  { value: 'unknown', label: 'Desconhecidas' },
+  { value: 'expired', label: 'Expiradas' },
+] as const;
+const filteredHistory = computed(() =>
+  history.value.filter(
+    (event) =>
+      (!filterClass.value || event.operationClass === filterClass.value) &&
+      (!filterState.value || event.state === filterState.value),
+  ),
+);
+
+function resetFilters() {
+  filterClass.value = '';
+  filterState.value = '';
+}
 
 async function loadHistory() {
   loading.value = true;
@@ -676,6 +749,42 @@ onMounted(loadHistory);
 </script>
 
 <style scoped>
+.history-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 0.75rem;
+}
+
+.filter-field {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--q-color-grey-8);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.filter-field select {
+  min-height: 2.25rem;
+  border: 1px solid var(--q-color-grey-5);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: inherit;
+  padding: 0.35rem 0.5rem;
+}
+
+.filter-field select:focus-visible,
+.history-filters button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--q-color-primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .history-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
 .audit-event__summary {
   align-items: flex-start;
   gap: 1rem;

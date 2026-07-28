@@ -228,6 +228,7 @@
             no-caps
             color="negative"
             label="Confirmar revogação"
+            aria-label="Tentar revogar novamente"
             :loading="revoking"
             @click="revokeConnection"
           />
@@ -350,6 +351,10 @@ onMounted(loadIntegration);
 </script>
 
 <style scoped>
+.q-btn {
+  min-height: 44px;
+}
+
 .mcp-endpoint {
   display: block;
   min-width: 0;

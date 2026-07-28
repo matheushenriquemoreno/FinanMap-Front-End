@@ -559,4 +559,24 @@ describe('McpAuditHistory', () => {
     expect(McpService.obterEventoHistorico).toHaveBeenCalledTimes(2);
     expect(wrapper.get(`[data-testid="event-detail-${detail.id}"]`).text()).toContain('Categoria');
   });
+
+  it('filtra histórico por classe, estado e texto sem expor payload bruto', async () => {
+    const events = [
+      { ...detailFor({ id: 'event-read', operationClass: 'read', state: 'completed' }) },
+      { ...detailFor({ id: 'event-failed', operationClass: 'confirm', state: 'failed' }) },
+    ];
+    const wrapper = await mountWithEvents(events);
+
+    expect(wrapper.get('[data-testid="mcp-history-filters"]').attributes('aria-label')).toContain(
+      'Filtros',
+    );
+    await wrapper.get('[data-testid="history-filter-class"]').setValue('confirm');
+    expect(wrapper.find('[data-testid="history-event-event-failed"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="history-event-event-read"]').exists()).toBe(false);
+
+    await wrapper.get('[data-testid="history-filter-state"]').setValue('completed');
+    expect(wrapper.get('[data-testid="history-filter-empty"]').text()).toContain('Nenhuma');
+    await wrapper.get('[data-testid="history-filter-reset"]').trigger('click');
+    expect(wrapper.find('[data-testid="history-event-event-read"]').exists()).toBe(true);
+  });
 });

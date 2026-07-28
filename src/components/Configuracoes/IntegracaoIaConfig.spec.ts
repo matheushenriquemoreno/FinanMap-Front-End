@@ -138,6 +138,23 @@ describe('IntegracaoIaConfig', () => {
     expect(wrapper.find('[data-testid="revoke-connection-active"]').exists()).toBe(false);
   });
 
+  it('mantém a confirmação e apresenta erro acessível quando a revogação falha', async () => {
+    vi.mocked(McpService.listarConexoes).mockResolvedValue({ items: [activeConnection] });
+    vi.mocked(McpService.revogarConexao).mockRejectedValueOnce(new Error('offline'));
+
+    const wrapper = mountComponent();
+    await flushPromises();
+    await wrapper.get('[data-testid="revoke-connection-active"]').trigger('click');
+    await wrapper.get('[data-testid="confirm-revoke"]').trigger('click');
+    await flushPromises();
+
+    expect(wrapper.get('[role="alert"]').text()).toContain('Não foi possível revogar');
+    expect(wrapper.find('[data-testid="revoke-confirmation"]').exists()).toBe(true);
+    expect(wrapper.get('[data-testid="confirm-revoke"]').attributes('aria-label')).toBe(
+      'Tentar revogar novamente',
+    );
+  });
+
   it('apresenta falha recuperável e permite tentar carregar novamente', async () => {
     vi.mocked(McpService.obterConfiguracao).mockRejectedValueOnce(new Error('offline'));
 
