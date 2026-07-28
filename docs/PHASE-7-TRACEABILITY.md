@@ -53,3 +53,21 @@ compartilhado da fase.
 - [ ] métricas/alertas e contato de suporte definidos;
 - [ ] SHA implantado e SHA anterior de rollback registrados;
 - [ ] aceite do responsável antes de qualquer usuário real.
+
+## Runbook local integrado (PowerShell)
+
+1. Inicie o backend local pelo compose de staging, com um `.env` efêmero válido:
+   `docker compose --env-file .env.mcp-staging.local -f ..\FinanMap-Back-End\Modulos\GerenciamentoMensal\docker-compose.mcp-staging.yaml up -d --build --wait`.
+2. Confirme o backend antes do frontend:
+   `Invoke-RestMethod http://localhost:17270/healthcheck`.
+3. Construa e suba o frontend apontando para o backend publicado no host (o valor
+   é embutido no bundle, portanto deve ser definido antes do build):
+   `$env:HOMOLOG_URL_API='http://localhost:17270/api/'; $env:MCP_ENABLED='true'; $env:MCP_WRITE_TOOLS_ENABLED='false'; docker compose -f docker-compose.homolog.yml up -d --build --wait`.
+4. Valide o frontend em `http://localhost:9071/` e execute
+   `npm run test:phase7`; o catálogo `mcp-phase7-journeys.mjs` confirma as dez
+   jornadas representadas. A execução ponta a ponta exige credenciais/cliente MCP
+   locais e deve registrar requests, correlation IDs e auditoria sem payload bruto.
+5. Para rollback local, primeiro desligue writes e troque para a imagem anterior:
+   `$env:MCP_WRITE_TOOLS_ENABLED='false'; docker compose -f docker-compose.homolog.yml down`;
+   reexecute `up` com `MCP_FRONTEND_IMAGE` apontando para o SHA anterior. Não use
+   `down -v` no backend: o volume Mongo/journal/auditoria deve ser preservado.
