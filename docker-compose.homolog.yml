@@ -1,0 +1,19 @@
+services:
+  frontend-homolog:
+    build:
+      context: .
+      dockerfile: Dockerfile.homolog
+      args:
+        URL_API: ${HOMOLOG_URL_API:?defina HOMOLOG_URL_API}
+        LOGIN_URL: ${HOMOLOG_LOGIN_URL:-/login}
+        MCP_ENABLED: ${MCP_ENABLED:-false}
+        MCP_WRITE_TOOLS_ENABLED: ${MCP_WRITE_TOOLS_ENABLED:-false}
+    image: ${MCP_FRONTEND_IMAGE:-mcp-frontend-homolog:local}
+    ports:
+      - "${HOMOLOG_PORT:-9071}:8080"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    restart: unless-stopped

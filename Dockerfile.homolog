@@ -1,0 +1,26 @@
+FROM node:22.14.0-alpine3.21 AS build
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+
+ARG URL_API
+ARG LOGIN_URL=/login
+ARG MCP_ENABLED=false
+ARG MCP_WRITE_TOOLS_ENABLED=false
+ENV URL_API=$URL_API \
+    LOGIN_URL=$LOGIN_URL \
+    MCP_ENABLED=$MCP_ENABLED \
+    MCP_WRITE_TOOLS_ENABLED=$MCP_WRITE_TOOLS_ENABLED
+
+RUN npm run build
+
+FROM nginx:1.27.4-alpine3.21 AS runtime
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist/spa /usr/share/nginx/html
+RUN addgroup -S app && adduser -S -G app app \
+  && chown -R app:app /usr/share/nginx/html
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget -q -O /dev/null http://127.0.0.1:8080/ || exit 1
+CMD ["nginx", "-g", "daemon off;"]

@@ -54,8 +54,10 @@ export default defineConfig((/* ctx */) => {
       // analyze: true,
 
       env: {
-        URL_API: 'https://api.devmoreno.online/api/',
-        lOGIN_URL: '/#/login'
+        URL_API: process.env.URL_API ?? '',
+        LOGIN_URL: process.env.LOGIN_URL ?? '/login',
+        MCP_ENABLED: process.env.MCP_ENABLED ?? 'false',
+        MCP_WRITE_TOOLS_ENABLED: process.env.MCP_WRITE_TOOLS_ENABLED ?? 'false',
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

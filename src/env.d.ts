@@ -4,6 +4,8 @@ declare namespace NodeJS {
     VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined;
     VUE_ROUTER_BASE: string | undefined;
     URL_API: string | undefined;
-    lOGIN_URL: string | undefined;
+    LOGIN_URL: string | undefined;
+    MCP_ENABLED: string | undefined;
+    MCP_WRITE_TOOLS_ENABLED: string | undefined;
   }
 }

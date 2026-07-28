@@ -15,6 +15,7 @@
     "test:avatar": "node scripts/check-avatar-experience.mjs",
     "test:avatar:release": "node scripts/check-avatar-release.mjs",
     "test:custo-fixo-despesa": "node scripts/check-custo-fixo-para-despesa.mjs",
+    "test:phase7": "node scripts/check-mcp-phase7-readiness.check.mjs",
     "test:theme": "node scripts/check-dark-mode.mjs",
     "dev": "quasar dev",
     "build": "quasar build",
