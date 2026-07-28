@@ -123,6 +123,52 @@ export interface McpAuditFailure {
   guidance: string;
 }
 
+export type McpImportItemType = 'category' | 'income' | 'expense' | 'investment' | 'fixed_cost';
+export type McpImportBatchState = 'partial' | 'completed' | 'failed' | 'unknown';
+export type McpImportItemState =
+  | 'valid'
+  | 'invalid'
+  | 'pending'
+  | 'possible_duplicate'
+  | 'skipped'
+  | 'already_applied'
+  | 'completed'
+  | 'failed'
+  | 'unknown';
+
+export interface McpAuditImportTotal {
+  type: McpImportItemType;
+  amount: number;
+  currency: 'BRL';
+}
+
+export interface McpAuditImportFailure {
+  clientItemId: string;
+  sourceRef?: string | null;
+  field?: string | null;
+  code: string;
+  message: string;
+  guidance: string;
+}
+
+export interface McpAuditImportItem {
+  clientItemId: string;
+  sourceRef?: string | null;
+  type: McpImportItemType;
+  operationId: string;
+  result: 'completed' | 'failed' | 'unknown';
+}
+
+export interface McpAuditImportBatch {
+  state: McpImportBatchState;
+  itemCount: number;
+  countsByState: Partial<Record<McpImportItemState, number>>;
+  countsByType: Partial<Record<McpImportItemType, number>>;
+  totals: McpAuditImportTotal[];
+  failures: McpAuditImportFailure[];
+  items: McpAuditImportItem[];
+}
+
 export interface McpAuditEvent {
   id: string;
   correlationId: string;
@@ -143,6 +189,7 @@ export interface McpAuditEventDetail extends McpAuditEvent {
   reconciliation?: McpAuditReconciliation | null;
   result?: McpAuditWriteResult | null;
   failure?: McpAuditFailure | null;
+  importBatch?: McpAuditImportBatch | null;
 }
 
 export interface McpAuditPage {

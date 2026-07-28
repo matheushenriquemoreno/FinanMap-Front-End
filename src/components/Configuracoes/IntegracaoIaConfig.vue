@@ -60,6 +60,15 @@
         <strong>Somente leitura</strong>.
       </q-banner>
 
+      <q-banner
+        v-if="configuration?.features.writeToolsEnabled && !importToolsEnabled"
+        data-testid="mcp-import-disabled"
+        class="bg-orange-1 text-grey-9 rounded-borders q-mb-md"
+        role="status"
+      >
+        A importação estruturada está indisponível no perfil de gestão atual.
+      </q-banner>
+
       <q-card v-if="configuration" flat bordered class="rounded-borders q-mb-md">
         <q-card-section>
           <div class="text-subtitle1 text-weight-bold">Como conectar</div>
@@ -136,6 +145,8 @@
       />
 
       <McpWriteGuides v-if="configuration?.features.writeToolsEnabled" />
+
+      <McpImportGuides v-if="importToolsEnabled" />
 
       <q-card
         v-if="connections.length === 0"
@@ -239,8 +250,9 @@
 <script setup lang="ts">
 import type { McpConfiguration, McpConnectionStatus, McpConnectionSummary } from 'src/models/Mcp';
 import McpService from 'src/services/McpService';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import McpAuditHistory from './McpAuditHistory.vue';
+import McpImportGuides from './McpImportGuides.vue';
 import McpQueryGuides from './McpQueryGuides.vue';
 import McpWriteGuides from './McpWriteGuides.vue';
 
@@ -252,6 +264,15 @@ const connectionPendingRevocation = ref<McpConnectionSummary | null>(null);
 const revoking = ref(false);
 const revocationError = ref(false);
 const copyFeedback = ref('');
+const importToolsEnabled = computed(
+  () =>
+    Boolean(configuration.value?.features.writeToolsEnabled) &&
+    Boolean(
+      configuration.value?.profiles.some(
+        (profile) => profile.id === 'full_management' && profile.scopes.includes('mcp:import'),
+      ),
+    ),
+);
 
 async function loadIntegration() {
   loading.value = true;

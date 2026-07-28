@@ -112,6 +112,7 @@ describe('McpAuditHistory', () => {
       ['executing', 'Em execução'],
       ['reconciling', 'Em reconciliação'],
       ['completed', 'Concluída'],
+      ['partiallyCompleted', 'Parcial'],
       ['failed', 'Falhou'],
       ['rejected', 'Rejeitada'],
       ['unknown', 'Resultado desconhecido'],
@@ -431,6 +432,109 @@ describe('McpAuditHistory', () => {
     expect(rendered).toContain('Resumo permitido');
     expect(rendered).not.toMatch(
       /PAYLOAD_FINANCEIRO_CANARIO|SEGREDO_CANARIO|STACK_CANARIO|SNAPSHOT_INTEGRAL_CANARIO|RESPOSTA_BRUTA_CANARIO/,
+    );
+  });
+
+  it('resume lote de 1.000 itens por estado, tipo e totais sem renderizar payload integral', async () => {
+    const detail = {
+      ...detailFor({
+        id: 'event-import-batch',
+        correlationId: 'correlation-import-batch',
+        toolName: 'finanmap_import_confirm',
+        operationClass: 'import',
+        state: 'partiallyCompleted',
+        action: null,
+        preview: null,
+      }),
+      importBatch: {
+        state: 'partial',
+        itemCount: 1_000,
+        countsByState: {
+          completed: 995,
+          failed: 3,
+          unknown: 2,
+        },
+        countsByType: {
+          category: 100,
+          income: 250,
+          expense: 400,
+          investment: 150,
+          fixed_cost: 100,
+        },
+        totals: [
+          { type: 'income', amount: 12500, currency: 'BRL' },
+          { type: 'expense', amount: 8250.5, currency: 'BRL' },
+        ],
+        failures: [
+          {
+            clientItemId: 'item-998',
+            sourceRef: 'Orçamento!Linha 998',
+            field: 'value',
+            code: 'INVALID_VALUE',
+            message: 'O valor informado não é válido.',
+            guidance: 'Corrija o valor e reenvie somente este item.',
+          },
+        ],
+        items: [
+          {
+            clientItemId: 'item-1',
+            sourceRef: 'Receitas!Linha 1',
+            type: 'income',
+            operationId: 'operation-safe-1',
+            result: 'completed',
+          },
+        ],
+      },
+      rawPayload: 'PAYLOAD_INTEGRAL_DE_1000_ITENS',
+    } as McpAuditEventDetail & Record<string, unknown>;
+
+    const wrapper = await openDetails(detail.id, detail);
+    const rendered = wrapper.get(`[data-testid="event-detail-${detail.id}"]`).text();
+
+    expect(rendered).toContain('1.000');
+    expect(rendered).toContain('995');
+    expect(rendered).toContain('Categoria');
+    expect(rendered).toContain('Custo fixo');
+    expect(rendered).toContain('R$');
+    expect(rendered).toContain('Orçamento!Linha 998');
+    expect(rendered).toContain('value');
+    expect(rendered).toContain('INVALID_VALUE');
+    expect(rendered).toContain('O valor informado não é válido');
+    expect(rendered).toContain('Corrija o valor e reenvie somente este item');
+    expect(rendered).toContain('operation-safe-1');
+    expect(rendered).toContain('Concluído');
+    expect(rendered).not.toContain('PAYLOAD_INTEGRAL_DE_1000_ITENS');
+  });
+
+  it.each([
+    ['partial', 'Parcial'],
+    ['completed', 'Concluído'],
+    ['failed', 'Falhou'],
+    ['unknown', 'Resultado desconhecido'],
+  ] as const)('apresenta o estado seguro de lote %s', async (state, expectedLabel) => {
+    const detail = {
+      ...detailFor({
+        id: `event-import-${state}`,
+        correlationId: `correlation-import-${state}`,
+        operationClass: 'import',
+        action: null,
+        preview: null,
+      }),
+      importBatch: {
+        state,
+        itemCount: 1,
+        countsByState: {},
+        countsByType: {},
+        totals: [],
+        failures: [],
+        items: [],
+      },
+    } as McpAuditEventDetail & Record<string, unknown>;
+
+    const wrapper = await openDetails(detail.id, detail);
+
+    expect(wrapper.get(`[data-testid="import-batch-state-${detail.id}"]`).text()).toContain(
+      expectedLabel,
     );
   });
 

@@ -253,6 +253,101 @@
               </ul>
             </div>
 
+            <section
+              v-if="details[event.id]?.importBatch"
+              :data-testid="`import-batch-${event.id}`"
+              class="detail-block"
+              aria-label="Resumo seguro do lote de importação"
+            >
+              <h3 class="detail-title">Resumo do lote de importação</h3>
+              <div class="detail-grid">
+                <div>
+                  <div class="detail-label">Estado do lote</div>
+                  <div :data-testid="`import-batch-state-${event.id}`" role="status">
+                    {{ importBatchStatePresentation(details[event.id]!.importBatch!.state) }}
+                  </div>
+                </div>
+                <div>
+                  <div class="detail-label">Itens no lote</div>
+                  <div>{{ formatCount(details[event.id]!.importBatch!.itemCount) }}</div>
+                </div>
+              </div>
+
+              <div class="import-summary-grid q-mt-md">
+                <div>
+                  <h4 class="detail-subtitle">Contagens por estado</h4>
+                  <ul class="result-list">
+                    <li
+                      v-for="entry in importStateCounts(details[event.id]!.importBatch!)"
+                      :key="entry.key"
+                    >
+                      {{ entry.label }}: {{ formatCount(entry.count) }}
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 class="detail-subtitle">Contagens por tipo</h4>
+                  <ul class="result-list">
+                    <li
+                      v-for="entry in importTypeCounts(details[event.id]!.importBatch!)"
+                      :key="entry.key"
+                    >
+                      {{ entry.label }}: {{ formatCount(entry.count) }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div v-if="details[event.id]!.importBatch!.totals.length" class="q-mt-md">
+                <h4 class="detail-subtitle">Totais financeiros por tipo</h4>
+                <ul class="result-list">
+                  <li v-for="total in details[event.id]!.importBatch!.totals" :key="total.type">
+                    {{ importTypePresentation(total.type) }}:
+                    {{ formatImportAmount(total.amount, total.currency) }}
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="details[event.id]!.importBatch!.failures.length" class="q-mt-md">
+                <h4 class="detail-subtitle">Itens que precisam de correção</h4>
+                <ul class="import-detail-list">
+                  <li
+                    v-for="failure in details[event.id]!.importBatch!.failures"
+                    :key="failure.clientItemId"
+                    class="import-detail-item"
+                  >
+                    <div class="text-weight-medium">
+                      {{ failure.sourceRef || failure.clientItemId }}
+                    </div>
+                    <div v-if="failure.field">Campo: {{ failure.field }}</div>
+                    <div v-if="safeErrorCode(failure.code)" class="text-negative">
+                      Código: {{ safeErrorCode(failure.code) }}
+                    </div>
+                    <div>{{ failure.message }}</div>
+                    <div class="guidance">{{ failure.guidance }}</div>
+                  </li>
+                </ul>
+              </div>
+
+              <div v-if="details[event.id]!.importBatch!.items.length" class="q-mt-md">
+                <h4 class="detail-subtitle">Operações por item</h4>
+                <ul class="import-detail-list">
+                  <li
+                    v-for="item in details[event.id]!.importBatch!.items"
+                    :key="item.clientItemId"
+                    class="import-detail-item"
+                  >
+                    <div class="text-weight-medium">
+                      {{ item.sourceRef || item.clientItemId }} ·
+                      {{ importTypePresentation(item.type) }}
+                    </div>
+                    <div>Operação: {{ item.operationId }}</div>
+                    <div>Resultado: {{ importItemResultPresentation(item.result) }}</div>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
             <q-banner
               v-if="details[event.id]?.failure"
               class="bg-orange-1 text-grey-9 rounded-borders detail-block"
@@ -292,10 +387,14 @@
 import type {
   McpAuditEvent,
   McpAuditEventDetail,
+  McpAuditImportBatch,
   McpAuditResultState,
   McpAuditSafeValue,
   McpAuditState,
   McpConfirmationActor,
+  McpImportBatchState,
+  McpImportItemState,
+  McpImportItemType,
   McpReconciliationStatus,
   McpRequiredDecision,
   McpWriteAction,
@@ -474,6 +573,91 @@ function resultStatePresentation(status: McpAuditResultState): string {
   return presentation[status];
 }
 
+const importTypeLabels: Record<McpImportItemType, string> = {
+  category: 'Categoria',
+  income: 'Receita',
+  expense: 'Despesa',
+  investment: 'Investimento',
+  fixed_cost: 'Custo fixo',
+};
+
+const importStateLabels: Record<McpImportItemState, string> = {
+  valid: 'Válidos',
+  invalid: 'Inválidos',
+  pending: 'Pendentes',
+  possible_duplicate: 'Possíveis duplicidades',
+  skipped: 'Ignorados',
+  already_applied: 'Já aplicados',
+  completed: 'Concluídos',
+  failed: 'Falhos',
+  unknown: 'Resultado desconhecido',
+};
+
+function importTypePresentation(type: McpImportItemType): string {
+  return importTypeLabels[type];
+}
+
+function importBatchStatePresentation(state: McpImportBatchState): string {
+  const presentation: Record<McpImportBatchState, string> = {
+    partial: 'Parcial',
+    completed: 'Concluído',
+    failed: 'Falhou',
+    unknown: 'Resultado desconhecido',
+  };
+  return presentation[state];
+}
+
+function importItemResultPresentation(result: 'completed' | 'failed' | 'unknown'): string {
+  const presentation = {
+    completed: 'Concluído',
+    failed: 'Falhou',
+    unknown: 'Resultado desconhecido',
+  } as const;
+  return presentation[result];
+}
+
+function importStateCounts(
+  batch: McpAuditImportBatch,
+): Array<{ key: McpImportItemState; label: string; count: number }> {
+  return (Object.keys(importStateLabels) as McpImportItemState[])
+    .map((key) => ({
+      key,
+      label: importStateLabels[key],
+      count: batch.countsByState[key],
+    }))
+    .filter(
+      (entry): entry is { key: McpImportItemState; label: string; count: number } =>
+        typeof entry.count === 'number' && Number.isFinite(entry.count) && entry.count >= 0,
+    );
+}
+
+function importTypeCounts(
+  batch: McpAuditImportBatch,
+): Array<{ key: McpImportItemType; label: string; count: number }> {
+  return (Object.keys(importTypeLabels) as McpImportItemType[])
+    .map((key) => ({
+      key,
+      label: importTypeLabels[key],
+      count: batch.countsByType[key],
+    }))
+    .filter(
+      (entry): entry is { key: McpImportItemType; label: string; count: number } =>
+        typeof entry.count === 'number' && Number.isFinite(entry.count) && entry.count >= 0,
+    );
+}
+
+function formatCount(value: number): string {
+  return Number.isFinite(value) && value >= 0
+    ? new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }).format(value)
+    : 'Indisponível';
+}
+
+function formatImportAmount(value: number, currency: 'BRL'): string {
+  return Number.isFinite(value)
+    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency }).format(value)
+    : 'Total indisponível';
+}
+
 function hasValue(value: McpAuditSafeValue | undefined): boolean {
   return value !== undefined;
 }
@@ -524,6 +708,12 @@ onMounted(loadHistory);
   font-weight: 600;
 }
 
+.detail-subtitle {
+  margin: 0 0 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
 .detail-label {
   display: block;
   margin-bottom: 0.125rem;
@@ -551,6 +741,28 @@ onMounted(loadHistory);
   padding-left: 1.25rem;
 }
 
+.import-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.import-detail-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.import-detail-item {
+  min-width: 0;
+  padding: 0.75rem;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+  border-radius: 0.5rem;
+}
+
 .support-reference code {
   display: inline-block;
   max-width: 100%;
@@ -573,7 +785,8 @@ onMounted(loadHistory);
   }
 
   .detail-grid,
-  .change-grid {
+  .change-grid,
+  .import-summary-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -220,6 +220,7 @@ describe('IntegracaoIaConfig', () => {
       'não fazem parte destes guias de leitura',
     );
     expect(wrapper.findAll('[data-testid="mcp-write-guide-card"]')).toHaveLength(15);
+    expect(wrapper.findAll('[data-testid="mcp-import-guide-card"]')).toHaveLength(6);
   });
 
   it('informa quando as ferramentas de escrita estão indisponíveis', async () => {
@@ -240,5 +241,27 @@ describe('IntegracaoIaConfig', () => {
       'capacidades futuras',
     );
     expect(wrapper.find('[data-testid="mcp-write-guides"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="mcp-import-guides"]').exists()).toBe(false);
+  });
+
+  it('exibe importação somente quando escrita e escopo de importação estão disponíveis', async () => {
+    vi.mocked(McpService.obterConfiguracao).mockResolvedValue({
+      ...configuration,
+      profiles: configuration.profiles.map((profile) =>
+        profile.id === 'full_management'
+          ? { ...profile, scopes: profile.scopes.filter((scope) => scope !== 'mcp:import') }
+          : profile,
+      ),
+    });
+
+    const wrapper = mountComponent();
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="mcp-import-guides"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="mcp-import-disabled"]').text()).toContain(
+      'importação estruturada',
+    );
+    expect(wrapper.findAll('[data-testid="mcp-write-guide-card"]')).toHaveLength(15);
+    expect(wrapper.findAll('[data-testid="mcp-query-guide-card"]')).toHaveLength(9);
   });
 });
