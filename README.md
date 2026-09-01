@@ -140,7 +140,7 @@ docker-compose up --build
 A URL da API está configurada em `quasar.config.ts`:
 ```typescript
 env: {
-  URL_API: 'https://api.devmoreno.online/api/'
+  URL_API: 'https://api.devmoreno.com.br/api/'
 }
 ```
 
