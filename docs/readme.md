@@ -314,7 +314,7 @@ Componentes personalizados de seleção:
 
 ### Configuração Base
 
-**URL da API**: `https://api.devmoreno.online/api/`
+**URL da API**: `https://api.devmoreno.com.br/api/`
 
 Todos os serviços utilizam Axios configurado em `src/boot/axios.ts`
 
@@ -597,7 +597,7 @@ O layout principal (`src/layouts/MainLayout.vue`) inclui:
 #### **Variáveis de Ambiente**
 ```typescript
 env: {
-  URL_API: 'https://api.devmoreno.online/api/',
+  URL_API: 'https://api.devmoreno.com.br/api/',
   lOGIN_URL: '/#/login'
 }
 ```
