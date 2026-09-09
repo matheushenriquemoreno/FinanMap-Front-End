@@ -7,7 +7,7 @@
 
 ## Fase ativa
 
-Fase 01 — implementação concluída e review pendente.
+Fase 02 — Gestão dos itens pendentes; próxima fase autorizada após review da Fase 01.
 
 Cada fase deve ser executada isoladamente e aprovada por `review` antes da ativação da fase seguinte.
 

@@ -1,6 +1,6 @@
 # Fase 01 — Tracer bullet de navegação e cadastro
 
-| Status       | Pendente   |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-09 |
 | Last Updated | 2026-09-09 |
@@ -83,7 +83,7 @@ Integrar formulário e serviço, atualizar a lista e o total somente após suces
 | T02 | Concluída | Rota `/compras-planejadas` e entrada do menu principal adicionadas; lint e `vue-tsc` aprovados. |
 | T03 | Concluída | Página, total estimado, cards, ordem da API, loading, vazio e erro com retry adicionados; lint e `vue-tsc` aprovados. |
 | T04 | Concluída | Modal com máscara BRL, prioridade, descrição, múltiplos links e validação contextual adicionado; lint e `vue-tsc` aprovados. |
-| T05 | Concluída | POST, refresh pós-sucesso, preservação do modal em falhas e script estrutural integrados; `npm test`, `npm run lint`, `npx vue-tsc --noEmit` e `npm run build` aprovados. |
+| T05 | Concluída | POST, refresh pós-sucesso, preservação do modal em falhas e script estrutural/comportamental integrados; `npm test`, `npm run lint`, `npx vue-tsc --noEmit` e `npm run build` aprovados. |
 
 ## Encerramento da fase
 
