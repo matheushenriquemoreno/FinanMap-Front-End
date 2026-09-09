@@ -9,6 +9,7 @@ import type {
 class CompraPlanejadaService {
   private readonly baseUrl: string;
   public loading = ref(false);
+  public saving = ref(false);
   private readonly axios = CreateIntanceAxios();
 
   constructor() {
@@ -27,6 +28,18 @@ class CompraPlanejadaService {
     }
   }
 
+  private async requestWithSaving<T>(request: () => Promise<T>): Promise<T> {
+    try {
+      this.saving.value = true;
+      return await request();
+    } catch (error) {
+      handleErrorAxios(error);
+      throw error;
+    } finally {
+      this.saving.value = false;
+    }
+  }
+
   async obterPendentes(): Promise<ListaComprasPlanejadasResult> {
     return this.requestWithLoading(async () => {
       const response = await this.axios.get<ListaComprasPlanejadasResult>(this.baseUrl);
@@ -35,7 +48,7 @@ class CompraPlanejadaService {
   }
 
   async criar(dto: CompraPlanejadaCreate): Promise<CompraPlanejadaResult> {
-    return this.requestWithLoading(async () => {
+    return this.requestWithSaving(async () => {
       const response = await this.axios.post<CompraPlanejadaResult>(this.baseUrl, dto);
       return response.data;
     });

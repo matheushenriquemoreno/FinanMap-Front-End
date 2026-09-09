@@ -65,7 +65,11 @@
       <q-btn color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="abrirModalCriar" />
     </div>
 
-    <CompraPlanejadaFormModal v-model="modalCriacaoAberto" @salvar="salvarCompra" />
+    <CompraPlanejadaFormModal
+      v-model="modalCriacaoAberto"
+      :loading="service.saving.value"
+      @salvar="salvarCompra"
+    />
   </q-page>
 </template>
 
@@ -80,6 +84,7 @@ import getCompraPlanejadaService from 'src/services/CompraPlanejadaService';
 import type { CompraPlanejadaCreate, CompraPlanejadaResult, ListaComprasPlanejadasResult } from 'src/Model/CompraPlanejada';
 import { formatarValor } from 'src/helpers/FormatUtils';
 import { notificarErro } from 'src/helpers/Notificacao';
+import { calcularTotalEstimado, ordenarComprasPlanejadas } from 'src/helpers/CompraPlanejadaPresentation.mjs';
 
 const $q = useQuasar();
 const service = getCompraPlanejadaService();
@@ -112,13 +117,8 @@ async function carregarDados(): Promise<boolean> {
 }
 
 function inserirCompraLocal(compra: CompraPlanejadaResult) {
-  const prioridadePeso = { Alta: 3, Media: 2, Baixa: 1 };
-  compras.value = [...compras.value, compra].sort((a, b) => {
-    const prioridade = prioridadePeso[b.prioridade] - prioridadePeso[a.prioridade];
-    if (prioridade !== 0) return prioridade;
-    return new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime();
-  });
-  totalEstimado.value += compra.valorEstimado;
+  compras.value = ordenarComprasPlanejadas([...compras.value, compra]);
+  totalEstimado.value = calcularTotalEstimado(compras.value);
   erroCarregamento.value = false;
 }
 

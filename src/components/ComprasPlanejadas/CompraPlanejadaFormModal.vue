@@ -20,7 +20,7 @@
             placeholder="Ex.: notebook para trabalho"
             maxlength="120"
             counter
-            :rules="[nomeValido]"
+            :rules="[validarNomeCompra]"
             autofocus
           />
 
@@ -28,7 +28,7 @@
             v-model="form.valorEstimado"
             label="Valor estimado"
             placeholder="0,00"
-            :rules="[valorValido]"
+            :rules="[validarValorCompra]"
           />
 
           <q-select
@@ -39,7 +39,7 @@
             emit-value
             map-options
             label="Prioridade"
-            :rules="[prioridadeValida]"
+            :rules="[validarPrioridadeCompra]"
           >
             <template #prepend>
               <q-icon name="flag" color="primary" />
@@ -88,7 +88,7 @@
                 dense
                 label="Loja"
                 placeholder="Ex.: Loja A"
-                :rules="[lojaValida]"
+                :rules="[validarNomeLoja]"
               />
               <q-input
                 v-model="link.url"
@@ -99,7 +99,7 @@
                 label="URL"
                 placeholder="https://..."
                 type="url"
-                :rules="[urlValida]"
+                :rules="[validarUrlLoja]"
               />
               <q-btn
                 flat
@@ -115,7 +115,15 @@
 
           <div class="compra-form-modal__actions row justify-end q-gutter-sm q-mt-lg">
             <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
-            <q-btn type="submit" label="Salvar plano" color="primary" rounded unelevated />
+            <q-btn
+              type="submit"
+              label="Salvar plano"
+              color="primary"
+              rounded
+              unelevated
+              :loading="loading"
+              :disable="loading"
+            />
           </div>
         </q-form>
       </q-card-section>
@@ -132,10 +140,19 @@ import {
   type CompraPlanejadaLinkInput,
   type PrioridadeCompraPlanejada,
 } from 'src/Model/CompraPlanejada';
+import {
+  validarNomeCompra,
+  validarValorCompra,
+  validarPrioridadeCompra,
+  validarNomeLoja,
+  validarUrlLoja,
+} from 'src/helpers/CompraPlanejadaValidation.mjs';
 
 defineOptions({ name: 'CompraPlanejadaFormModal' });
 
-const props = defineProps<{ modelValue: boolean }>();
+const props = withDefaults(defineProps<{ modelValue: boolean; loading?: boolean }>(), {
+  loading: false,
+});
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void;
   (event: 'salvar', dto: CompraPlanejadaCreate): void;
@@ -187,26 +204,8 @@ function removerLink(index: number) {
   form.value.linksLojas.splice(index, 1);
 }
 
-const nomeValido = (value: unknown) =>
-  (typeof value === 'string' && value.trim().length > 0) || 'Informe o nome da compra.';
-const valorValido = (value: unknown) => Number(value) > 0 || 'Informe um valor maior que zero.';
-const prioridadeValida = (value: unknown) => Boolean(value) || 'Escolha uma prioridade.';
-const lojaValida = (value: unknown) =>
-  (typeof value === 'string' && value.trim().length > 0) || 'Informe o nome da loja.';
-
-function urlValida(value: unknown) {
-  const url = typeof value === 'string' ? value.trim() : '';
-  if (!url) return 'Informe a URL da loja.';
-
-  try {
-    const parsedUrl = new URL(url);
-    return ['http:', 'https:'].includes(parsedUrl.protocol) || 'Use uma URL http ou https.';
-  } catch {
-    return 'Informe uma URL válida.';
-  }
-}
-
 async function submeter() {
+  if (props.loading) return;
   if (!(await formRef.value?.validate())) return;
 
   const dto: CompraPlanejadaCreate = {
