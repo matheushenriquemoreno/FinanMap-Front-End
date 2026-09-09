@@ -75,6 +75,23 @@ Integrar formulário e serviço, atualizar a lista e o total somente após suces
 
 ## Orientações de implementação
 
+## Execução
+
+| Tarefa | Status | Evidência |
+|--------|--------|-----------|
+| T01 | Concluída | Modelos TypeScript e serviço Axios adicionados; `npm run lint` e `npx vue-tsc --noEmit` aprovados. |
+| T02 | Concluída | Rota `/compras-planejadas` e entrada do menu principal adicionadas; lint e `vue-tsc` aprovados. |
+| T03 | Concluída | Página, total estimado, cards, ordem da API, loading, vazio e erro com retry adicionados; lint e `vue-tsc` aprovados. |
+| T04 | Concluída | Modal com máscara BRL, prioridade, descrição, múltiplos links e validação contextual adicionado; lint e `vue-tsc` aprovados. |
+| T05 | Concluída | POST, refresh pós-sucesso, preservação do modal em falhas e script estrutural integrados; `npm test`, `npm run lint`, `npx vue-tsc --noEmit` e `npm run build` aprovados. |
+
+## Encerramento da fase
+
+- Gate dos scripts: `npm test` — dark mode, avatar, fluxo custo fixo/despesa e lista de compras planejadas aprovados.
+- Gate de qualidade: `npm run lint` e `npx vue-tsc --noEmit` — aprovados.
+- Gate de build: `npm run build` — SPA compilada com sucesso.
+- Limitação: validação manual autenticada, persistência, CORS/SameSite e falha de rede real dependem do ambiente integrado e permanecem pendentes para o review.
+
 - O card não deve tornar toda URL editável fora do formulário; links exibidos abrem o endereço informado com proteção adequada.
 - A fonte do total confirmado é a resposta do back-end ou uma nova consulta após mutação.
 - Não adicionar filtro, busca, categoria ou prazo não previstos.
