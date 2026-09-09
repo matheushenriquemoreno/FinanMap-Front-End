@@ -51,6 +51,8 @@ assert.match(page, /type: 'radio'/);
 assert.match(page, /preservar/);
 assert.match(page, /permanecerá no Mês a Mês/);
 assert.match(page, /compartilhamentoStore\.podeEditar/);
+assert.match(page, /abaAtiva === 'pendentes' && compartilhamentoStore\.podeEditar/);
+assert.match(page, /dados confirmados continuam visíveis/);
 assert.match(form, /Adicionar loja/);
 assert.match(form, /:disable="loading"/);
 assert.match(form, /validarUrlLoja/);
@@ -66,6 +68,8 @@ assert.match(conclusao, /criarDespesa/);
 assert.match(conclusao, /validarValorReal/);
 assert.match(conclusao, /type="date"/);
 assert.match(conclusao, /:disable="loading"/);
+assert.match(conclusao, /erroCategorias/);
+assert.match(conclusao, /Tentar novamente/);
 
 assert.equal(validarNomeCompra(''), 'Informe o nome da compra.');
 assert.equal(validarValorCompra(0), 'Informe um valor maior que zero.');
