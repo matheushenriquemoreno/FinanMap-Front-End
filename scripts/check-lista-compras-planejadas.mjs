@@ -53,6 +53,8 @@ assert.match(page, /permanecerá no Mês a Mês/);
 assert.match(page, /compartilhamentoStore\.podeEditar/);
 assert.match(page, /abaAtiva === 'pendentes' && compartilhamentoStore\.podeEditar/);
 assert.match(page, /dados confirmados continuam visíveis/);
+assert.match(page, /<template v-else-if="erroAba">[\s\S]*<q-banner[\s\S]*v-else[\s\S]*dados confirmados continuam visíveis/);
+assert.doesNotMatch(page, /<q-banner[\s\S]*v-if="erroAba && comprasAtuais\.length > 0"/);
 assert.match(form, /Adicionar loja/);
 assert.match(form, /:disable="loading"/);
 assert.match(form, /validarUrlLoja/);

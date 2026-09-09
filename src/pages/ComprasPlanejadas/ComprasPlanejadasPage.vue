@@ -65,28 +65,27 @@
       </q-card>
     </div>
 
-    <template v-else-if="erroAba && comprasAtuais.length === 0">
-      <div class="compras-state text-center q-pa-xl">
+    <template v-else-if="erroAba">
+      <div v-if="comprasAtuais.length === 0" class="compras-state text-center q-pa-xl">
         <q-icon name="cloud_off" size="72px" color="grey-5" />
         <h2 class="text-h6 q-mt-md q-mb-sm">Não foi possível carregar esta lista</h2>
         <p class="text-body2 text-grey-6 q-mb-lg">Tente novamente sem perder o que já estava salvo.</p>
         <q-btn color="primary" outline rounded label="Tentar novamente" icon="refresh" @click="carregarAba" />
       </div>
+      <q-banner
+        v-else
+        rounded
+        class="q-mb-md"
+        inline-actions
+        dense
+        icon="cloud_off"
+      >
+        Não foi possível atualizar esta lista. Os dados confirmados continuam visíveis.
+        <template #action>
+          <q-btn flat color="primary" label="Tentar novamente" @click="carregarAba" />
+        </template>
+      </q-banner>
     </template>
-
-    <q-banner
-      v-if="erroAba && comprasAtuais.length > 0"
-      rounded
-      class="q-mb-md"
-      inline-actions
-      dense
-      icon="cloud_off"
-    >
-      Não foi possível atualizar esta lista. Os dados confirmados continuam visíveis.
-      <template #action>
-        <q-btn flat color="primary" label="Tentar novamente" @click="carregarAba" />
-      </template>
-    </q-banner>
 
     <template v-else-if="comprasAtuais.length > 0">
       <transition-group name="compras-list" tag="div" class="compras-grid">
