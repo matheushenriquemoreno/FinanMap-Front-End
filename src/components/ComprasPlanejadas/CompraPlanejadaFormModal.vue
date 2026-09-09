@@ -3,8 +3,10 @@
     <q-card class="compra-form-modal">
       <q-card-section class="compra-form-modal__header row items-center q-pb-none">
         <div>
-          <div class="text-h6 text-bold">Nova compra planejada</div>
-          <div class="text-caption text-grey-6 q-mt-xs">Anote o plano enquanto ele ainda é uma possibilidade.</div>
+        <div class="text-h6 text-bold">{{ props.compra ? 'Editar compra planejada' : 'Nova compra planejada' }}</div>
+        <div class="text-caption text-grey-6 q-mt-xs">
+          {{ props.compra ? 'Atualize o plano sem perder os links pesquisados.' : 'Anote o plano enquanto ele ainda é uma possibilidade.' }}
+        </div>
         </div>
         <q-space />
         <q-btn icon="close" flat round dense aria-label="Fechar" v-close-popup />
@@ -117,7 +119,7 @@
             <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
             <q-btn
               type="submit"
-              label="Salvar plano"
+              :label="props.compra ? 'Salvar alterações' : 'Salvar plano'"
               color="primary"
               rounded
               unelevated
@@ -137,6 +139,7 @@ import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import {
   prioridadesCompraPlanejada,
   type CompraPlanejadaCreate,
+  type CompraPlanejadaResult,
   type CompraPlanejadaLinkInput,
   type PrioridadeCompraPlanejada,
 } from 'src/Model/CompraPlanejada';
@@ -150,8 +153,13 @@ import {
 
 defineOptions({ name: 'CompraPlanejadaFormModal' });
 
-const props = withDefaults(defineProps<{ modelValue: boolean; loading?: boolean }>(), {
+const props = withDefaults(defineProps<{
+  modelValue: boolean;
+  loading?: boolean;
+  compra?: CompraPlanejadaResult | null;
+}>(), {
   loading: false,
+  compra: null,
 });
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void;
@@ -189,10 +197,25 @@ function novoLink(): LinkForm {
   return { id: nextLinkId, nomeLoja: '', url: '' };
 }
 
+function carregarForm(compra: CompraPlanejadaResult | null | undefined): FormState {
+  if (!compra) return novoForm();
+
+  return {
+    nome: compra.nome,
+    valorEstimado: compra.valorEstimado,
+    prioridade: compra.prioridade,
+    descricao: compra.descricao ?? '',
+    linksLojas: compra.linksLojas.map((link) => ({
+      ...link,
+      id: ++nextLinkId,
+    })),
+  };
+}
+
 watch(
   () => props.modelValue,
   (aberto) => {
-    if (aberto) form.value = novoForm();
+    if (aberto) form.value = carregarForm(props.compra);
   },
 );
 

@@ -5,21 +5,47 @@
       title="Compras Planejadas"
       subtitle="Dê forma aos próximos planos sem perder o controle do seu dinheiro"
       button-label="Nova compra"
+      :show-action="compartilhamentoStore.podeEditar"
       gradient="linear-gradient(135deg, #102a43 0%, #1d169c 62%, #0e7490 100%)"
       @action="abrirModalCriar"
     />
 
-    <section class="compras-total" aria-label="Resumo das compras pendentes">
+    <q-tabs
+      v-model="abaAtiva"
+      class="compras-tabs q-mb-lg"
+      active-color="primary"
+      indicator-color="primary"
+      align="left"
+      @update:model-value="trocarAba"
+    >
+      <q-tab name="pendentes" icon="schedule" label="Pendentes" />
+      <q-tab name="compradas" icon="task_alt" label="Compradas" />
+    </q-tabs>
+
+    <section class="compras-total" :aria-label="`Resumo das compras ${abaAtiva}`">
       <div class="compras-total__eyebrow">
-        <q-icon name="track_changes" size="18px" />
-        <span>Seu próximo movimento</span>
+        <q-icon :name="abaAtiva === 'pendentes' ? 'track_changes' : 'task_alt'" size="18px" />
+        <span>{{ abaAtiva === 'pendentes' ? 'Seu próximo movimento' : 'O que já saiu do plano' }}</span>
       </div>
       <div class="row items-end justify-between q-col-gutter-md">
         <div>
-          <h2 class="compras-total__title">Total estimado</h2>
-          <p class="compras-total__hint">{{ compras.length }} {{ compras.length === 1 ? 'item pendente' : 'itens pendentes' }}</p>
+          <h2 class="compras-total__title">{{ abaAtiva === 'pendentes' ? 'Total estimado' : 'Comparativo realizado' }}</h2>
+          <p class="compras-total__hint">
+            {{ comprasAtuais.length }} {{ comprasAtuais.length === 1 ? 'item' : 'itens' }}
+            {{ abaAtiva === 'pendentes' ? 'pendente' : 'comprado' }}{{ comprasAtuais.length === 1 ? '' : 's' }}
+          </p>
         </div>
-        <strong class="compras-total__value">R$ {{ formatarValor(totalEstimado) }}</strong>
+        <strong class="compras-total__value">R$ {{ formatarValor(totalAtual) }}</strong>
+      </div>
+      <div v-if="abaAtiva === 'compradas'" class="compras-total__comparison row q-col-gutter-md q-mt-md">
+        <div class="col">
+          <span class="text-caption">Estimado</span>
+          <strong>R$ {{ formatarValor(totalEstimadoComprados) }}</strong>
+        </div>
+        <div class="col">
+          <span class="text-caption">Real</span>
+          <strong>R$ {{ formatarValor(totalRealComprados) }}</strong>
+        </div>
       </div>
     </section>
 
@@ -39,18 +65,28 @@
       </q-card>
     </div>
 
-    <template v-else-if="erroCarregamento">
+    <template v-else-if="erroAba">
       <div class="compras-state text-center q-pa-xl">
         <q-icon name="cloud_off" size="72px" color="grey-5" />
-        <h2 class="text-h6 q-mt-md q-mb-sm">Não foi possível carregar seus planos</h2>
+        <h2 class="text-h6 q-mt-md q-mb-sm">Não foi possível carregar esta lista</h2>
         <p class="text-body2 text-grey-6 q-mb-lg">Tente novamente sem perder o que já estava salvo.</p>
-        <q-btn color="primary" outline rounded label="Tentar novamente" icon="refresh" @click="carregarDados" />
+        <q-btn color="primary" outline rounded label="Tentar novamente" icon="refresh" @click="carregarAba" />
       </div>
     </template>
 
-    <template v-else-if="compras.length > 0">
+    <template v-else-if="comprasAtuais.length > 0">
       <transition-group name="compras-list" tag="div" class="compras-grid">
-        <CompraPlanejadaCard v-for="compra in compras" :key="compra.id" :compra="compra" />
+        <CompraPlanejadaCard
+          v-for="compra in comprasAtuais"
+          :key="compra.id"
+          :compra="compra"
+          :comprado="abaAtiva === 'compradas'"
+          :pode-editar="compartilhamentoStore.podeEditar"
+          @editar="abrirModalEditar"
+          @excluir="confirmarExclusao"
+          @comprar="abrirModalConclusao"
+          @reverter="confirmarReversao"
+        />
       </transition-group>
     </template>
 
@@ -58,49 +94,93 @@
       <div class="compras-state__illustration" aria-hidden="true">
         <q-icon name="format_list_bulleted" size="56px" />
       </div>
-      <h2 class="text-h6 q-mt-lg q-mb-sm">Sua lista começa com um plano</h2>
+      <h2 class="text-h6 q-mt-lg q-mb-sm">{{ abaAtiva === 'pendentes' ? 'Sua lista começa com um plano' : 'Nenhuma compra concluída ainda' }}</h2>
       <p class="text-body2 text-grey-6 q-mb-lg">
-        Registre uma compra futura e acompanhe o valor antes de decidir.
+        {{ abaAtiva === 'pendentes' ? 'Registre uma compra futura e acompanhe o valor antes de decidir.' : 'Quando você concluir um plano, ele aparecerá aqui com o comparativo realizado.' }}
       </p>
-      <q-btn color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="abrirModalCriar" />
+      <q-btn v-if="abaAtiva === 'pendentes'" color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="abrirModalCriar" />
     </div>
 
     <CompraPlanejadaFormModal
-      v-model="modalCriacaoAberto"
+      v-model="modalCompraAberto"
+      :compra="compraEmEdicao"
       :loading="service.saving.value"
       @salvar="salvarCompra"
+    />
+    <CompraPlanejadaConclusaoModal
+      v-model="modalConclusaoAberto"
+      :compra="compraParaConcluir"
+      :loading="service.saving.value"
+      @confirmar="concluirCompra"
     />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import axios from 'axios';
 import { useQuasar } from 'quasar';
+import { useCompartilhamentoStore } from 'src/stores/compartilhamento-store';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CompraPlanejadaCard from 'src/components/ComprasPlanejadas/CompraPlanejadaCard.vue';
 import CompraPlanejadaFormModal from 'src/components/ComprasPlanejadas/CompraPlanejadaFormModal.vue';
+import CompraPlanejadaConclusaoModal from 'src/components/ComprasPlanejadas/CompraPlanejadaConclusaoModal.vue';
 import getCompraPlanejadaService from 'src/services/CompraPlanejadaService';
-import type { CompraPlanejadaCreate, CompraPlanejadaResult, ListaComprasPlanejadasResult } from 'src/Model/CompraPlanejada';
+import type {
+  CompraPlanejadaCreate,
+  CompraPlanejadaResult,
+  ListaComprasPlanejadasResult,
+  CompraPlanejadaConcluir,
+  ListaComprasCompradasResult,
+} from 'src/Model/CompraPlanejada';
 import { formatarValor } from 'src/helpers/FormatUtils';
 import { notificarErro } from 'src/helpers/Notificacao';
 import { calcularTotalEstimado, ordenarComprasPlanejadas } from 'src/helpers/CompraPlanejadaPresentation.mjs';
 
 const $q = useQuasar();
+const compartilhamentoStore = useCompartilhamentoStore();
 const service = getCompraPlanejadaService();
 const compras = ref<CompraPlanejadaResult[]>([]);
 const totalEstimado = ref(0);
 const erroCarregamento = ref(false);
-const modalCriacaoAberto = ref(false);
+const comprasCompradas = ref<CompraPlanejadaResult[]>([]);
+const totalEstimadoComprados = ref(0);
+const totalRealComprados = ref(0);
+const erroComprados = ref(false);
+const compradasCarregadas = ref(false);
+type AbaCompras = 'pendentes' | 'compradas';
+const abaAtiva = ref<AbaCompras>('pendentes');
+const modalCompraAberto = ref(false);
+const compraEmEdicao = ref<CompraPlanejadaResult | null>(null);
+const modalConclusaoAberto = ref(false);
+const compraParaConcluir = ref<CompraPlanejadaResult | null>(null);
+
+const comprasAtuais = computed(() => abaAtiva.value === 'pendentes' ? compras.value : comprasCompradas.value);
+const totalAtual = computed(() => abaAtiva.value === 'pendentes' ? totalEstimado.value : totalRealComprados.value);
+const erroAba = computed(() => abaAtiva.value === 'pendentes' ? erroCarregamento.value : erroComprados.value);
 
 function abrirModalCriar() {
-  modalCriacaoAberto.value = true;
+  compraEmEdicao.value = null;
+  modalCompraAberto.value = true;
+}
+
+function abrirModalEditar(compra: CompraPlanejadaResult) {
+  compraEmEdicao.value = compra;
+  modalCompraAberto.value = true;
 }
 
 function aplicarLista(resultado: ListaComprasPlanejadasResult) {
   compras.value = resultado.itens;
   totalEstimado.value = resultado.totalEstimado;
   erroCarregamento.value = false;
+}
+
+function aplicarListaComprados(resultado: ListaComprasCompradasResult) {
+  comprasCompradas.value = resultado.itens;
+  totalEstimadoComprados.value = resultado.totalEstimado;
+  totalRealComprados.value = resultado.totalReal;
+  erroComprados.value = false;
+  compradasCarregadas.value = true;
 }
 
 async function carregarDados(): Promise<boolean> {
@@ -116,17 +196,76 @@ async function carregarDados(): Promise<boolean> {
   }
 }
 
+async function carregarComprados(): Promise<boolean> {
+  erroComprados.value = false;
+
+  try {
+    aplicarListaComprados(await service.obterComprados());
+    return true;
+  } catch (error) {
+    console.error('Erro ao carregar compras concluídas:', error);
+    erroComprados.value = true;
+    return false;
+  }
+}
+
+async function trocarAba(aba: string | number | null) {
+  if (aba !== 'pendentes' && aba !== 'compradas') return;
+  abaAtiva.value = aba;
+  if (aba === 'compradas' && !compradasCarregadas.value) await carregarComprados();
+}
+
+function carregarAba() {
+  return abaAtiva.value === 'pendentes' ? carregarDados() : carregarComprados();
+}
+
 function inserirCompraLocal(compra: CompraPlanejadaResult) {
   compras.value = ordenarComprasPlanejadas([...compras.value, compra]);
   totalEstimado.value = calcularTotalEstimado(compras.value);
   erroCarregamento.value = false;
 }
 
+function substituirCompraLocal(compra: CompraPlanejadaResult) {
+  const index = compras.value.findIndex((item) => item.id === compra.id);
+  if (index === -1) return;
+
+  const atualizadas = [...compras.value];
+  atualizadas[index] = compra;
+  compras.value = ordenarComprasPlanejadas(atualizadas);
+  totalEstimado.value = calcularTotalEstimado(compras.value);
+  erroCarregamento.value = false;
+}
+
+function removerCompraLocal(id: string) {
+  compras.value = compras.value.filter((item) => item.id !== id);
+  totalEstimado.value = calcularTotalEstimado(compras.value);
+  erroCarregamento.value = false;
+}
+
+function inserirCompraCompradaLocal(compra: CompraPlanejadaResult) {
+  const semDuplicata = comprasCompradas.value.filter((item) => item.id !== compra.id);
+  comprasCompradas.value = [...semDuplicata, compra];
+  totalEstimadoComprados.value = comprasCompradas.value.reduce((total, item) => total + item.valorEstimado, 0);
+  totalRealComprados.value = comprasCompradas.value.reduce((total, item) => total + (item.valorReal ?? 0), 0);
+  erroComprados.value = false;
+  compradasCarregadas.value = true;
+}
+
+function removerCompraCompradaLocal(id: string) {
+  comprasCompradas.value = comprasCompradas.value.filter((item) => item.id !== id);
+  totalEstimadoComprados.value = comprasCompradas.value.reduce((total, item) => total + item.valorEstimado, 0);
+  totalRealComprados.value = comprasCompradas.value.reduce((total, item) => total + (item.valorReal ?? 0), 0);
+  erroComprados.value = false;
+}
+
 async function salvarCompra(dto: CompraPlanejadaCreate) {
-  let criada: CompraPlanejadaResult;
+  const editando = compraEmEdicao.value;
+  let confirmada: CompraPlanejadaResult;
 
   try {
-    criada = await service.criar(dto);
+    confirmada = editando
+      ? await service.atualizar(editando.id, dto)
+      : await service.criar(dto);
   } catch (error) {
     if (!axios.isAxiosError(error)) {
       notificarErro('Não foi possível salvar o plano. Verifique os dados e tente novamente.');
@@ -136,25 +275,168 @@ async function salvarCompra(dto: CompraPlanejadaCreate) {
 
   // A resposta da lista é a fonte de ordenação e total. O fallback evita deixar a tela
   // desatualizada se o POST confirmou, mas a consulta seguinte falhar.
-  if (!(await carregarDados())) inserirCompraLocal(criada);
+  if (!(await carregarDados())) {
+    if (editando) substituirCompraLocal(confirmada);
+    else inserirCompraLocal(confirmada);
+  }
 
-  modalCriacaoAberto.value = false;
+  modalCompraAberto.value = false;
+  compraEmEdicao.value = null;
   $q.notify({
     type: 'positive',
-    message: 'Compra planejada salva com sucesso!',
+    message: editando ? 'Compra planejada atualizada com sucesso!' : 'Compra planejada salva com sucesso!',
+    position: 'top-right',
+  });
+}
+
+function confirmarExclusao(compra: CompraPlanejadaResult) {
+  $q.dialog({
+    title: 'Excluir compra planejada',
+    message: compra.estado === 'Comprado'
+      ? `Deseja excluir “${compra.nome}”? A despesa vinculada, se existir, permanecerá no Mês a Mês.`
+      : `Deseja realmente excluir “${compra.nome}”? Essa ação não pode ser desfeita.`,
+    persistent: false,
+    ok: {
+      flat: true,
+      color: 'negative',
+      label: 'Excluir',
+    },
+    cancel: {
+      flat: true,
+      color: 'primary',
+      label: 'Cancelar',
+    },
+  }).onOk(() => {
+    void excluirCompra(compra.id);
+  });
+}
+
+async function excluirCompra(id: string) {
+  try {
+    await service.excluir(id);
+    if (abaAtiva.value === 'pendentes') {
+      if (!(await carregarDados())) removerCompraLocal(id);
+    } else if (!(await carregarComprados())) {
+      removerCompraCompradaLocal(id);
+    }
+    $q.notify({
+      type: 'positive',
+      message: 'Compra planejada excluída com sucesso!',
+      position: 'top-right',
+    });
+  } catch {
+    // O AxiosHelper já apresenta o erro e o item confirmado permanece na lista.
+  }
+}
+
+function abrirModalConclusao(compra: CompraPlanejadaResult) {
+  compraParaConcluir.value = compra;
+  modalConclusaoAberto.value = true;
+}
+
+async function concluirCompra(dto: CompraPlanejadaConcluir) {
+  const compra = compraParaConcluir.value;
+  if (!compra) return;
+
+  let confirmada: CompraPlanejadaResult;
+  try {
+    confirmada = await service.concluir(compra.id, dto);
+  } catch (error) {
+    if (!axios.isAxiosError(error)) notificarErro('Não foi possível confirmar a compra. Tente novamente.');
+    return;
+  }
+
+  if (!(await carregarDados())) removerCompraLocal(compra.id);
+  if (compradasCarregadas.value) inserirCompraCompradaLocal(confirmada);
+
+  modalConclusaoAberto.value = false;
+  compraParaConcluir.value = null;
+  $q.notify({
+    type: 'positive',
+    message: 'Compra marcada como realizada!',
+    position: 'top-right',
+  });
+}
+
+function confirmarReversao(compra: CompraPlanejadaResult) {
+  const possuiDespesa = Boolean(compra.despesaId);
+  $q.dialog({
+    title: 'Reverter compra',
+    message: possuiDespesa
+      ? 'Esta compra possui uma despesa vinculada. Escolha o que fazer com ela.'
+      : 'O item voltará para a lista de pendentes.',
+    ...(possuiDespesa ? {
+      options: {
+        type: 'radio' as const,
+        model: 'preservar',
+        items: [
+          { label: 'Preservar despesa no Mês a Mês', value: 'preservar' },
+          { label: 'Excluir também a despesa', value: 'excluir' },
+        ],
+      },
+    } : {}),
+    persistent: true,
+    ok: {
+      flat: true,
+      color: 'primary',
+      label: 'Confirmar reversão',
+    },
+    cancel: {
+      flat: true,
+      color: 'grey-7',
+      label: 'Cancelar',
+    },
+  }).onOk((escolha) => {
+    void reverterCompra(compra, possuiDespesa && escolha === 'excluir');
+  });
+}
+
+async function reverterCompra(compra: CompraPlanejadaResult, excluirDespesa: boolean) {
+  let revertida: CompraPlanejadaResult;
+  try {
+    revertida = await service.reverter(compra.id, excluirDespesa);
+  } catch (error) {
+    if (!axios.isAxiosError(error)) notificarErro('Não foi possível reverter a compra. Tente novamente.');
+    return;
+  }
+
+  if (!(await carregarDados())) inserirCompraLocal(revertida);
+  if (compradasCarregadas.value) removerCompraCompradaLocal(compra.id);
+  $q.notify({
+    type: 'positive',
+    message: excluirDespesa ? 'Compra e despesa revertidas.' : 'Compra devolvida aos pendentes.',
     position: 'top-right',
   });
 }
 
 onMounted(carregarDados);
 
-defineExpose({ carregarDados });
+watch(
+  () => compartilhamentoStore.contextoAtivo?.proprietarioId ?? null,
+  () => {
+    compras.value = [];
+    totalEstimado.value = 0;
+    comprasCompradas.value = [];
+    totalEstimadoComprados.value = 0;
+    totalRealComprados.value = 0;
+    compradasCarregadas.value = false;
+    void carregarAba();
+  },
+);
+
+defineExpose({ carregarDados, carregarComprados });
 </script>
 
 <style lang="scss" scoped>
 .compras-page {
   width: min(1200px, 100%);
   margin: 0 auto;
+}
+
+.compras-tabs {
+  min-height: 48px;
+  background: var(--bg-card);
+  border-radius: 12px;
 }
 
 .compras-total {
@@ -192,6 +474,21 @@ defineExpose({ carregarDados });
     font-size: clamp(1.8rem, 4vw, 2.6rem);
     letter-spacing: -0.03em;
     white-space: nowrap;
+  }
+
+  &__comparison {
+    color: rgba(255, 255, 255, 0.82);
+
+    span,
+    strong {
+      display: block;
+    }
+
+    strong {
+      margin-top: 3px;
+      color: white;
+      font-size: 1.05rem;
+    }
   }
 }
 

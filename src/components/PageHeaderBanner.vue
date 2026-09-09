@@ -10,6 +10,7 @@
       </div>
     </div>
     <q-btn
+      v-if="showAction"
       color="white"
       text-color="primary"
       :icon="buttonIcon"
@@ -28,12 +29,14 @@ withDefaults(
     title: string;
     subtitle: string;
     buttonLabel: string;
+    showAction?: boolean;
     buttonIcon?: string;
     gradient?: string;
   }>(),
   {
     buttonIcon: 'add',
     gradient: 'linear-gradient(135deg, #1a237e 0%, #4a148c 100%)',
+    showAction: true,
   },
 );
 

@@ -21,7 +21,23 @@
         </q-badge>
       </div>
 
-      <div class="compra-card__value-row">
+      <template v-if="comprado">
+        <div class="compra-card__value-row">
+          <span class="text-caption text-grey-6">Estimativa original</span>
+          <strong class="compra-card__value">R$ {{ formatarValor(compra.valorEstimado) }}</strong>
+        </div>
+        <div class="compra-card__value-row compra-card__value-row--real">
+          <span class="text-caption text-grey-6">Valor pago</span>
+          <strong class="compra-card__value">R$ {{ formatarValor(compra.valorReal ?? 0) }}</strong>
+        </div>
+        <div v-if="compra.dataCompra" class="text-caption text-grey-6 q-mt-sm">
+          Comprada em {{ formatarData(compra.dataCompra) }}
+        </div>
+        <q-badge v-if="compra.despesaId" color="teal-1" text-color="teal-9" class="q-mt-sm self-start">
+          Despesa registrada no Mês a Mês
+        </q-badge>
+      </template>
+      <div v-else class="compra-card__value-row">
         <span class="text-caption text-grey-6">Estimativa</span>
         <strong class="compra-card__value">R$ {{ formatarValor(compra.valorEstimado) }}</strong>
       </div>
@@ -51,6 +67,67 @@
         </div>
       </div>
     </q-card-section>
+
+    <q-separator />
+    <q-card-actions align="right" class="compra-card__actions">
+      <q-btn
+        v-if="!comprado && podeEditar"
+        flat
+        dense
+        no-caps
+        color="primary"
+        icon="edit"
+        label="Editar"
+        aria-label="Editar compra planejada"
+        @click="emit('editar', compra)"
+      />
+      <q-btn
+        v-if="!comprado && podeEditar"
+        flat
+        dense
+        no-caps
+        color="negative"
+        icon="delete_outline"
+        label="Excluir"
+        aria-label="Excluir compra planejada"
+        @click="emit('excluir', compra)"
+      />
+      <q-btn
+        v-if="!comprado && podeEditar"
+        flat
+        dense
+        no-caps
+        color="teal"
+        icon="done"
+        label="Marcar como comprado"
+        aria-label="Marcar compra como comprada"
+        @click="emit('comprar', compra)"
+      />
+      <template v-else>
+        <q-btn
+          v-if="podeEditar"
+          flat
+          dense
+          no-caps
+          color="primary"
+          icon="undo"
+          label="Reverter"
+          aria-label="Reverter compra"
+          @click="emit('reverter', compra)"
+        />
+        <q-btn
+          v-if="podeEditar"
+          flat
+          dense
+          no-caps
+          color="negative"
+          icon="delete_outline"
+          label="Excluir"
+          aria-label="Excluir compra comprada"
+          @click="emit('excluir', compra)"
+        />
+      </template>
+    </q-card-actions>
   </q-card>
 </template>
 
@@ -59,7 +136,23 @@ import { computed } from 'vue';
 import type { CompraPlanejadaResult } from 'src/Model/CompraPlanejada';
 import { formatarData, formatarValor } from 'src/helpers/FormatUtils';
 
-const props = defineProps<{ compra: CompraPlanejadaResult }>();
+const props = withDefaults(defineProps<{
+  compra: CompraPlanejadaResult;
+  comprado?: boolean;
+  podeEditar?: boolean;
+}>(), {
+  comprado: false,
+  podeEditar: true,
+});
+const emit = defineEmits<{
+  (event: 'editar', compra: CompraPlanejadaResult): void;
+  (event: 'excluir', compra: CompraPlanejadaResult): void;
+  (event: 'comprar', compra: CompraPlanejadaResult): void;
+  (event: 'reverter', compra: CompraPlanejadaResult): void;
+}>();
+
+const comprado = computed(() => props.comprado);
+const podeEditar = computed(() => props.podeEditar);
 
 const prioridadeConfig = computed(() => {
   const configs = {
@@ -182,6 +275,10 @@ const prioridadeConfig = computed(() => {
     min-height: 32px;
     padding: 0 8px;
     background: rgba(29, 22, 156, 0.06);
+  }
+
+  &__actions {
+    padding: 8px 16px 14px;
   }
 }
 

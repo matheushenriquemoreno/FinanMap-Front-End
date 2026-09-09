@@ -26,6 +26,12 @@ export interface ListaComprasPlanejadasResult {
   totalEstimado: number;
 }
 
+export interface ListaComprasCompradasResult {
+  itens: CompraPlanejadaResult[];
+  totalEstimado: number;
+  totalReal: number;
+}
+
 export interface CompraPlanejadaLinkInput {
   url: string;
   nomeLoja: string;
@@ -37,6 +43,17 @@ export interface CompraPlanejadaCreate {
   prioridade: PrioridadeCompraPlanejada;
   descricao?: string;
   linksLojas: CompraPlanejadaLinkInput[];
+}
+
+export type CompraPlanejadaUpdate = CompraPlanejadaCreate;
+
+export interface CompraPlanejadaConcluir {
+  valorReal: number;
+  dataCompra: string;
+  criarDespesa: boolean;
+  mes: number;
+  ano: number;
+  categoriaId?: string;
 }
 
 export const prioridadesCompraPlanejada: Array<{
