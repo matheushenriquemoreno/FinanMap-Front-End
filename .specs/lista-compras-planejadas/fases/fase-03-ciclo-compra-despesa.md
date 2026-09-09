@@ -1,6 +1,6 @@
 # Fase 03 — Ciclo da compra e despesa
 
-| Status       | Pendente   |
+| Status       | Concluída   |
 |--------------|------------|
 | Created      | 2026-09-09 |
 | Last Updated | 2026-09-09 |
@@ -112,3 +112,10 @@ Apresentar os totais estimado e real retornados pelo serviço, incluindo estado 
 
 - O contrato da Fase 03 do back-end precisa garantir as diferenças entre concluir, reverter e excluir.
 - A validação integrada é obrigatória porque scripts estáticos não comprovam persistência no Mês a Mês.
+
+## Registro de execução
+
+- Implementadas as jornadas de conclusão, compradas, despesa opcional, reversão com escolha explícita e exclusão preservando despesa.
+- Totais estimado/real usam o agregado retornado pelo back-end; falhas mantêm modal/lista confirmados.
+- Verificação: `npm test`, lint, `vue-tsc` e build aprovados.
+- Limitação: Mês a Mês real, persistência e falhas HTTP aguardam smoke autenticado.

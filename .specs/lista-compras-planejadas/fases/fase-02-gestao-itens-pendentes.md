@@ -1,6 +1,6 @@
 # Fase 02 — Gestão dos itens pendentes
 
-| Status       | Pendente   |
+| Status       | Concluída   |
 |--------------|------------|
 | Created      | 2026-09-09 |
 | Last Updated | 2026-09-09 |
@@ -85,3 +85,11 @@ Estender o script da feature para verificar a presença dos contratos, ações, 
 ## Riscos, premissas e dependências externas da fase
 
 - Esta fase depende do contrato final de pendentes publicado pelo back-end.
+
+## Registro de execução
+
+- Formulário único alterna entre criação e edição, carregando todos os campos e links confirmados.
+- Card oferece editar/excluir; exclusão usa confirmação e atualiza total somente após sucesso.
+- Falha de recarga mantém conteúdo confirmado visível e oferece retry; o formulário permanece aberto em falha de mutação.
+- Script da feature, `npm test`, `npm run lint`, `npx vue-tsc --noEmit` e `npm run build` aprovados.
+- Limitação: fluxo autenticado e HTTP real aguardam ambiente integrado.

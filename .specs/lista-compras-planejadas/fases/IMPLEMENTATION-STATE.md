@@ -1,13 +1,13 @@
 # Estado da Implementação — Lista de Compras Planejadas (Front-end)
 
-| Status       | Em execução |
+| Status       | Concluída |
 |--------------|------------|
 | Created      | 2026-09-09 |
 | Last Updated | 2026-09-09 |
 
 ## Fase ativa
 
-Fase 02 — Gestão dos itens pendentes; próxima fase autorizada após review da Fase 01.
+Gate 5 aprovado — Fases 01 a 04 implementadas, revisadas e concluídas no escopo local.
 
 Cada fase deve ser executada isoladamente e aprovada por `review` antes da ativação da fase seguinte.
 
@@ -16,9 +16,9 @@ Cada fase deve ser executada isoladamente e aprovada por `review` antes da ativa
 | #  | Fase | Arquivo | Status | Concluída em |
 |----|------|---------|--------|--------------|
 | 01 | Tracer bullet de navegação e cadastro | fases/fase-01-tracer-bullet-navegacao-cadastro.md | Concluída | 2026-09-09 |
-| 02 | Gestão dos itens pendentes | fases/fase-02-gestao-itens-pendentes.md | Pendente | — |
-| 03 | Ciclo da compra e despesa | fases/fase-03-ciclo-compra-despesa.md | Pendente | — |
-| 04 | Compartilhamento, apresentação e volume | fases/fase-04-compartilhamento-apresentacao-volume.md | Pendente | — |
+| 02 | Gestão dos itens pendentes | fases/fase-02-gestao-itens-pendentes.md | Concluída | 2026-09-09 |
+| 03 | Ciclo da compra e despesa | fases/fase-03-ciclo-compra-despesa.md | Concluída | 2026-09-09 |
+| 04 | Compartilhamento, apresentação e volume | fases/fase-04-compartilhamento-apresentacao-volume.md | Concluída | 2026-09-09 |
 
 ## Tarefas
 
@@ -29,20 +29,21 @@ Cada fase deve ser executada isoladamente e aprovada por `review` antes da ativa
 | T03 | 01 | Concluída | Página, total, cards e estados loading/vazio/erro adicionados; lint e `vue-tsc` aprovados. |
 | T04 | 01 | Concluída | Modal BRL com validação contextual e múltiplos links adicionado; lint e `vue-tsc` aprovados. |
 | T05 | 01 | Concluída | Integração POST/refresh/preservação em falhas; `npm test`, lint, `vue-tsc` e build aprovados. |
-| T06 | 02 | Pendente | — |
-| T07 | 02 | Pendente | — |
-| T08 | 02 | Pendente | — |
-| T09 | 02 | Pendente | — |
-| T10 | 03 | Pendente | — |
-| T11 | 03 | Pendente | — |
-| T12 | 03 | Pendente | — |
-| T13 | 03 | Pendente | — |
-| T14 | 03 | Pendente | — |
-| T15 | 03 | Pendente | — |
-| T16 | 04 | Pendente | — |
-| T17 | 04 | Pendente | — |
-| T18 | 04 | Pendente | — |
+| T06 | 02 | Concluída | Modal compartilhado com dados atuais, atualização confirmada e preservação em falha. |
+| T07 | 02 | Concluída | Confirmação explícita, DELETE somente após confirmação e remoção após sucesso. |
+| T08 | 02 | Concluída | Loading, vazio, erro, retry e preservação de lista confirmada em falha de recarga. |
+| T09 | 02 | Concluída | Script da feature verifica CRUD, contratos e helpers; suíte completa, lint, typecheck e build aprovados. |
+| T10 | 03 | Concluída | Modal de conclusão com valor real positivo, data até hoje e preservação em falha. |
+| T11 | 03 | Concluída | Aba de compradas com estimativa, real, data e indicação de despesa. |
+| T12 | 03 | Concluída | Toggle opcional, categoria/período e valor real enviado ao endpoint dedicado. |
+| T13 | 03 | Concluída | Reversão com escolha radio explícita para preservar/excluir despesa. |
+| T14 | 03 | Concluída | Exclusão de comprado comunica preservação da despesa e só remove após sucesso. |
+| T15 | 03 | Concluída | Totais estimado/real exibidos a partir do agregado de comprados. |
+| T16 | 04 | Concluída | Store de compartilhamento controla ações; recarga ao trocar contexto. |
+| T17 | 04 | Concluída | BRL, temas, mobile, aria-labels, links `noopener noreferrer` e retry de categorias. |
+| T18 | 04 | Concluída | Regressão controla massa de 500 itens; npm test, lint, vue-tsc e build aprovados. |
 
 ## Bloqueios e desvios
 
 - Fase 01: validação manual autenticada, persistência, CORS/SameSite e falha de rede real ainda dependem do ambiente integrado e do review.
+- Fases 02–04: smoke autenticado, Mês a Mês real, inspeção visual/teclado e fluidez de DOM com centenas de cards permanecem como ressalvas pré-publicação; a rota protegida redirecionou sem credenciais.

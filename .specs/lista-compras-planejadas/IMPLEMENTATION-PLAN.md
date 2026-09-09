@@ -15,6 +15,8 @@ Design técnico: dispensado. Premissas no lugar: a feature seguirá Vue 3, Quasa
 |------------|-----------|
 | 2026-09-09 | Versão inicial criada a partir do PRD aprovado, incluindo a preservação da despesa ao excluir um item comprado. |
 | 2026-09-09 | Gate 3 aprovado pelo solicitante; plano liberado para execução futura pela skill `implement`. |
+| 2026-09-09 | Implementação das quatro fases concluída; Fase 01 concluída e Fases 02 a 04 aguardando review final independente. |
+| 2026-09-09 | Gate 5 aprovado com ressalvas operacionais; as quatro fases e 18 tarefas foram concluídas no escopo local. |
 
 ## Objetivo geral da implementação
 
@@ -30,10 +32,10 @@ Cada fase depende da fase correspondente do plano de back-end estar concluída e
 
 | #  | Fase | Arquivo | Status |
 |----|------|---------|--------|
-| 01 | Tracer bullet de navegação e cadastro | [fase-01-tracer-bullet-navegacao-cadastro.md](fases/fase-01-tracer-bullet-navegacao-cadastro.md) | Pendente |
-| 02 | Gestão dos itens pendentes | [fase-02-gestao-itens-pendentes.md](fases/fase-02-gestao-itens-pendentes.md) | Pendente |
-| 03 | Ciclo da compra e despesa | [fase-03-ciclo-compra-despesa.md](fases/fase-03-ciclo-compra-despesa.md) | Pendente |
-| 04 | Compartilhamento, apresentação e volume | [fase-04-compartilhamento-apresentacao-volume.md](fases/fase-04-compartilhamento-apresentacao-volume.md) | Pendente |
+| 01 | Tracer bullet de navegação e cadastro | [fase-01-tracer-bullet-navegacao-cadastro.md](fases/fase-01-tracer-bullet-navegacao-cadastro.md) | Concluída |
+| 02 | Gestão dos itens pendentes | [fase-02-gestao-itens-pendentes.md](fases/fase-02-gestao-itens-pendentes.md) | Concluída |
+| 03 | Ciclo da compra e despesa | [fase-03-ciclo-compra-despesa.md](fases/fase-03-ciclo-compra-despesa.md) | Concluída |
+| 04 | Compartilhamento, apresentação e volume | [fase-04-compartilhamento-apresentacao-volume.md](fases/fase-04-compartilhamento-apresentacao-volume.md) | Concluída |
 
 ## Dependências e ordem entre as fases
 
