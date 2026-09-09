@@ -65,23 +65,23 @@
       <q-btn color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="abrirModalCriar" />
     </div>
 
-    <CompraPlanejadaFormModal v-model="modalCriacaoAberto" @salvar="emit('salvar', $event)" />
+    <CompraPlanejadaFormModal v-model="modalCriacaoAberto" @salvar="salvarCompra" />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import axios from 'axios';
+import { useQuasar } from 'quasar';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CompraPlanejadaCard from 'src/components/ComprasPlanejadas/CompraPlanejadaCard.vue';
 import CompraPlanejadaFormModal from 'src/components/ComprasPlanejadas/CompraPlanejadaFormModal.vue';
 import getCompraPlanejadaService from 'src/services/CompraPlanejadaService';
-import type { CompraPlanejadaCreate, CompraPlanejadaResult } from 'src/Model/CompraPlanejada';
+import type { CompraPlanejadaCreate, CompraPlanejadaResult, ListaComprasPlanejadasResult } from 'src/Model/CompraPlanejada';
 import { formatarValor } from 'src/helpers/FormatUtils';
+import { notificarErro } from 'src/helpers/Notificacao';
 
-const emit = defineEmits<{
-  (event: 'salvar', dto: CompraPlanejadaCreate): void;
-}>();
-
+const $q = useQuasar();
 const service = getCompraPlanejadaService();
 const compras = ref<CompraPlanejadaResult[]>([]);
 const totalEstimado = ref(0);
@@ -92,17 +92,58 @@ function abrirModalCriar() {
   modalCriacaoAberto.value = true;
 }
 
-async function carregarDados() {
+function aplicarLista(resultado: ListaComprasPlanejadasResult) {
+  compras.value = resultado.itens;
+  totalEstimado.value = resultado.totalEstimado;
+  erroCarregamento.value = false;
+}
+
+async function carregarDados(): Promise<boolean> {
   erroCarregamento.value = false;
 
   try {
-    const resultado = await service.obterPendentes();
-    compras.value = resultado.itens;
-    totalEstimado.value = resultado.totalEstimado;
+    aplicarLista(await service.obterPendentes());
+    return true;
   } catch (error) {
     console.error('Erro ao carregar compras planejadas:', error);
     erroCarregamento.value = true;
+    return false;
   }
+}
+
+function inserirCompraLocal(compra: CompraPlanejadaResult) {
+  const prioridadePeso = { Alta: 3, Media: 2, Baixa: 1 };
+  compras.value = [...compras.value, compra].sort((a, b) => {
+    const prioridade = prioridadePeso[b.prioridade] - prioridadePeso[a.prioridade];
+    if (prioridade !== 0) return prioridade;
+    return new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime();
+  });
+  totalEstimado.value += compra.valorEstimado;
+  erroCarregamento.value = false;
+}
+
+async function salvarCompra(dto: CompraPlanejadaCreate) {
+  let criada: CompraPlanejadaResult;
+
+  try {
+    criada = await service.criar(dto);
+  } catch (error) {
+    if (!axios.isAxiosError(error)) {
+      notificarErro('Não foi possível salvar o plano. Verifique os dados e tente novamente.');
+    }
+    return;
+  }
+
+  // A resposta da lista é a fonte de ordenação e total. O fallback evita deixar a tela
+  // desatualizada se o POST confirmou, mas a consulta seguinte falhar.
+  if (!(await carregarDados())) inserirCompraLocal(criada);
+
+  modalCriacaoAberto.value = false;
+  $q.notify({
+    type: 'positive',
+    message: 'Compra planejada salva com sucesso!',
+    position: 'top-right',
+  });
 }
 
 onMounted(carregarDados);
