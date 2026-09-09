@@ -53,6 +53,12 @@
               :loading="carregandoCategorias"
               :rules="[validarCategoria]"
             />
+            <q-banner v-if="erroCategorias" rounded dense class="bg-red-1 text-negative">
+              Não foi possível carregar as categorias.
+              <template #action>
+                <q-btn flat color="negative" label="Tentar novamente" @click="carregarCategorias" />
+              </template>
+            </q-banner>
             <div class="row q-col-gutter-sm">
               <q-input
                 v-model.number="form.mes"
@@ -98,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import MoneyInputBR from 'src/components/Inputs/MoneyInputBR.vue';
 import obterCategoriaService from 'src/services/CategoriaService';
 import { TipoCategoriaETransacao, type CategoriaResult } from 'src/Model/Categoria';
@@ -122,6 +128,7 @@ const categoriaService = obterCategoriaService();
 const formRef = ref<{ validate: () => Promise<boolean> } | null>(null);
 const categorias = ref<CategoriaResult[]>([]);
 const carregandoCategorias = ref(false);
+const erroCategorias = ref(false);
 const agora = new Date();
 const anoAtual = agora.getFullYear();
 const anoMinimo = anoAtual - 5;
@@ -155,11 +162,13 @@ function resetarForm() {
 
 async function carregarCategorias() {
   carregandoCategorias.value = true;
+  erroCategorias.value = false;
   try {
     categorias.value = await categoriaService.obterCategoria(TipoCategoriaETransacao.Despesa);
   } catch (error) {
     console.error('Erro ao carregar categorias de despesa:', error);
     categorias.value = [];
+    erroCategorias.value = true;
   } finally {
     carregandoCategorias.value = false;
   }

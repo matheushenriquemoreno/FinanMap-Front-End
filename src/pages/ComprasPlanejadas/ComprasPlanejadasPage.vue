@@ -65,7 +65,7 @@
       </q-card>
     </div>
 
-    <template v-else-if="erroAba">
+    <template v-else-if="erroAba && comprasAtuais.length === 0">
       <div class="compras-state text-center q-pa-xl">
         <q-icon name="cloud_off" size="72px" color="grey-5" />
         <h2 class="text-h6 q-mt-md q-mb-sm">Não foi possível carregar esta lista</h2>
@@ -73,6 +73,20 @@
         <q-btn color="primary" outline rounded label="Tentar novamente" icon="refresh" @click="carregarAba" />
       </div>
     </template>
+
+    <q-banner
+      v-if="erroAba && comprasAtuais.length > 0"
+      rounded
+      class="q-mb-md"
+      inline-actions
+      dense
+      icon="cloud_off"
+    >
+      Não foi possível atualizar esta lista. Os dados confirmados continuam visíveis.
+      <template #action>
+        <q-btn flat color="primary" label="Tentar novamente" @click="carregarAba" />
+      </template>
+    </q-banner>
 
     <template v-else-if="comprasAtuais.length > 0">
       <transition-group name="compras-list" tag="div" class="compras-grid">
@@ -98,7 +112,15 @@
       <p class="text-body2 text-grey-6 q-mb-lg">
         {{ abaAtiva === 'pendentes' ? 'Registre uma compra futura e acompanhe o valor antes de decidir.' : 'Quando você concluir um plano, ele aparecerá aqui com o comparativo realizado.' }}
       </p>
-      <q-btn v-if="abaAtiva === 'pendentes'" color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="abrirModalCriar" />
+      <q-btn
+        v-if="abaAtiva === 'pendentes' && compartilhamentoStore.podeEditar"
+        color="primary"
+        rounded
+        unelevated
+        label="Adicionar primeira compra"
+        icon="add"
+        @click="abrirModalCriar"
+      />
     </div>
 
     <CompraPlanejadaFormModal
