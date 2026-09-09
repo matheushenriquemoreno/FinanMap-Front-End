@@ -6,7 +6,7 @@
       subtitle="Dê forma aos próximos planos sem perder o controle do seu dinheiro"
       button-label="Nova compra"
       gradient="linear-gradient(135deg, #102a43 0%, #1d169c 62%, #0e7490 100%)"
-      @action="emit('novo-item')"
+      @action="abrirModalCriar"
     />
 
     <section class="compras-total" aria-label="Resumo das compras pendentes">
@@ -62,8 +62,10 @@
       <p class="text-body2 text-grey-6 q-mb-lg">
         Registre uma compra futura e acompanhe o valor antes de decidir.
       </p>
-      <q-btn color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="emit('novo-item')" />
+      <q-btn color="primary" rounded unelevated label="Adicionar primeira compra" icon="add" @click="abrirModalCriar" />
     </div>
+
+    <CompraPlanejadaFormModal v-model="modalCriacaoAberto" @salvar="emit('salvar', $event)" />
   </q-page>
 </template>
 
@@ -71,18 +73,24 @@
 import { onMounted, ref } from 'vue';
 import PageHeaderBanner from 'src/components/PageHeaderBanner.vue';
 import CompraPlanejadaCard from 'src/components/ComprasPlanejadas/CompraPlanejadaCard.vue';
+import CompraPlanejadaFormModal from 'src/components/ComprasPlanejadas/CompraPlanejadaFormModal.vue';
 import getCompraPlanejadaService from 'src/services/CompraPlanejadaService';
-import type { CompraPlanejadaResult } from 'src/Model/CompraPlanejada';
+import type { CompraPlanejadaCreate, CompraPlanejadaResult } from 'src/Model/CompraPlanejada';
 import { formatarValor } from 'src/helpers/FormatUtils';
 
 const emit = defineEmits<{
-  (event: 'novo-item'): void;
+  (event: 'salvar', dto: CompraPlanejadaCreate): void;
 }>();
 
 const service = getCompraPlanejadaService();
 const compras = ref<CompraPlanejadaResult[]>([]);
 const totalEstimado = ref(0);
 const erroCarregamento = ref(false);
+const modalCriacaoAberto = ref(false);
+
+function abrirModalCriar() {
+  modalCriacaoAberto.value = true;
+}
 
 async function carregarDados() {
   erroCarregamento.value = false;
