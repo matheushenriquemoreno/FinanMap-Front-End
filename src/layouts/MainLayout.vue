@@ -118,6 +118,15 @@
             </q-item-section>
           </q-item>
 
+          <q-item to="/compras-planejadas" class="menu-title" clickable v-ripple active-class="text-dark">
+            <q-item-section avatar>
+              <q-avatar icon="shopping_cart" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Compras Planejadas</q-item-label>
+            </q-item-section>
+          </q-item>
+
           <q-item
             v-if="!compartilhamentoStore.emModoCompartilhado"
             to="/custos-fixos"

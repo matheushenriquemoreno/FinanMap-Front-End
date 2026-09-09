@@ -52,6 +52,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/pages/MetasFinanceiras/MetasFinanceirasPage.vue'),
       },
       {
+        path: '/compras-planejadas',
+        name: 'ComprasPlanejadasPage',
+        component: () => import('src/pages/ComprasPlanejadas/ComprasPlanejadasPage.vue'),
+      },
+      {
         path: '/custos-fixos',
         name: 'CustosFixosPage',
         component: () => import('src/pages/CustosFixos/CustosFixosPage.vue'),
