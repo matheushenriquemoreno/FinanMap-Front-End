@@ -1,7 +1,7 @@
 # Plano de Implementação — Lista de Compras Planejadas (Front-end)
 
 | Status       | Aprovado   |
-|--------------|------------|
+| ------------ | ---------- |
 | Created      | 2026-09-09 |
 | Last Updated | 2026-09-09 |
 
@@ -11,12 +11,12 @@ Design técnico: dispensado. Premissas no lugar: a feature seguirá Vue 3, Quasa
 
 ## Histórico de atualizações
 
-| Data       | Alteração |
-|------------|-----------|
-| 2026-09-09 | Versão inicial criada a partir do PRD aprovado, incluindo a preservação da despesa ao excluir um item comprado. |
-| 2026-09-09 | Gate 3 aprovado pelo solicitante; plano liberado para execução futura pela skill `implement`. |
-| 2026-09-09 | Implementação das quatro fases concluída; Fase 01 concluída e Fases 02 a 04 aguardando review final independente. |
-| 2026-09-09 | Gate 5 aprovado com ressalvas operacionais; as quatro fases e 18 tarefas foram concluídas no escopo local. |
+| Data       | Alteração                                                                                                                                |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-09-09 | Versão inicial criada a partir do PRD aprovado, incluindo a preservação da despesa ao excluir um item comprado.                          |
+| 2026-09-09 | Gate 3 aprovado pelo solicitante; plano liberado para execução futura pela skill `implement`.                                            |
+| 2026-09-09 | Implementação das quatro fases concluída; review final independente e smoke autenticado integrado executados com ressalvas operacionais. |
+| 2026-09-09 | Gate 5 aprovado com ressalvas operacionais; as quatro fases e 18 tarefas foram concluídas no escopo local.                               |
 
 ## Objetivo geral da implementação
 
@@ -30,12 +30,12 @@ Cada fase depende da fase correspondente do plano de back-end estar concluída e
 
 ## Fases
 
-| #  | Fase | Arquivo | Status |
-|----|------|---------|--------|
-| 01 | Tracer bullet de navegação e cadastro | [fase-01-tracer-bullet-navegacao-cadastro.md](fases/fase-01-tracer-bullet-navegacao-cadastro.md) | Concluída |
-| 02 | Gestão dos itens pendentes | [fase-02-gestao-itens-pendentes.md](fases/fase-02-gestao-itens-pendentes.md) | Concluída |
-| 03 | Ciclo da compra e despesa | [fase-03-ciclo-compra-despesa.md](fases/fase-03-ciclo-compra-despesa.md) | Concluída |
-| 04 | Compartilhamento, apresentação e volume | [fase-04-compartilhamento-apresentacao-volume.md](fases/fase-04-compartilhamento-apresentacao-volume.md) | Concluída |
+| #   | Fase                                    | Arquivo                                                                                                  | Status    |
+| --- | --------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------- |
+| 01  | Tracer bullet de navegação e cadastro   | [fase-01-tracer-bullet-navegacao-cadastro.md](fases/fase-01-tracer-bullet-navegacao-cadastro.md)         | Concluída |
+| 02  | Gestão dos itens pendentes              | [fase-02-gestao-itens-pendentes.md](fases/fase-02-gestao-itens-pendentes.md)                             | Concluída |
+| 03  | Ciclo da compra e despesa               | [fase-03-ciclo-compra-despesa.md](fases/fase-03-ciclo-compra-despesa.md)                                 | Concluída |
+| 04  | Compartilhamento, apresentação e volume | [fase-04-compartilhamento-apresentacao-volume.md](fases/fase-04-compartilhamento-apresentacao-volume.md) | Concluída |
 
 ## Dependências e ordem entre as fases
 
@@ -55,15 +55,15 @@ Não há ciclos; o back-end sempre disponibiliza e documenta o contrato antes do
 
 ## Cobertura de requisitos
 
-| Requisitos | Tarefas |
-|------------|---------|
-| `LCP-FE-01`, `LCP-FE-04`, `LCP-FE-05`, `LCP-FE-06` | `T01`–`T05` |
-| `LCP-FE-02`, `LCP-FE-03` | `T06`–`T09` |
-| `LCP-FE-07`–`LCP-FE-13`, `LCP-FE-15` | `T10`–`T15` |
-| `LCP-FE-14` | `T16` |
-| `EXPECT-FE-01`, `EXPECT-FE-02`, `EXPECT-FE-05` | `T03`–`T05`, `T08`–`T18` |
-| `EXPECT-FE-03` | `T18` |
-| `EXPECT-FE-04` | `T05`, `T08`, `T10`, `T12`, `T13` |
+| Requisitos                                         | Tarefas                           |
+| -------------------------------------------------- | --------------------------------- |
+| `LCP-FE-01`, `LCP-FE-04`, `LCP-FE-05`, `LCP-FE-06` | `T01`–`T05`                       |
+| `LCP-FE-02`, `LCP-FE-03`                           | `T06`–`T09`                       |
+| `LCP-FE-07`–`LCP-FE-13`, `LCP-FE-15`               | `T10`–`T15`                       |
+| `LCP-FE-14`                                        | `T16`                             |
+| `EXPECT-FE-01`, `EXPECT-FE-02`, `EXPECT-FE-05`     | `T03`–`T05`, `T08`–`T18`          |
+| `EXPECT-FE-03`                                     | `T18`                             |
+| `EXPECT-FE-04`                                     | `T05`, `T08`, `T10`, `T12`, `T13` |
 
 ## Riscos e verificações gerais
 
@@ -81,6 +81,6 @@ Não há ciclos; o back-end sempre disponibiliza e documenta o contrato antes do
 
 ## Perguntas que bloqueiam a implementação
 
-| Pergunta | Por que bloqueia | Status |
-|----------|------------------|--------|
+| Pergunta | Por que bloqueia                                                                                                 | Status    |
+| -------- | ---------------------------------------------------------------------------------------------------------------- | --------- |
 | Nenhuma. | Os fluxos e a regra de preservação da despesa estão definidos; edição direta de comprado está fora desta versão. | Resolvida |

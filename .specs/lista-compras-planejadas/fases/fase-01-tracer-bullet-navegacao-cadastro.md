@@ -1,7 +1,7 @@
 # Fase 01 — Tracer bullet de navegação e cadastro
 
-| Status       | Concluída |
-|--------------|------------|
+| Status       | Concluída  |
+| ------------ | ---------- |
 | Created      | 2026-09-09 |
 | Last Updated | 2026-09-09 |
 
@@ -77,20 +77,20 @@ Integrar formulário e serviço, atualizar a lista e o total somente após suces
 
 ## Execução
 
-| Tarefa | Status | Evidência |
-|--------|--------|-----------|
-| T01 | Concluída | Modelos TypeScript e serviço Axios adicionados; `npm run lint` e `npx vue-tsc --noEmit` aprovados. |
-| T02 | Concluída | Rota `/compras-planejadas` e entrada do menu principal adicionadas; lint e `vue-tsc` aprovados. |
-| T03 | Concluída | Página, total estimado, cards, ordem da API, loading, vazio e erro com retry adicionados; lint e `vue-tsc` aprovados. |
-| T04 | Concluída | Modal com máscara BRL, prioridade, descrição, múltiplos links e validação contextual adicionado; lint e `vue-tsc` aprovados. |
-| T05 | Concluída | POST, refresh pós-sucesso, preservação do modal em falhas e script estrutural/comportamental integrados; `npm test`, `npm run lint`, `npx vue-tsc --noEmit` e `npm run build` aprovados. |
+| Tarefa | Status    | Evidência                                                                                                                                                                                |
+| ------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T01    | Concluída | Modelos TypeScript e serviço Axios adicionados; `npm run lint` e `npx vue-tsc --noEmit` aprovados.                                                                                       |
+| T02    | Concluída | Rota `/compras-planejadas` e entrada do menu principal adicionadas; lint e `vue-tsc` aprovados.                                                                                          |
+| T03    | Concluída | Página, total estimado, cards, ordem da API, loading, vazio e erro com retry adicionados; lint e `vue-tsc` aprovados.                                                                    |
+| T04    | Concluída | Modal com máscara BRL, prioridade, descrição, múltiplos links e validação contextual adicionado; lint e `vue-tsc` aprovados.                                                             |
+| T05    | Concluída | POST, refresh pós-sucesso, preservação do modal em falhas e script estrutural/comportamental integrados; `npm test`, `npm run lint`, `npx vue-tsc --noEmit` e `npm run build` aprovados. |
 
 ## Encerramento da fase
 
 - Gate dos scripts: `npm test` — dark mode, avatar, fluxo custo fixo/despesa e lista de compras planejadas aprovados.
 - Gate de qualidade: `npm run lint` e `npx vue-tsc --noEmit` — aprovados.
 - Gate de build: `npm run build` — SPA compilada com sucesso.
-- Limitação: validação manual autenticada, persistência, CORS/SameSite e falha de rede real dependem do ambiente integrado e permanecem pendentes para o review.
+- Limitação residual: validação autenticada, persistência, CORS local e navegação foram executados no ambiente integrado; inspeção formal de teclado e falha de rede real permanecem como ressalvas.
 
 - O card não deve tornar toda URL editável fora do formulário; links exibidos abrem o endereço informado com proteção adequada.
 - A fonte do total confirmado é a resposta do back-end ou uma nova consulta após mutação.
