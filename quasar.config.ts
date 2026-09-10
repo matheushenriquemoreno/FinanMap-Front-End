@@ -54,8 +54,8 @@ export default defineConfig((/* ctx */) => {
       // analyze: true,
 
       env: {
-        URL_API: 'https://api.devmoreno.com.br/api/',
-        lOGIN_URL: '/#/login'
+        URL_API: process.env.FINANMAP_API_URL ?? 'https://api.devmoreno.com.br/api/',
+        lOGIN_URL: '/#/login',
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

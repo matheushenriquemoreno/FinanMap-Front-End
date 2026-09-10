@@ -11,3 +11,13 @@ export function ordenarComprasPlanejadas(compras) {
 export function calcularTotalEstimado(compras) {
   return compras.reduce((total, compra) => total + compra.valorEstimado, 0);
 }
+
+export function filtrarComprasPlanejadas(compras, termoBusca) {
+  const termo = String(termoBusca ?? '')
+    .trim()
+    .toLowerCase();
+
+  if (!termo) return [...compras];
+
+  return compras.filter((compra) => compra.nome.toLowerCase().includes(termo));
+}
