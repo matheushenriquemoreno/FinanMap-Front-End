@@ -3,10 +3,16 @@
     <q-card class="compra-form-modal">
       <q-card-section class="compra-form-modal__header row items-center q-pb-none">
         <div>
-        <div class="text-h6 text-bold">{{ props.compra ? 'Editar compra planejada' : 'Nova compra planejada' }}</div>
-        <div class="text-caption text-grey-6 q-mt-xs">
-          {{ props.compra ? 'Atualize o plano sem perder os links pesquisados.' : 'Anote o plano enquanto ele ainda é uma possibilidade.' }}
-        </div>
+          <div class="text-h6 text-bold">
+            {{ props.compra ? 'Editar compra planejada' : 'Nova compra planejada' }}
+          </div>
+          <div class="text-caption text-grey-6 q-mt-xs">
+            {{
+              props.compra
+                ? 'Atualize o plano sem perder os links pesquisados.'
+                : 'Anote o plano enquanto ele ainda é uma possibilidade.'
+            }}
+          </div>
         </div>
         <q-space />
         <q-btn icon="close" flat round dense aria-label="Fechar" v-close-popup />
@@ -30,6 +36,7 @@
             v-model="form.valorEstimado"
             label="Valor estimado"
             placeholder="0,00"
+            :dense="false"
             :rules="[validarValorCompra]"
           />
 
@@ -60,11 +67,17 @@
             counter
           />
 
-          <section class="links-section" aria-labelledby="links-title">
+          <section
+            class="links-section"
+            :class="{ 'links-section--dark': $q.dark.isActive }"
+            aria-labelledby="links-title"
+          >
             <div class="row items-center justify-between q-mb-sm">
               <div>
                 <div id="links-title" class="text-subtitle2 text-bold">Lojas para pesquisar</div>
-                <div class="text-caption text-grey-6">Opcional. Você pode adicionar mais de uma.</div>
+                <div class="links-section__hint text-caption">
+                  Adicione o nome da loja e o link do produto. Você pode incluir mais de uma.
+                </div>
               </div>
               <q-btn
                 flat
@@ -77,8 +90,11 @@
               />
             </div>
 
-            <div v-if="form.linksLojas.length === 0" class="links-section__empty text-caption text-grey-6">
-              Nenhum link adicionado ainda.
+            <div
+              v-if="form.linksLojas.length === 0"
+              class="links-section__empty links-section__hint text-caption"
+            >
+              Nenhuma loja adicionada ainda.
             </div>
 
             <div v-for="(link, index) in form.linksLojas" :key="link.id" class="link-row q-mb-sm">
@@ -119,7 +135,7 @@
             <q-btn flat label="Cancelar" color="grey-7" v-close-popup />
             <q-btn
               type="submit"
-              :label="props.compra ? 'Salvar alterações' : 'Salvar plano'"
+              :label="props.compra ? 'Salvar alterações' : 'Salvar'"
               color="primary"
               rounded
               unelevated
@@ -153,14 +169,17 @@ import {
 
 defineOptions({ name: 'CompraPlanejadaFormModal' });
 
-const props = withDefaults(defineProps<{
-  modelValue: boolean;
-  loading?: boolean;
-  compra?: CompraPlanejadaResult | null;
-}>(), {
-  loading: false,
-  compra: null,
-});
+const props = withDefaults(
+  defineProps<{
+    modelValue: boolean;
+    loading?: boolean;
+    compra?: CompraPlanejadaResult | null;
+  }>(),
+  {
+    loading: false,
+    compra: null,
+  },
+);
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void;
   (event: 'salvar', dto: CompraPlanejadaCreate): void;
@@ -281,8 +300,21 @@ async function submeter() {
   border: 1px solid rgba(29, 22, 156, 0.1);
   border-radius: 14px;
 
+  &__hint {
+    color: #6f7078;
+  }
+
   &__empty {
     padding: 10px 0 2px;
+  }
+}
+
+.links-section--dark {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.22);
+
+  .links-section__hint {
+    color: #b7b9c4;
   }
 }
 
