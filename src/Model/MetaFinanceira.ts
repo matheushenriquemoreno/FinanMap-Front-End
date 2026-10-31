@@ -73,6 +73,8 @@ export interface MetaFinanceiraResult {
   valorAtual: number;
   percentualProgresso: number;
   concluida: boolean;
+  /** Indica se a meta está arquivada (oculta do fluxo ativo, mas preservada). */
+  arquivada: boolean;
   diasRestantes: number;
   valorFaltante: number;
   contribuicoes: ContribuicaoResult[];

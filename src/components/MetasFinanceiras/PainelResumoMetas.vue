@@ -19,7 +19,7 @@
                 <q-card-section horizontal class="items-center q-pa-md">
                     <q-avatar size="48px" color="blue-1" text-color="blue" icon="gps_fixed" />
                     <div class="q-ml-md">
-                        <div class="text-caption text-grey-6">Total das Metas</div>
+                        <div class="text-caption text-grey-6">{{ labelTotalMetas }}</div>
                         <div class="text-h6 text-bold">R$ {{ formatarValor(resumo?.totalMetas || 0) }}</div>
                     </div>
                 </q-card-section>
@@ -46,6 +46,7 @@
                         <div class="text-caption text-grey-6">Metas Concluídas</div>
                         <div class="text-h6 text-bold">{{ resumo?.metasConcluidas || 0 }} de {{
                             resumo?.totalDeMetasAtivas || 0 }}</div>
+                        <div class="text-caption text-grey-5">{{ contextoFiltro }}</div>
                     </div>
                 </q-card-section>
             </q-card>
@@ -54,14 +55,32 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { ResumoMetasDTO } from 'src/Model/MetaFinanceira';
 
 import { formatarValor } from 'src/helpers/FormatUtils';
 
-defineProps<{
+/** Estados de filtro de arquivamento (mesma tipagem da MetasFinanceirasPage). */
+type FiltroStatus = 'ativas' | 'arquivadas' | 'todas';
+
+const props = defineProps<{
     resumo?: ResumoMetasDTO;
     loading?: boolean;
+    filtroStatus?: FiltroStatus;
 }>();
+
+// Rótulos do resumo adaptados ao filtro ativo (o resumo segue o filtro da listagem).
+const labelTotalMetas = computed(() => {
+    if (props.filtroStatus === 'ativas') return 'Total das Metas Ativas';
+    if (props.filtroStatus === 'arquivadas') return 'Total das Metas Arquivadas';
+    return 'Total das Metas';
+});
+
+const contextoFiltro = computed(() => {
+    if (props.filtroStatus === 'arquivadas') return 'no escopo das arquivadas';
+    if (props.filtroStatus === 'ativas') return 'no escopo das ativas';
+    return 'considerando todas as metas';
+});
 </script>
 
 <style lang="scss" scoped>
