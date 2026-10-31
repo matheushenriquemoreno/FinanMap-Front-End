@@ -85,23 +85,17 @@ class MetaFinanceiraService {
     });
   }
 
-  /** Arquiva a meta, removendo-a do fluxo ativo preservando todo o histórico. */
-  async arquivar(id: string): Promise<MetaFinanceiraResult> {
+  /** Arquiva a meta, removendo-a do fluxo ativo preservando todo o histórico. A API responde com corpo vazio. */
+  async arquivar(id: string): Promise<void> {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.post<MetaFinanceiraResult>(
-        `${this.baseUrl}/${id}/arquivar`
-      );
-      return response.data;
+      await this.axios.post(`${this.baseUrl}/${id}/arquivar`);
     });
   }
 
-  /** Desarquiva a meta, retornando-a ao fluxo ativo. */
-  async desarquivar(id: string): Promise<MetaFinanceiraResult> {
+  /** Desarquiva a meta, retornando-a ao fluxo ativo. A API responde com corpo vazio. */
+  async desarquivar(id: string): Promise<void> {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.post<MetaFinanceiraResult>(
-        `${this.baseUrl}/${id}/desarquivar`
-      );
-      return response.data;
+      await this.axios.post(`${this.baseUrl}/${id}/desarquivar`);
     });
   }
 

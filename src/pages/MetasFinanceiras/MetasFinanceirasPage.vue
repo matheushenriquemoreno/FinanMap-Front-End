@@ -154,12 +154,18 @@ const contribuicaoSelecionada = ref<ContribuicaoResult | null>(null);
 const emptyStateTitulo = computed(() => {
     if (filtroStatus.value === 'arquivadas') return 'Nenhuma meta arquivada';
     if (filtroStatus.value === 'todas') return 'Nenhuma meta encontrada';
+    // No filtro "Ativas": se existem metas arquivadas, o usuário não está sem metas,
+    // apenas não há metas no fluxo ativo.
+    if ((contagens.value.arquivadas ?? 0) > 0) return 'Nenhuma meta ativa';
     return 'Nenhuma meta criada ainda';
 });
 
 const emptyStateSubtitulo = computed(() => {
     if (filtroStatus.value === 'arquivadas') return 'Metas arquivadas aparecerão aqui para consulta.';
     if (filtroStatus.value === 'todas') return 'Clique em "Nova Meta" para começar a planejar seus objetivos!';
+    // Filtro "Ativas" vazio com metas arquivadas: orienta o usuário para o filtro Arquivadas.
+    if ((contagens.value.arquivadas ?? 0) > 0)
+        return 'Existem metas arquivadas. Consulte o filtro "Arquivadas" para vê-las.';
     return 'Clique em "Nova Meta" para começar a planejar seus objetivos!';
 });
 
@@ -179,7 +185,11 @@ watch(filtroStatus, () => {
     void carregarDados();
 });
 
+/** Geração das buscas: descarta respostas atrasadas de um filtro anterior (condição de corrida). */
+let geracaoBusca = 0;
+
 async function carregarDados() {
+    const geracao = ++geracaoBusca;
     loading.value = true;
     const filtro = filtroStatus.value;
     try {
@@ -187,21 +197,24 @@ async function carregarDados() {
             service.obterTodas(paramDoFiltro(filtro)),
             service.obterResumo(paramDoFiltro(filtro)),
         ]);
+        // Chegou depois de trocarem o filtro: resposta desatualizada, descarta sem aplicar.
+        if (geracao !== geracaoBusca) return;
         metas.value = metasRes || [];
         resumo.value = resumoRes || {
             totalMetas: 0, totalInvestido: 0, percentualGeral: 0, metasConcluidas: 0, totalDeMetasAtivas: 0,
         };
         contagens.value[filtro] = metas.value.length;
-        await carregarContagensFaltantes();
+        await carregarContagensFaltantes(geracao);
     } catch (err) {
         console.error(err);
     } finally {
-        loading.value = false;
+        if (geracao === geracaoBusca) loading.value = false;
     }
 }
 
-/** Carrega contagens dos filtros ainda não visitados (badges dos outros estados). */
-async function carregarContagensFaltantes() {
+/** Carrega contagens dos filtros ainda não visitados (badges dos outros estados).
+ * Usa o resumo por filtro (barato) em vez de fetch das listas completas. */
+async function carregarContagensFaltantes(geracao: number) {
     const faltantes = (['ativas', 'arquivadas', 'todas'] as FiltroStatus[]).filter(
         (f) => f !== filtroStatus.value && contagens.value[f] === null
     );
@@ -210,9 +223,11 @@ async function carregarContagensFaltantes() {
     const resultados = await Promise.allSettled(
         faltantes.map(async (f) => ({
             filtro: f,
-            total: (await service.obterTodas(paramDoFiltro(f)))?.length || 0,
+            // `totalDeMetasAtivas` do resumo já reflete o total do conjunto filtrado.
+            total: (await service.obterResumo(paramDoFiltro(f)))?.totalDeMetasAtivas || 0,
         }))
     );
+    if (geracao !== geracaoBusca) return;
     for (const resultado of resultados) {
         if (resultado.status === 'fulfilled') {
             contagens.value[resultado.value.filtro] = resultado.value.total;
@@ -220,8 +235,8 @@ async function carregarContagensFaltantes() {
     }
 }
 
-/** Invalida contagens (arquivamento altera todos os filtros) e recarrega a tela. */
-async function recarregarAposArquivamento() {
+/** Invalida contagens (operações que alteram todos os filtros) e recarrega a tela. */
+async function recarregarInvalidandoContagens() {
     contagens.value = { ativas: null, arquivadas: null, todas: null };
     await carregarDados();
 }
@@ -262,7 +277,7 @@ async function criarMeta(dto: CreateMetaFinanceiraDTO) {
         await service.criar(dto);
         modalCriarAberto.value = false;
         $q.notify({ type: 'positive', message: 'Meta criada com sucesso! 🎯' });
-        carregarDados();
+        await recarregarInvalidandoContagens();
     } catch (error: any) {
         notificarErro('Erro ao criar a meta. Verifique os campos.');
     }
@@ -351,7 +366,7 @@ function excluirMeta(id: string) {
             try {
                 await service.excluir(id);
                 $q.notify({ type: 'positive', message: 'Meta excluída.' });
-                await carregarDados();
+                await recarregarInvalidandoContagens();
             } catch (error) {
                 // Handle via AxiosHelper
             }
@@ -370,7 +385,7 @@ function arquivarMeta(meta: MetaFinanceiraResult) {
             try {
                 await service.arquivar(meta.id);
                 $q.notify({ type: 'positive', message: 'Meta arquivada com sucesso! 📦' });
-                await recarregarAposArquivamento();
+                await recarregarInvalidandoContagens();
             } catch (error) {
                 // Handle via AxiosHelper
             }
@@ -389,7 +404,7 @@ function desarquivarMeta(meta: MetaFinanceiraResult) {
             try {
                 await service.desarquivar(meta.id);
                 $q.notify({ type: 'positive', message: 'Meta desarquivada com sucesso! ✨' });
-                await recarregarAposArquivamento();
+                await recarregarInvalidandoContagens();
             } catch (error) {
                 // Handle via AxiosHelper
             }
