@@ -1,5 +1,5 @@
 <template>
-    <q-card flat bordered class="meta-card">
+    <q-card flat bordered class="meta-card" :class="{ 'meta-card--arquivada': meta.arquivada }">
         <q-btn class="meta-card__delete-btn" flat round dense icon="delete_outline" color="red-4"
             @click.stop="emit('excluir')">
             <q-tooltip>Excluir meta</q-tooltip>
@@ -16,6 +16,9 @@
                         {{ categoriaConfig.label }}
                     </div>
                 </div>
+                <q-badge v-if="meta.arquivada" class="q-ml-auto meta-card__badge-arquivada" outline color="grey-7">
+                    <q-icon name="archive" size="12px" class="q-mr-xs" /> Arquivada
+                </q-badge>
             </div>
 
             <div class="meta-card__valores q-mt-md">
@@ -47,8 +50,16 @@
 
         <q-separator />
         <q-card-actions align="center">
-            <q-btn flat no-caps icon="add" label="Contribuir" color="primary"
+            <q-btn v-if="!meta.arquivada" flat no-caps icon="add" label="Contribuir" color="primary"
                 @click="emit('contribuir')" />
+            <q-btn v-if="!meta.arquivada" flat no-caps icon="archive" label="Arquivar" color="grey-7"
+                @click="emit('arquivar')">
+                <q-tooltip>Arquivar meta</q-tooltip>
+            </q-btn>
+            <q-btn v-else flat no-caps icon="unarchive" label="Desarquivar" color="primary"
+                @click="emit('desarquivar')">
+                <q-tooltip>Desarquivar meta</q-tooltip>
+            </q-btn>
             <q-btn flat no-caps icon="visibility" label="Detalhes" color="secondary" @click="emit('detalhes')" />
         </q-card-actions>
     </q-card>
@@ -65,6 +76,8 @@ const emit = defineEmits<{
     (e: 'contribuir'): void;
     (e: 'detalhes'): void;
     (e: 'excluir'): void;
+    (e: 'arquivar'): void;
+    (e: 'desarquivar'): void;
 }>();
 
 const categoriaConfig = computed(() => {
@@ -106,6 +119,19 @@ const corProgresso = computed(() => {
         opacity: 0;
         transition: opacity 0.2s;
         z-index: 1;
+    }
+
+    &__badge-arquivada {
+        font-size: 10px;
+    }
+
+    // Card arquivado: atenuado (padrão do CustoFixoCard)
+    &--arquivada {
+        opacity: 0.65;
+
+        &:hover {
+            opacity: 1;
+        }
     }
 
     &__header {

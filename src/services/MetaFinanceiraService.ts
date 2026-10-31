@@ -31,16 +31,29 @@ class MetaFinanceiraService {
     }
   }
 
-  async obterTodas(): Promise<MetaFinanceiraResult[]> {
+  /**
+   * Composição do parâmetro de filtro por arquivadas na query string.
+   * Sem parâmetro = todas; `true` = só arquivadas; `false` = só ativas.
+   */
+  private construirParamsArquivadas(arquivadas?: boolean): Record<string, string> | undefined {
+    if (arquivadas === undefined) return undefined;
+    return { arquivadas: arquivadas ? 'true' : 'false' };
+  }
+
+  async obterTodas(arquivadas?: boolean): Promise<MetaFinanceiraResult[]> {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.get<MetaFinanceiraResult[]>(this.baseUrl);
+      const response = await this.axios.get<MetaFinanceiraResult[]>(this.baseUrl, {
+        params: this.construirParamsArquivadas(arquivadas),
+      });
       return response.data;
     });
   }
 
-  async obterResumo(): Promise<ResumoMetasDTO> {
+  async obterResumo(arquivadas?: boolean): Promise<ResumoMetasDTO> {
     return this.requestWithLoading(async () => {
-      const response = await this.axios.get<ResumoMetasDTO>(`${this.baseUrl}/resumo`);
+      const response = await this.axios.get<ResumoMetasDTO>(`${this.baseUrl}/resumo`, {
+        params: this.construirParamsArquivadas(arquivadas),
+      });
       return response.data;
     });
   }
@@ -69,6 +82,20 @@ class MetaFinanceiraService {
   async excluir(id: string): Promise<void> {
     return this.requestWithLoading(async () => {
       await this.axios.delete(`${this.baseUrl}/${id}`);
+    });
+  }
+
+  /** Arquiva a meta, removendo-a do fluxo ativo preservando todo o histórico. A API responde com corpo vazio. */
+  async arquivar(id: string): Promise<void> {
+    return this.requestWithLoading(async () => {
+      await this.axios.post(`${this.baseUrl}/${id}/arquivar`);
+    });
+  }
+
+  /** Desarquiva a meta, retornando-a ao fluxo ativo. A API responde com corpo vazio. */
+  async desarquivar(id: string): Promise<void> {
+    return this.requestWithLoading(async () => {
+      await this.axios.post(`${this.baseUrl}/${id}/desarquivar`);
     });
   }
 

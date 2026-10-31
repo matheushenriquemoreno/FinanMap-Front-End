@@ -163,7 +163,7 @@ const loadingMetas = ref(false);
 async function carregarMetas() {
   loadingMetas.value = true;
   try {
-    const res = await metaService.obterTodas();
+    const res = await metaService.obterTodas(false); // apenas metas ativas (não arquivadas) podem receber contribuição
     // Filtra apenas metas não concluídas
     metasDisponiveis.value = (res || []).filter(m => !m.concluida);
   } catch (error) {
